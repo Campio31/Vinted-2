@@ -243,7 +243,7 @@ const title=p=>[p.marque||'Sans marque',p.sub||p.cat].filter(Boolean).join(' · 
 function clean(o){const r={};for(const k in o){if(k[0]==='_')continue;const v=o[k];if(v===''||v==null||(Array.isArray(v)&&!v.length)||(typeof v==='number'&&!isFinite(v)))continue;r[k]=v}return r}
 
 /* ---------- stockage sur l'appareil (IndexedDB) ---------- */
-const idbOpen=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('indexedDB indisponible'));const r=indexedDB.open('stock-friperie',2);r.onupgradeneeded=()=>{const d=r.result;[['pieces','id'],['photos','id'],['outbox','k'],['meta','k']].forEach(([n,k])=>{if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:k})})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const idbOpen=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('indexedDB indisponible'));const r=indexedDB.open('stock-friperie',2);r.onupgradeneeded=()=>{const d=r.result;[['pieces','id'],['photos','id'],['outbox','k'],['meta','k']].forEach(([n,k])=>{if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:k})})};r.onblocked=()=>{$('sync').querySelector('span').textContent='Ferme les autres onglets ou fenêtres de l\'appli'};r.onsuccess=()=>{const d=r.result;d.onversionchange=()=>d.close();res(d)};r.onerror=()=>rej(r.error)});
 const tx=(store,mode,fn)=>new Promise((res,rej)=>{if(!IDB)return res();let out;const t=IDB.transaction(store,mode);try{out=fn(t.objectStore(store))}catch(e){return rej(e)}t.oncomplete=()=>res(out&&'result' in out?out.result:undefined);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)});
 let localState='ok';
 const setSync=s=>{localState=s;refreshStatus()};
@@ -595,6 +595,8 @@ function refreshStatus(){const el=$('sync');let c='',t;
  else if(flushing||pulling||pending||localState==='pend'){c='pend';t='Synchronisation…'+(pending?' ('+pending+')':'')}
  else t='Synchronisé';
  el.className=c;el.querySelector('span').textContent=t;if(view==='set')renderSync()}
+const T=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('Délai dépassé : le serveur ne répond pas.')),ms||30000))]);
+$('sync').onclick=()=>go('set');
 const countPending=async()=>{pending=(await tx('outbox','readonly',s=>s.count()))||0;refreshStatus()};
 const kickFlush=()=>{clearTimeout(kickT);kickT=setTimeout(()=>{flush()},400)};
 async function queue(kind,id){if(!cloud||!IDB)return;await tx('outbox','readwrite',s=>{s.put({k:(kind==='photo'?'f:':'p:')+id,kind,id,ts:Date.now()+Math.random()})});await countPending();kickFlush()}
@@ -602,10 +604,10 @@ async function queueMany(ids,photoIds){if(!cloud||!IDB)return;await tx('outbox',
 const clearOb=ents=>tx('outbox','readwrite',s=>{ents.forEach(e=>{const r=s.get(e.k);r.onsuccess=()=>{if(r.result&&r.result.ts===e.ts)s.delete(e.k)}})});
 async function flush(){if(!cloud||!user||flushing||!online||importing)return;flushing=true;syncErr='';refreshStatus();
  try{for(;;){const ob=(await tx('outbox','readonly',s=>s.getAll()))||[];if(!ob.length)break;
-   for(const e of ob.filter(x=>x.kind==='photo').slice(0,5)){const b=await phBlob(e.id);if(b){const r=await sb.storage.from('photos').upload(user.id+'/'+e.id+'.jpg',b,{upsert:true,contentType:b.type||'image/jpeg'});if(r.error)throw r.error}await clearOb([e])}
+   for(const e of ob.filter(x=>x.kind==='photo').slice(0,5)){const b=await phBlob(e.id);if(b){const r=await T(sb.storage.from('photos').upload(user.id+'/'+e.id+'.jpg',b,{upsert:true,contentType:b.type||'image/jpeg'}),60000);if(r.error)throw r.error}await clearOb([e])}
    const chunk=ob.filter(x=>x.kind!=='photo').slice(0,100);
    if(chunk.length){const rows=chunk.map(e=>{const p=e.kind==='put'?P.find(x=>x.id===e.id):null;return p?{user_id:user.id,id:e.id,data:p,deleted:false}:{user_id:user.id,id:e.id,data:{},deleted:true}});
-    const r=await sb.from('pieces').upsert(rows,{onConflict:'user_id,id'});if(r.error)throw r.error;await clearOb(chunk)}
+    const r=await T(sb.from('pieces').upsert(rows,{onConflict:'user_id,id'}));if(r.error)throw r.error;await clearOb(chunk)}
    await countPending()}
   lastSync=new Date()}
  catch(e){syncErr=errMsg(e)}
@@ -617,7 +619,7 @@ async function applyRows(rows){const ob=new Set((await tx('outbox','readonly',s=
  if(put.length||del.length){await tx('pieces','readwrite',s=>{put.forEach(d=>s.put(d));del.forEach(id=>s.delete(id))});scheduleRender()}}
 async function pull(){if(!cloud||!user||pulling||!online)return;pulling=true;refreshStatus();
  try{const since=(await metaGet('lastPull'))||'1970-01-01T00:00:00Z';let from=0,last=since;
-  for(;;){const r=await sb.from('pieces').select('id,data,deleted,updated_at').gt('updated_at',since).order('updated_at',{ascending:true}).range(from,from+999);if(r.error)throw r.error;const d=r.data||[];if(!d.length)break;await applyRows(d);last=d[d.length-1].updated_at;if(d.length<1000)break;from+=1000}
+  for(;;){const r=await T(sb.from('pieces').select('id,data,deleted,updated_at').gt('updated_at',since).order('updated_at',{ascending:true}).range(from,from+999));if(r.error)throw r.error;const d=r.data||[];if(!d.length)break;await applyRows(d);last=d[d.length-1].updated_at;if(d.length<1000)break;from+=1000}
   if(last!==since)await metaSet('lastPull',last);lastSync=new Date();syncErr=''}
  catch(e){syncErr=errMsg(e)}
  finally{pulling=false;refreshStatus()}}
