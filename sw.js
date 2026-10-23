@@ -2,8 +2,13 @@
 const VERSION = 'stock-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest', './vendor/xlsx.full.min.js', './vendor/supabase.js', './config.js', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
+/* Une nouvelle version attend que l'utilisateur touche « Mettre à jour » dans l'appli (message SKIP_WAITING). */
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' })))));
+});
+
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
