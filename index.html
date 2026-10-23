@@ -37,7 +37,27 @@ h1{font-size:22px;margin:0;font-weight:800}
 .view{display:none}.view.on{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);min-width:0}
 .card h3{margin:0 0 4px;font-size:17px}
-.card.frm>div:not(:first-child),.card.frm>details{margin-top:18px}
+.grp{border-top:1px solid var(--line)}.grp:first-child{border-top:0}
+.gh{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:12px 0;min-height:50px;cursor:pointer;text-align:left}
+.gh .l{margin:0;flex:none}
+.gs{margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:14px}
+.gc{flex:none;width:9px;height:9px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(45deg);margin:-3px 4px 0 2px}
+.grp.open>.gh .gc{transform:rotate(-135deg);margin-top:3px}
+.gb{padding:2px 0 16px}
+.gb>.l,.gb .row2 .l{margin-top:16px}.gb>.l:first-child,.gb>.photo+.hint{margin-top:0}
+.gb .row2>div{min-width:0}
+.grp.err>.gh .l{color:var(--red)}
+.card.frm>.hint{margin-top:10px}
+.pill{display:inline-block;min-width:28px;text-align:center;padding:2px 12px;border-radius:999px;font-weight:800;color:#fff}
+.pill.g-A,.chip.g-A.on{background:var(--mint);border-color:var(--mint);color:#fff}
+.pill.g-B,.chip.g-B.on{background:var(--tag);border-color:var(--tag);color:#17233B}
+.pill.g-C,.chip.g-C.on{background:var(--red);border-color:var(--red);color:#fff}
+.pill.g-B{color:#17233B}
+.chip.cl{display:inline-flex;align-items:center}
+.chip.cl .sw{width:14px;height:14px;border-radius:50%;background:var(--c);border:1px solid rgba(128,128,128,.55);margin-right:7px;flex:none}
+.chip.cl.on{background:var(--c);color:var(--ct);border-color:var(--ink)}
+.chip.cl.on .sw{border-color:var(--ct)}
+input[type=date]{display:block;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;text-align:left}
 .sub{font-size:13px;color:var(--mute);margin:0 0 12px}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .kpis.two{grid-template-columns:repeat(2,1fr)}
@@ -279,8 +299,9 @@ $('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
 function freq(f,arr){const c=new Map();P.forEach(p=>{const v=arr?(p[f]||[]):[p[f]];v.forEach(x=>{if(x&&x!=='Aucun'&&x!=='Aucune')c.set(x,(c.get(x)||0)+1)})});return[...c.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0])}
 function subsOf(cat){const c=new Map();P.forEach(p=>{if(p.cat===cat&&p.sub)c.set(p.sub,(c.get(p.sub)||0)+1)});return[...c.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0])}
 const MARQUES0=['Nike','Adidas','Levis','Tommy','Ralph Lauren','Lacoste','Champion','Carhartt','The North Face','Puma','Reebok','Under Armour','Jordan','Kappa','Fila','Umbro','New Balance','Columbia','Calvin Klein','Hugo Boss','Diesel','Guess','Gap','Dickies','Wrangler','Lee','Vans','Converse','Zara','H&M','Jack & Jones','Uniqlo','Superdry','Napapijri','Nautica','Starter','Russell'];
-const allBrands=()=>{const seen=new Set();return[...freq('marque'),...MARQUES0].filter(b=>{const k=b.toLowerCase();if(seen.has(k))return false;seen.add(k);return true})};
-const recentBrands=()=>{const used=freq('marque').filter(b=>!/^Non (renseigné|Identifié)$/i.test(b)).slice(0,8),seen=new Set(used.map(b=>b.toLowerCase()));return[...used,...MARQUES0.filter(b=>!seen.has(b.toLowerCase()))].slice(0,24)};
+const sortFr=a=>[...a].sort((x,y)=>String(x).localeCompare(String(y),'fr',{sensitivity:'base',numeric:true}));
+const allBrands=()=>{const seen=new Set();return sortFr([...freq('marque'),...MARQUES0].filter(b=>{const k=b.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}))};
+const recentBrands=()=>{const used=freq('marque').filter(b=>!/^Non (renseigné|Identifié)$/i.test(b)).slice(0,8),seen=new Set(used.map(b=>b.toLowerCase()));return sortFr([...used,...MARQUES0.filter(b=>!seen.has(b.toLowerCase()))])};
 function lev(a,b){a=a.toLowerCase();b=b.toLowerCase();const d=[];for(let i=0;i<=a.length;i++)d[i]=[i];for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]==b[j-1]?0:1));return d[a.length][b.length]}
 function suggestBrand(v){v=(v||'').trim();if(v.length<3)return null;const all=allBrands();if(all.some(b=>b.toLowerCase()===v.toLowerCase()))return null;let best=null,bd=3;for(const b of all){const d=lev(v,b);if(d<bd&&d<=Math.max(1,Math.floor(b.length/4))){bd=d;best=b}}return best}
 function canon(v){v=(v||'').trim();return allBrands().find(b=>b.toLowerCase()===v.toLowerCase())||v}
@@ -301,65 +322,80 @@ const SUBS0={Short:['Sport','Jeans'],Tshirt:['T-Imprimé','T-Unis','T-Rayures'],
 const MAT0=['Coton','Polyester','Laine','Nylon','Viscose','Lyocell','Elasthanne','Acrylique','Lin','Cachemire','Alpage','Cuir'];
 const COUL0=['Bleu','Noir','Blanc','Gris','Rouge','Vert','Beige','Violet','Marron','Rose','Jaune','Orange'];
 const ETAT0=['RAS','Neuf','Légères traces d\'usure','Petites tâches','Grosses tâches','Grosses traces d\'usure','Décoloration','Petit trou','Déchirure','Bouton manquant','Fermeture cassé','Cordon manquant','Rétrécit'];
-const MADEIN0=['Chine','USA','Malaisie','Vietnam','Inde','Cambodge','Taiwan','Turquie','UK','Mexique','Roumanie','France','Tunisie','Haïti','Sri Lanka'];
+const MADEIN0=['Afghanistan','Afrique du Sud','Albanie','Algérie','Allemagne','Andorre','Angola','Antigua-et-Barbuda','Arabie saoudite','Argentine','Arménie','Australie','Autriche','Azerbaïdjan','Bahamas','Bahreïn','Bangladesh','Barbade','Belgique','Belize','Bénin','Bhoutan','Biélorussie','Birmanie','Bolivie','Bosnie-Herzégovine','Botswana','Brésil','Brunei','Bulgarie','Burkina Faso','Burundi','Cambodge','Cameroun','Canada','Cap-Vert','Chili','Chine','Chypre','Colombie','Comores','Congo','Corée du Nord','Corée du Sud','Costa Rica','Côte d\'Ivoire','Croatie','Cuba','Danemark','Djibouti','Dominique','Égypte','Émirats arabes unis','Équateur','Érythrée','Espagne','Estonie','Eswatini','États-Unis','Éthiopie','Fidji','Finlande','France','Gabon','Gambie','Géorgie','Ghana','Grèce','Grenade','Groenland','Guatemala','Guinée','Guinée-Bissau','Guinée équatoriale','Guyana','Haïti','Honduras','Hong Kong','Hongrie','Îles Marshall','Inde','Indonésie','Irak','Iran','Irlande','Islande','Israël','Italie','Jamaïque','Japon','Jordanie','Kazakhstan','Kenya','Kirghizistan','Kiribati','Kosovo','Koweït','Laos','Lesotho','Lettonie','Liban','Liberia','Libye','Liechtenstein','Lituanie','Luxembourg','Macao','Macédoine du Nord','Madagascar','Malaisie','Malawi','Maldives','Mali','Malte','Maroc','Maurice','Mauritanie','Mexique','Micronésie','Moldavie','Monaco','Mongolie','Monténégro','Mozambique','Namibie','Nauru','Népal','Nicaragua','Niger','Nigeria','Norvège','Nouvelle-Zélande','Oman','Ouganda','Ouzbékistan','Pakistan','Palaos','Palestine','Panama','Papouasie-Nouvelle-Guinée','Paraguay','Pays-Bas','Pérou','Philippines','Pologne','Porto Rico','Portugal','Qatar','République centrafricaine','République dominicaine','République tchèque','Roumanie','Royaume-Uni','Russie','Rwanda','Saint-Christophe-et-Niévès','Saint-Marin','Saint-Vincent-et-les-Grenadines','Sainte-Lucie','Salomon','Salvador','Samoa','Sao Tomé-et-Principe','Sénégal','Serbie','Seychelles','Sierra Leone','Singapour','Slovaquie','Slovénie','Somalie','Soudan','Soudan du Sud','Sri Lanka','Suède','Suisse','Suriname','Syrie','Taïwan','Tadjikistan','Tanzanie','Tchad','Thaïlande','Timor oriental','Togo','Tonga','Trinité-et-Tobago','Tunisie','Turkménistan','Turquie','Tuvalu','Ukraine','Uruguay','Vanuatu','Vatican','Venezuela','Vietnam','Yémen','Zambie','Zimbabwe','UK','USA','Taiwan'];
 const mrg=(a,b)=>[...new Set([...(a||[]),...(b||[])])];
 const dimsFor=cat=>HAUT.includes(cat)?DH:BAS.includes(cat)?DB:[...DH,...DB];
+/* Groupes dans l'ordre de saisie : un seul est ouvert au départ (la catégorie), le suivant s'ouvre quand le précédent est rempli. */
+const ORDER=['cat','sub','marque','taille','genre','grade','achat','prov','photo','dim','det'];
+const COLORS={Bleu:['#2F6FDE','#fff'],Noir:['#1A1A1A','#fff'],Blanc:['#FFFFFF','#17233B'],Gris:['#8A8F98','#fff'],Rouge:['#D32F2F','#fff'],Vert:['#2E9E5B','#fff'],Beige:['#D8C3A5','#17233B'],Violet:['#7E57C2','#fff'],Marron:['#7B4A2D','#fff'],Rose:['#F48FB1','#17233B'],Jaune:['#F5C518','#17233B'],Orange:['#F57C00','#17233B']};
+const abc=a=>[...a].sort((x,y)=>String(x).localeCompare(String(y),'fr',{sensitivity:'base',numeric:true}));
 function mkForm(host,S,o){
- let open=!!o.open,errs={},newField=null,dopen=DK.some(k=>S[k]!=null&&S[k]!=='');
- const chip=(f,v,on,sm)=>`<button type="button" class="chip${on?' on':''}${sm?' sm':''}" data-f="${f}" data-v="${esc(v)}">${esc(v)}</button>`;
+ const edit=o.mode==='edit';
+ let G=new Set(edit?ORDER:['cat']),errs={},newField=null,focusKey=null;
+ const chip=(f,v,on,sm)=>{let cls='chip'+(on?' on':'')+(sm?' sm':''),st='',inner=esc(v);
+  if(f==='grade')cls+=' g-'+v;
+  if(f==='coul'&&COLORS[v]){cls+=' cl';st=` style="--c:${COLORS[v][0]};--ct:${COLORS[v][1]}"`;inner='<i class="sw"></i>'+inner}
+  return`<button type="button" class="${cls}"${st} data-f="${f}" data-v="${esc(v)}">${inner}</button>`};
  const group=(f,vals,multi,allowNew)=>{const cur=multi?(S[f]||[]):[S[f]];const set=[...vals];cur.forEach(c=>{if(c&&!set.includes(c))set.unshift(c)});
   return`<div class="chips" data-g="${f}" ${multi?'data-multi="1"':''}>${set.map(v=>chip(f,v,cur.includes(v))).join('')}${allowNew?(newField===f?`<input type="text" class="newin" data-n="${f}" placeholder="Nouveau…" style="width:150px">`:`<button type="button" class="chip add" data-new="${f}">+ autre</button>`):''}</div>`};
+ const hasSub=()=>!!(S.cat&&(mrg(SUBS0[S.cat],subsOf(S.cat)).length||S.sub));
+ function advance(k){if(edit)return;G.delete(k);let i=ORDER.indexOf(k)+1;if(ORDER[i]==='sub'&&!hasSub())i++;const n=ORDER[i];if(n){G.add(n);focusKey=n}}
  function cprev(){const e=host.querySelector('#cdp');if(!e)return;const c=genCode(Object.assign({},S,{id:S.id||'_new'}));e.textContent=c?'Code : '+c:'Code : renseigne catégorie, type, marque et grade'}
  function draw(){
   const cats=mrg(CATS0,freq('cat')),subs=S.cat?mrg(SUBS0[S.cat],subsOf(S.cat)):[],sizes=sizesFor(S.cat),provs=[...new Set([...PROV0,...freq('prov')])];
   const sizesSorted=sizes.sort((a,b)=>{const ia=SIZES.indexOf(a),ib=SIZES.indexOf(b);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return-1;if(ib>=0)return 1;return String(a).localeCompare(String(b),'fr',{numeric:true})});
   const rb=recentBrands(),sug=suggestBrand(S.marque);
-  host.innerHTML=`
-  <div class="${errs.cat?'err':''}"><div class="l">Catégorie</div>${group('cat',cats,false,true)}</div>
-  ${S.cat&&(subs.length||S.sub)?`<div><div class="l">Type</div>${group('sub',subs,false,true)}</div>`:''}
-  <div class="${errs.marque?'err':''}"><div class="l">Marque</div>
-   ${rb.length?`<div class="chips" style="margin-bottom:8px">${rb.map(b=>chip('marque',b,S.marque===b,true)).join('')}</div>`:''}
-   <input type="text" id="fm" list="dlm" placeholder="Taper la marque" value="${esc(S.marque)}" autocomplete="off" autocapitalize="words"><datalist id="dlm">${allBrands().map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
-   <div class="sug" id="sg">${sug?`<button type="button" class="chip sm" data-sug="${esc(sug)}">Tu voulais dire ${esc(sug)} ?</button>`:''}</div></div>
-  <div><div class="l">Taille</div>${group('taille',sizesSorted,false,true)}</div>
-  <div><div class="l">Genre</div>${group('genre',GEN,false,false)}</div>
-  <div><div class="l">Grade</div>${group('grade',GRADES,false,false)}</div>
-  <div class="${errs.achat?'err':''}"><div class="l">Prix d'achat</div><div class="price"><input type="text" inputmode="decimal" id="fa" placeholder="0,00" value="${S.achat!=null&&S.achat!==''?esc(String(S.achat).replace('.',',')):''}"><span>€</span></div></div>
-  <div><div class="l">Provenance</div>${group('prov',provs,false,true)}</div>
-  <div><div class="l">Photo (facultatif)</div><div class="photo">${S.photo?phImg(S.photo):''}<span class="btn sec sm filebtn">Prendre une photo<input type="file" accept="image/*" capture="environment" class="fph" aria-label="Prendre une photo"></span><span class="btn sec sm filebtn">Choisir une image<input type="file" accept="image/*" class="fph" aria-label="Choisir une image"></span>${S.photo?'<button type="button" class="btn sec sm" data-rmph="1">Retirer</button>':''}</div><div class="hint" id="phs"></div></div>
-  <details class="more" id="dd" ${dopen?'open':''}><summary>Dimensions (cm)</summary>
-   <div class="row2" style="margin-top:6px">${dimsFor(S.cat).map(([k,l])=>`<div><div class="l">${l}</div><input type="text" inputmode="decimal" data-d="${k}" value="${S[k]!=null&&S[k]!==''?esc(String(S[k]).replace('.',',')):''}" placeholder="cm"></div>`).join('')}</div>
-  </details>
-  <details class="more" id="dm" ${open?'open':''}><summary>Plus de détails</summary>
-   <div class="l">Matières</div>${group('mat',mrg(MAT0,freq('mat',1)),true,true)}
-   <div class="l">Couleurs</div>${group('coul',mrg(COUL0,freq('coul',1)),true,true)}
-   <div class="l">État / défaut</div><select data-k="etat"><option value="">—</option>${mrg(ETAT0,freq('etat')).map(e=>`<option ${S.etat===e?'selected':''}>${esc(e)}</option>`).join('')}</select>
-   <div class="row2"><div><div class="l">Modèle</div><input type="text" data-k="modele" value="${esc(S.modele)}"></div><div><div class="l">Made in</div><input type="text" data-k="madein" list="dlmi" value="${esc(S.madein)}"><datalist id="dlmi">${mrg(MADEIN0,freq('madein')).map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div></div>
-   <div class="row2"><div><div class="l">Collab / équipe</div><input type="text" data-k="collab" list="dlc" value="${esc(S.collab&&!/^Aucun/.test(S.collab)?S.collab:'')}"><datalist id="dlc">${freq('collab').map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div><div><div class="l">Ballot</div><input type="text" data-k="ballot" list="dlb" value="${esc(S.ballot)}"><datalist id="dlb">${freq('ballot').map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div></div>
-   <div class="row2"><div><div class="l">Date d'entrée</div><input type="date" data-k="entree" value="${esc(S.entree)}"></div><div><div class="l">Date de publication</div><input type="date" data-k="pub" value="${esc(S.pub)}"></div></div>
-   <div class="l">Note</div><textarea data-k="note" rows="2">${esc(S.note)}</textarea>
-  </details>
-  <div class="hint" id="cdp"></div>
-  <div class="acts">${o.mode==='add'?`<button type="button" class="btn" id="fok">Ajouter</button><button type="button" class="btn sec" id="fdup">Ajouter et dupliquer</button>`:`<button type="button" class="btn" id="fok">Enregistrer</button><button type="button" class="btn sec" id="fcancel">Retour</button>`}</div>`;
+  const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['mat','coul','etat','modele','madein','collab','ballot','pub','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length;
+  const sums={cat:S.cat,sub:S.sub,marque:S.marque,taille:S.taille,genre:S.genre,achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:S.prov,photo:S.photo?'Ajoutée':'',dim:dimN?dimN+' valeur'+(dimN>1?'s':''):'',det:detN?detN+' renseigné'+(detN>1?'s':''):''};
+  const sec=(k,label,body,opt)=>{opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
+   return`<div class="grp${op?' open':''}${errs[k]?' err':''}" data-sec="${k}"><button type="button" class="gh" data-tg="${k}" aria-expanded="${op}"><span class="l">${label}</span><span class="gs">${sm}</span><span class="gc" aria-hidden="true"></span></button>${op?`<div class="gb">${body}${opt.next&&!edit?`<div class="acts" style="margin-top:12px"><button type="button" class="btn sec sm" data-next="${k}">${opt.next} ›</button></div>`:''}</div>`:''}</div>`};
+  host.innerHTML=
+   sec('cat','Catégorie',group('cat',cats,false,true))+
+   (hasSub()?sec('sub','Type',group('sub',subs,false,true)):'')+
+   sec('marque','Marque',`${rb.length?`<div class="chips" style="margin-bottom:8px">${rb.map(b=>chip('marque',b,S.marque===b,true)).join('')}</div>`:''}
+    <input type="text" id="fm" list="dlm" placeholder="Taper la marque" value="${esc(S.marque)}" autocomplete="off" autocapitalize="words"><datalist id="dlm">${allBrands().map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+    <div class="sug" id="sg">${sug?`<button type="button" class="chip sm" data-sug="${esc(sug)}">Tu voulais dire ${esc(sug)} ?</button>`:''}</div>`,{next:'Suivant'})+
+   sec('taille','Taille',group('taille',sizesSorted,false,true))+
+   sec('genre','Genre',group('genre',GEN,false,false))+
+   sec('grade','Grade',group('grade',GRADES,false,false),{sumHtml:S.grade?`<span class="pill g-${esc(S.grade)}">${esc(S.grade)}</span>`:''})+
+   sec('achat',"Prix d'achat",`<div class="price"><input type="text" inputmode="decimal" id="fa" placeholder="0,00" value="${S.achat!=null&&S.achat!==''?esc(String(S.achat).replace('.',',')):''}"><span>€</span></div>`,{next:'Suivant'})+
+   sec('prov','Provenance',group('prov',provs,false,true))+
+   sec('photo','Photo (facultatif)',`<div class="photo">${S.photo?phImg(S.photo):''}<span class="btn sec sm filebtn">Prendre une photo<input type="file" accept="image/*" capture="environment" class="fph" aria-label="Prendre une photo"></span><span class="btn sec sm filebtn">Choisir une image<input type="file" accept="image/*" class="fph" aria-label="Choisir une image"></span>${S.photo?'<button type="button" class="btn sec sm" data-rmph="1">Retirer</button>':''}</div><div class="hint" id="phs"></div>`,{next:'Passer'})+
+   sec('dim','Dimensions (cm)',`<div class="row2">${dimsFor(S.cat).map(([k,l])=>`<div><div class="l">${l}</div><input type="text" inputmode="decimal" data-d="${k}" value="${S[k]!=null&&S[k]!==''?esc(String(S[k]).replace('.',',')):''}" placeholder="cm"></div>`).join('')}</div>`,{next:'Suivant'})+
+   sec('det','Plus de détails',`<div class="l">Matières</div>${group('mat',mrg(MAT0,freq('mat',1)),true,true)}
+    <div class="l">Couleurs</div>${group('coul',mrg(COUL0,freq('coul',1)),true,true)}
+    <div class="l">État / défaut</div><select data-k="etat"><option value="">—</option>${mrg(ETAT0,freq('etat')).map(e=>`<option ${S.etat===e?'selected':''}>${esc(e)}</option>`).join('')}</select>
+    <div class="l">Ballot</div>${group('ballot',abc(freq('ballot')),false,true)}
+    <div class="row2"><div><div class="l">Modèle</div><input type="text" data-k="modele" value="${esc(S.modele)}"></div><div><div class="l">Made in</div><input type="text" data-k="madein" list="dlmi" value="${esc(S.madein)}" placeholder="Pays"><datalist id="dlmi">${abc(mrg(MADEIN0,freq('madein'))).map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div></div>
+    <div class="l">Collab / équipe</div><input type="text" data-k="collab" list="dlc" value="${esc(S.collab&&!/^Aucun/.test(S.collab)?S.collab:'')}"><datalist id="dlc">${freq('collab').map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+    <div class="row2"><div><div class="l">Date d'entrée</div><input type="date" data-k="entree" value="${esc(S.entree)}"></div><div><div class="l">Date de publication</div><input type="date" data-k="pub" value="${esc(S.pub)}"></div></div>
+    <div class="l">Note</div><textarea data-k="note" rows="2">${esc(S.note)}</textarea>`)+
+   `<div class="hint" id="cdp"></div>
+  <div class="acts">${edit?`<button type="button" class="btn" id="fok">Enregistrer</button><button type="button" class="btn sec" id="fcancel">Retour</button>`:`<button type="button" class="btn" id="fok">Ajouter</button><button type="button" class="btn sec" id="fdup">Ajouter et dupliquer</button>`}</div>`;
   const nf=host.querySelector('.newin');if(nf)nf.focus();
   cprev();hydrate();
+  if(focusKey){const el=host.querySelector(`[data-sec="${focusKey}"]`);focusKey=null;if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'})}
  }
- host.addEventListener('toggle',e=>{if(e.target.id==='dm')open=e.target.open;if(e.target.id==='dd')dopen=e.target.open},true);
  host.addEventListener('click',e=>{
   const c=e.target.closest('button');if(!c)return;
+  if(c.dataset.tg){const k=c.dataset.tg;if(G.has(k))G.delete(k);else G.add(k);draw();return}
+  if(c.dataset.next){advance(c.dataset.next);draw();return}
   if(c.dataset.f){const f=c.dataset.f,v=c.dataset.v,multi=c.parentNode.dataset.multi;
    if(multi){const a=S[f]||[];S[f]=a.includes(v)?a.filter(x=>x!==v):[...a,v]}
-   else{S[f]=S[f]===v?'':v;if(f==='cat')S.sub=''}
+   else{S[f]=S[f]===v?'':v;if(f==='cat')S.sub='';if(S[f])advance(f)}
    delete errs[f];draw();return}
   if(c.dataset.rmph){S.photo='';draw();return}
   if(c.dataset.new){newField=c.dataset.new;draw();return}
-  if(c.dataset.sug){S.marque=c.dataset.sug;draw();return}
+  if(c.dataset.sug){S.marque=c.dataset.sug;delete errs.marque;advance('marque');draw();return}
   if(c.id==='fok')submit(false);
   if(c.id==='fdup')submit(true);
   if(c.id==='fcancel'&&o.onCancel)o.onCancel();
  });
- function addNew(inp){const f=inp.dataset.n,v=inp.value.trim();if(newField!==f)return;newField=null;if(v){if(['mat','coul'].includes(f)){const a=S[f]||[];if(!a.includes(v))S[f]=[...a,v]}else{S[f]=v;if(f==='cat')S.sub=''}}draw()}
- host.addEventListener('keydown',e=>{if(e.target.classList.contains('newin')&&e.key==='Enter'){e.preventDefault();addNew(e.target)}});
+ function addNew(inp){const f=inp.dataset.n,v=inp.value.trim();if(newField!==f)return;newField=null;if(v){if(['mat','coul'].includes(f)){const a=S[f]||[];if(!a.includes(v))S[f]=[...a,v]}else{S[f]=v;if(f==='cat')S.sub='';advance(f)}}draw()}
+ host.addEventListener('keydown',e=>{
+  if(e.target.classList.contains('newin')&&e.key==='Enter'){e.preventDefault();addNew(e.target);return}
+  if(e.key==='Enter'&&e.target.id==='fm'){e.preventDefault();S.marque=e.target.value;if(S.marque.trim()){delete errs.marque;advance('marque');draw()}}
+  if(e.key==='Enter'&&e.target.id==='fa'){e.preventDefault();if(num(S.achat)>=0){delete errs.achat;advance('achat');draw()}}});
  host.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('newin'))addNew(e.target)});
  host.addEventListener('input',e=>{const t=e.target;
   if(t.id==='fm'){S.marque=t.value;delete errs.marque;const s=suggestBrand(t.value);$('sg').innerHTML=s?`<button type="button" class="chip sm" data-sug="${esc(s)}">Tu voulais dire ${esc(s)} ?</button>`:''}
@@ -367,7 +403,7 @@ function mkForm(host,S,o){
   else if(t.dataset.d){S[t.dataset.d]=t.value.replace(',','.')}
   else if(t.dataset.k){S[t.dataset.k]=t.value}
   cprev()});
- async function doPhoto(f){const st=$('phs');st.textContent='Enregistrement de la photo…';try{S.photo=await savePhoto(f);draw()}catch(er){st.textContent='Photo non enregistrée ('+((er&&(er.message||er.code))||'erreur')+').'}}
+ async function doPhoto(f){const st=$('phs');st.textContent='Enregistrement de la photo…';try{S.photo=await savePhoto(f);advance('photo');draw()}catch(er){st.textContent='Photo non enregistrée ('+((er&&(er.message||er.code))||'erreur')+').'}}
  host.addEventListener('change',e=>{const t=e.target;
   if(t.classList&&t.classList.contains('fph')){const f=t.files&&t.files[0];t.value='';if(f)doPhoto(f);return}
   if(t.dataset.k==='etat'||t.dataset.k==='entree'||t.dataset.k==='pub')S[t.dataset.k]=t.value;
@@ -375,12 +411,12 @@ function mkForm(host,S,o){
  function submit(dup){
   errs={};const a=num(S.achat);
   if(!S.cat)errs.cat=1;if(!(S.marque||'').trim())errs.marque=1;if(!(a>=0))errs.achat=1;
-  if(Object.keys(errs).length){draw();const el=host.querySelector('.err');if(el)el.scrollIntoView({block:'center',behavior:'smooth'});return}
+  if(Object.keys(errs).length){Object.keys(errs).forEach(k=>G.add(k));draw();const el=host.querySelector('.grp.err');if(el)el.scrollIntoView({block:'center',behavior:'smooth'});return}
   DK.forEach(k=>{const v=num(S[k]);S[k]=v>0?v:''});
   S.marque=canon(S.marque);S.achat=Math.round(a*100)/100;o.onSubmit(S,dup);
  }
  draw();
- return{draw,reset(ns){S=ns;errs={};draw()},get state(){return S}};
+ return{draw,reset(ns){S=ns;errs={};G=new Set(edit?ORDER:['cat']);draw()},get state(){return S}};
 }
 
 /* ---------- vue Ajouter ---------- */
