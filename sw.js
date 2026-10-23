@@ -1,6 +1,6 @@
-/* Fonctionnement hors-ligne : les fichiers de l'appli sont gardés en cache. Change VERSION à chaque mise à jour. */
-const VERSION = 'stock-v1';
-const FILES = ['./', './index.html', './manifest.webmanifest', './vendor/xlsx.full.min.js', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
+﻿/* Fonctionnement hors-ligne : les fichiers de l'appli sont gardés en cache. Change VERSION à chaque mise à jour. */
+const VERSION = 'stock-v2';
+const FILES = ['./', './index.html', './manifest.webmanifest', './vendor/xlsx.full.min.js', './vendor/supabase.js', './config.js', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -31,3 +31,4 @@ self.addEventListener('fetch', e => {
     return hit || net;
   }));
 });
+

@@ -15,6 +15,8 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="config.js"></script>
 <style>
 /* Mobile: barre d'onglets en bas. PC (≥ 900 px): menu à gauche, contenu plus large, bilan en deux colonnes. */
 :root{color-scheme:light;--bg:#F2F4F8;--card:#fff;--ink:#17233B;--mute:#6A7690;--line:#DDE3EC;--denim:#2F4B7C;--on:#fff;--tag:#F5B82E;--mint:#2F8A6E;--red:#C94A3E;--soft:#E8EDF6;--shadow:0 1px 2px rgba(23,35,59,.08),0 4px 14px rgba(23,35,59,.06);--fd:"Bricolage Grotesque",Figtree,system-ui,sans-serif;--fb:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -123,6 +125,11 @@ nav button.on{color:var(--denim)}
 .big-ph{width:100%;max-height:260px;object-fit:cover;border-radius:12px;margin-bottom:12px;border:1px solid var(--line)}
 .warn{background:color-mix(in srgb,var(--tag) 22%,var(--card));border:1px solid var(--tag);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px}
 .ex{font-size:11px;font-weight:700;color:var(--mute);border:1px dashed var(--mute);border-radius:6px;padding:0 5px;margin-left:6px}
+#auth{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+#auth .card{width:100%;max-width:400px;margin:0}
+#auth input{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:44px;font-size:16px}
+#auth input:focus{outline:2px solid var(--denim);outline-offset:-1px}
+#au_msg{font-size:14px;margin-top:12px;min-height:20px}
 @media(max-width:380px){.kpis{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:900px){
  body{padding-left:calc(224px + 24px);padding-right:24px}
@@ -162,6 +169,7 @@ nav button.on{color:var(--denim)}
    <div id="dsh"></div>
   </section>
   <section id="v-set" class="view">
+   <div class="card" id="sy"></div>
    <div class="card" id="inst" hidden>
     <h3>Installer l'application</h3>
     <p class="sub" id="insth">Ajoute l'appli à ton écran d'accueil ou à ton bureau pour l'ouvrir comme une application, même sans connexion.</p>
@@ -193,6 +201,14 @@ nav button.on{color:var(--denim)}
   <button data-v="set" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Export</button>
  </nav>
 </div>
+<div id="auth" hidden><div class="card">
+ <h2 style="margin:0 0 4px;font-size:22px">Stock Friperie</h2>
+ <p class="sub">Connecte-toi pour retrouver ton stock sur tous tes appareils.</p>
+ <div class="fld"><label class="l" for="au_mail">E-mail</label><input type="text" id="au_mail" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+ <div class="fld"><label class="l" for="au_pw">Mot de passe</label><input type="password" id="au_pw" autocomplete="current-password"></div>
+ <div class="acts"><button class="btn" id="au_in" type="button">Se connecter</button><button class="btn sec" id="au_up" type="button">Créer mon compte</button></div>
+ <div id="au_msg" role="status"></div>
+</div></div>
 <div id="sheet" hidden><div id="shc"></div></div>
 <div id="toast" hidden></div>
 
@@ -216,25 +232,30 @@ const sold=p=>p.statut==='Vendu',avail=p=>p.statut==='Disponible';
 const profit=p=>(p.pv||0)-(p.achat||0)-(p.frais||0);
 const age=p=>days(ok(p.entree)?p.entree:today(),today());
 const idn=id=>parseInt(String(id).replace(/\D/g,''),10)||0;
-const nextId=()=>'i'+pad(P.reduce((m,p)=>Math.max(m,idn(p.id)),0)+1,4);
+const nextId=()=>'i'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const title=p=>[p.marque||'Sans marque',p.sub||p.cat].filter(Boolean).join(' · ');
 function clean(o){const r={};for(const k in o){if(k[0]==='_')continue;const v=o[k];if(v===''||v==null||(Array.isArray(v)&&!v.length)||(typeof v==='number'&&!isFinite(v)))continue;r[k]=v}return r}
 
 /* ---------- stockage sur l'appareil (IndexedDB) ---------- */
-const idbOpen=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('indexedDB indisponible'));const r=indexedDB.open('stock-friperie',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('pieces',{keyPath:'id'});d.createObjectStore('photos',{keyPath:'id'})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const idbOpen=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('indexedDB indisponible'));const r=indexedDB.open('stock-friperie',2);r.onupgradeneeded=()=>{const d=r.result;[['pieces','id'],['photos','id'],['outbox','k'],['meta','k']].forEach(([n,k])=>{if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:k})})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const tx=(store,mode,fn)=>new Promise((res,rej)=>{if(!IDB)return res();let out;const t=IDB.transaction(store,mode);try{out=fn(t.objectStore(store))}catch(e){return rej(e)}t.oncomplete=()=>res(out&&'result' in out?out.result:undefined);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)});
-function setSync(s){const el=$('sync');el.className=s==='pend'?'pend':s==='err'?'err':'';el.querySelector('span').textContent=s==='pend'?'Enregistrement…':s==='err'?'Non enregistré':IDB?'Enregistré sur cet appareil':'Mémoire temporaire'}
+let localState='ok';
+const setSync=s=>{localState=s;refreshStatus()};
 let chain=Promise.resolve();
 function persist(fn){setSync('pend');chain=chain.then(fn).then(()=>setSync('ok'),e=>{setSync('err');toast('Enregistrement impossible'+(e&&e.message?' : '+e.message:''))});return chain}
-function save(p){p=clean(p);const i=P.findIndex(x=>x.id===p.id);if(i<0)P.unshift(p);else P[i]=p;renderAll();persist(()=>tx('pieces','readwrite',s=>s.put(p)));return p}
-function remove(id){P=P.filter(x=>x.id!==id);renderAll();return persist(()=>tx('pieces','readwrite',s=>s.delete(id)))}
+function save(p){p=clean(p);const i=P.findIndex(x=>x.id===p.id);if(i<0)P.unshift(p);else P[i]=p;renderAll();persist(async()=>{await tx('pieces','readwrite',s=>s.put(p));await queue('put',p.id)});return p}
+function remove(id){P=P.filter(x=>x.id!==id);renderAll();return persist(async()=>{await tx('pieces','readwrite',s=>s.delete(id));await queue('del',id)})}
 let tt;
 function toast(msg,undo){const t=$('toast');t.hidden=false;t.innerHTML='<span>'+esc(msg)+'</span>'+(undo?'<button type="button" id="tu">Annuler</button>':'');if(undo)$('tu').onclick=()=>{t.hidden=true;undo()};clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,undo?6000:3200)}
 
 /* ---------- photos ---------- */
 const phURL=new Map();
 async function phBlob(id){return tx('photos','readonly',s=>s.get(id)).then(r=>r&&r.blob)}
-async function hydrate(){for(const img of document.querySelectorAll('img[data-ph]:not([src])')){const id=img.dataset.ph;let u=phURL.get(id);if(!u){try{const b=await phBlob(id);if(b){u=URL.createObjectURL(b);phURL.set(id,u)}}catch(e){}}if(u)img.src=u}}
+async function hydrate(){await Promise.all([...document.querySelectorAll('img[data-ph]:not([src])')].map(async img=>{const id=img.dataset.ph;let u=phURL.get(id);
+ if(!u){try{let b=await phBlob(id);
+  if(!b&&cloud&&user&&online){const r=await sb.storage.from('photos').download(user.id+'/'+id+'.jpg');if(r.data){b=r.data;await tx('photos','readwrite',s=>s.put({id,blob:b}))}}
+  if(b){u=URL.createObjectURL(b);phURL.set(id,u)}}catch(e){}}
+ if(u)img.src=u}))}
 const phImg=(id,cls)=>`<img${cls?` class="${cls}"`:''} data-ph="${esc(id)}" alt="">`;
 async function savePhoto(file){
  let blob;
@@ -361,7 +382,7 @@ const KEEP=['prov','genre','grade','ballot'];
 function freshState(prev){const s={entree:today()};const d=LSg('defs',{});KEEP.forEach(k=>{if(d[k])s[k]=d[k]});if(prev)KEEP.forEach(k=>{if(prev[k])s[k]=prev[k]});return s}
 function initAdd(){
  addForm=mkForm($('fadd'),freshState(),{mode:'add',onSubmit(S,dup){
-  const p=Object.assign({},S,{id:nextId(),statut:'Disponible'});if(!p.entree)p.entree=today();
+  const p=Object.assign({},S,{id:nextId(),statut:'Disponible',cree:Date.now()});if(!p.entree)p.entree=today();
   p.code=genCode(p);if(p.collab==='')delete p.collab;
   const d={};KEEP.forEach(k=>{if(S[k])d[k]=S[k]});LSs('defs',d);
   const sv=save(p);
@@ -382,7 +403,7 @@ function renderList(){
  if(!P.length){$('lst').innerHTML=`<div class="card empty"><b>${loaded?'Ton stock est vide':'Chargement…'}</b>${loaded?'<br>Ajoute ta première pièce depuis l\'onglet Ajouter, importe ta sauvegarde (onglet Export), ou charge quelques exemples.<br><button class="btn" id="exb" type="button">Charger des exemples</button>':''}</div>`;if($('exb'))$('exb').onclick=loadExamples;return}
  const q=$('q').value.trim().toLowerCase();
  let ps=P.filter(p=>(filt==='Tous'||p.statut===filt)&&(!q||[p.marque,p.cat,p.sub,p.code,p.taille,p.modele,p.ballot,p.id].some(x=>x&&String(x).toLowerCase().includes(q))));
- ps.sort((a,b)=>(filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||idn(b.id)-idn(a.id));
+ ps.sort((a,b)=>(filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
  const tot=ps.length;ps=ps.slice(0,lim);
  $('lst').innerHTML=ps.length?ps.map(p=>{const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>vendu ${eur(p.pv)}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?a+' j':''}</small></div>`;
   return`<button type="button" class="li" data-id="${esc(p.id)}">${p.photo?phImg(p.photo,'th'):`<div class="th">${esc((p.marque||'?').slice(0,2))}</div>`}<div class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><small>${esc([p.taille,p.cat,p.genre].filter(Boolean).join(' · '))} ${tagOf(p)}</small></div>${pr}</button>`}).join('')+(tot>lim?`<button type="button" class="btn sec" id="more">Afficher plus (${tot-lim})</button>`:''):'<div class="empty">Aucune pièce.</div>';
@@ -472,7 +493,7 @@ $('per').onclick=e=>{const b=e.target.closest('[data-p]');if(b){period=+b.datase
 $('dsh').onclick=e=>{const b=e.target.closest('.li');if(b)openSheet(b.dataset.id)};
 
 /* ---------- export / import ---------- */
-function renderSet(){const n=P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?n+' pièce'+(n>1?'s':'')+' dans les fichiers.':'Aucune pièce à exporter pour le moment.')+(lb?' Dernière sauvegarde JSON : '+fd(lb)+'.':' Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.');
+function renderSet(){renderSync();const n=P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?n+' pièce'+(n>1?'s':'')+' dans les fichiers.':'Aucune pièce à exporter pour le moment.')+(lb?' Dernière sauvegarde JSON : '+fd(lb)+'.':' Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.');
  const ex=P.filter(x=>x.ex).length;$('exc').innerHTML=`<h3>Exemples</h3><p class="sub">${ex?ex+' pièce'+(ex>1?'s':'')+' d\'exemple dans ton stock.':'Charge des pièces fictives pour tester les écrans.'}</p><div class="acts">${ex?'<button class="btn sec" id="exd" type="button">Supprimer les exemples</button>':'<button class="btn sec" id="exl" type="button">Charger des exemples</button>'}</div>`;
  if($('exd'))$('exd').onclick=async()=>{const l=P.filter(x=>x.ex);for(const x of l)await remove(x.id);toast('Exemples supprimés')};if($('exl'))$('exl').onclick=loadExamples}
 async function saveFile(name,data,type){
@@ -507,7 +528,7 @@ async function bulkPut(l,s,photos){importing=true;
  for(const id in photos){try{const b=await (await fetch(photos[id])).blob();await tx('photos','readwrite',st=>st.put({id,blob:b}))}catch(e){}}
  l.forEach(x=>{const i=P.findIndex(y=>y.id===x.id);if(i<0)P.push(x);else P[i]=x});
  renderAll();setSync('pend');
- try{await tx('pieces','readwrite',st=>{l.forEach(x=>st.put(x))});setSync('ok')}catch(e){setSync('err');throw e}finally{importing=false}
+ try{await tx('pieces','readwrite',st=>{l.forEach(x=>st.put(x))});await queueMany(l.map(x=>x.id),Object.keys(photos));setSync('ok')}catch(e){setSync('err');throw e}finally{importing=false}
  renderAll()}
 async function importText(txt){const s=$('is');let j;try{j=JSON.parse(txt)}catch(e){s.textContent='Ce texte n\'est pas un JSON valide. Vérifie les virgules et les guillemets.';return}
  const rows=Array.isArray(j)?j:Array.isArray(j&&j.pieces)?j.pieces:Array.isArray(j&&j.items)?j.items:null;if(!rows){s.textContent='Je cherche une liste « pieces » dans ce fichier.';return}
@@ -528,7 +549,7 @@ function loadExamples(){
   const p={id:nextId(),cat,sub,marque,taille,genre,grade,achat,prov,entree,statut:'Disponible',ex:true};p.code=genCode(p);
   if(v){p.statut='Vendu';p.pv=pv;p.dv=addDays(entree,Math.min(ago-1,dv));p.canal=canal;p.frais=frais}
   P.unshift(clean(p))});
- const added=P.slice(0,E.length);renderAll();persist(()=>tx('pieces','readwrite',s=>{added.forEach(p=>s.put(p))}));toast('Exemples chargés')}
+ const added=P.slice(0,E.length);renderAll();persist(async()=>{await tx('pieces','readwrite',s=>{added.forEach(p=>s.put(p))});await queueMany(added.map(p=>p.id),[])});toast('Exemples chargés')}
 
 /* ---------- installation ---------- */
 let deferred=null;
@@ -538,13 +559,108 @@ $('instb').onclick=async()=>{if(!deferred)return;deferred.prompt();try{await def
 window.addEventListener('appinstalled',()=>{$('inst').hidden=true});
 if(!standalone&&/iphone|ipad|ipod/i.test(navigator.userAgent)){$('inst').hidden=false;$('insth').textContent='Sur iPhone et iPad : touche le bouton Partager de Safari, puis « Sur l\'écran d\'accueil ».';$('instb').hidden=true}
 
+/* ---------- synchronisation entre appareils (Supabase) ---------- */
+/* Chaque modification est écrite sur l'appareil puis ajoutée à une file d'attente (outbox) envoyée au serveur dès que la connexion le permet.
+   Les modifications des autres appareils arrivent en direct (realtime) et au retour de l'appli au premier plan. */
+const CFG=window.STOCK_CONFIG||{};
+const cloud=!!(CFG.supabaseUrl&&CFG.supabaseKey&&window.supabase);
+let sb=null,user=null,online=navigator.onLine,flushing=false,pulling=false,pending=0,lastSync=null,syncErr='',channel=null,kickT=null,rT=null,starting=false;
+if(cloud)sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const metaGet=async k=>{const r=await tx('meta','readonly',s=>s.get(k));return r&&r.v};
+const metaSet=(k,v)=>tx('meta','readwrite',s=>{s.put({k,v})});
+const sortKeys=o=>Array.isArray(o)?o.map(sortKeys):o&&typeof o==='object'?Object.keys(o).sort().reduce((a,k)=>(a[k]=sortKeys(o[k]),a),{}):o;
+const same=(a,b)=>JSON.stringify(sortKeys(a))===JSON.stringify(sortKeys(b));
+const scheduleRender=()=>{clearTimeout(rT);rT=setTimeout(renderAll,150)};
+function errMsg(e){const m=String(e&&(e.message||e.error_description)||e||'erreur');
+ if(/failed to fetch|networkerror|load failed/i.test(m))return 'Pas de connexion au serveur.';
+ if(/jwt|expired|not authenticated/i.test(m))return 'Session expirée : reconnecte-toi.';
+ if(e&&(e.code==='42P01'||/schema cache|does not exist/i.test(m)))return 'Tables manquantes : exécute le script supabase-setup.sql.';
+ if(/invalid login/i.test(m))return 'E-mail ou mot de passe incorrect.';
+ if(/already registered/i.test(m))return 'Un compte existe déjà avec cet e-mail : connecte-toi.';
+ if(/email not confirmed/i.test(m))return 'Confirme d\'abord ton e-mail (lien reçu par mail).';
+ if(/signups not allowed|signup.*disabled/i.test(m))return 'La création de compte est désactivée.';
+ return m}
+function refreshStatus(){const el=$('sync');let c='',t;
+ if(localState==='err'){c='err';t='Non enregistré'}
+ else if(!cloud)t=IDB?'Sur cet appareil':'Mémoire temporaire';
+ else if(!user){c='pend';t='Non connecté'}
+ else if(syncErr){c='err';t='Erreur de synchronisation'}
+ else if(!online){c='pend';t='Hors ligne'+(pending?' · '+pending+' en attente':'')}
+ else if(flushing||pulling||pending||localState==='pend'){c='pend';t='Synchronisation…'+(pending?' ('+pending+')':'')}
+ else t='Synchronisé';
+ el.className=c;el.querySelector('span').textContent=t;if(view==='set')renderSync()}
+const countPending=async()=>{pending=(await tx('outbox','readonly',s=>s.count()))||0;refreshStatus()};
+const kickFlush=()=>{clearTimeout(kickT);kickT=setTimeout(()=>{flush()},400)};
+async function queue(kind,id){if(!cloud||!IDB)return;await tx('outbox','readwrite',s=>{s.put({k:(kind==='photo'?'f:':'p:')+id,kind,id,ts:Date.now()+Math.random()})});await countPending();kickFlush()}
+async function queueMany(ids,photoIds){if(!cloud||!IDB)return;await tx('outbox','readwrite',s=>{const t=Date.now();ids.forEach(id=>s.put({k:'p:'+id,kind:'put',id,ts:t+Math.random()}));(photoIds||[]).forEach(id=>s.put({k:'f:'+id,kind:'photo',id,ts:t+Math.random()}))});await countPending();kickFlush()}
+const clearOb=ents=>tx('outbox','readwrite',s=>{ents.forEach(e=>{const r=s.get(e.k);r.onsuccess=()=>{if(r.result&&r.result.ts===e.ts)s.delete(e.k)}})});
+async function flush(){if(!cloud||!user||flushing||!online||importing)return;flushing=true;syncErr='';refreshStatus();
+ try{for(;;){const ob=(await tx('outbox','readonly',s=>s.getAll()))||[];if(!ob.length)break;
+   for(const e of ob.filter(x=>x.kind==='photo').slice(0,5)){const b=await phBlob(e.id);if(b){const r=await sb.storage.from('photos').upload(user.id+'/'+e.id+'.jpg',b,{upsert:true,contentType:b.type||'image/jpeg'});if(r.error)throw r.error}await clearOb([e])}
+   const chunk=ob.filter(x=>x.kind!=='photo').slice(0,100);
+   if(chunk.length){const rows=chunk.map(e=>{const p=e.kind==='put'?P.find(x=>x.id===e.id):null;return p?{user_id:user.id,id:e.id,data:p,deleted:false}:{user_id:user.id,id:e.id,data:{},deleted:true}});
+    const r=await sb.from('pieces').upsert(rows,{onConflict:'user_id,id'});if(r.error)throw r.error;await clearOb(chunk)}
+   await countPending()}
+  lastSync=new Date()}
+ catch(e){syncErr=errMsg(e)}
+ finally{flushing=false;await countPending()}}
+async function applyRows(rows){const ob=new Set((await tx('outbox','readonly',s=>s.getAllKeys()))||[]);const put=[],del=[];
+ for(const r of rows){if(!r||!r.id||ob.has('p:'+r.id))continue;const i=P.findIndex(x=>x.id===r.id);
+  if(r.deleted){if(i>=0){P.splice(i,1);del.push(r.id)}}
+  else{const d=Object.assign({},r.data,{id:r.id});if(i>=0){if(same(P[i],d))continue;P[i]=d}else P.push(d);put.push(d)}}
+ if(put.length||del.length){await tx('pieces','readwrite',s=>{put.forEach(d=>s.put(d));del.forEach(id=>s.delete(id))});scheduleRender()}}
+async function pull(){if(!cloud||!user||pulling||!online)return;pulling=true;refreshStatus();
+ try{const since=(await metaGet('lastPull'))||'1970-01-01T00:00:00Z';let from=0,last=since;
+  for(;;){const r=await sb.from('pieces').select('id,data,deleted,updated_at').gt('updated_at',since).order('updated_at',{ascending:true}).range(from,from+999);if(r.error)throw r.error;const d=r.data||[];if(!d.length)break;await applyRows(d);last=d[d.length-1].updated_at;if(d.length<1000)break;from+=1000}
+  if(last!==since)await metaSet('lastPull',last);lastSync=new Date();syncErr=''}
+ catch(e){syncErr=errMsg(e)}
+ finally{pulling=false;refreshStatus()}}
+async function syncNow(){await pull();await flush()}
+async function wipeLocal(){P=[];for(const s of ['pieces','photos','outbox','meta'])await tx(s,'readwrite',st=>{st.clear()});phURL.clear()}
+async function startSync(u){if(user&&user.id===u.id)return;user=u;$('auth').hidden=true;
+ const prev=await metaGet('userId');
+ if(prev&&prev!==u.id){await wipeLocal()}
+ if(prev!==u.id){await metaSet('userId',u.id);
+  /* première connexion : les données déjà présentes sur l'appareil sont envoyées au serveur */
+  const pk=(await tx('photos','readonly',s=>s.getAllKeys()))||[];await queueMany(P.map(p=>p.id),pk)}
+ renderAll();addForm.draw();
+ await pull();await flush();
+ if(channel)sb.removeChannel(channel);
+ channel=sb.channel('pieces-'+u.id).on('postgres_changes',{event:'*',schema:'public',table:'pieces',filter:'user_id=eq.'+u.id},pl=>{const r=pl.new;if(r&&r.id)applyRows([r])}).subscribe();
+ refreshStatus()}
+function stopSync(){user=null;if(channel&&sb){sb.removeChannel(channel);channel=null}syncErr='';refreshStatus();showAuth()}
+function showAuth(){if(!cloud||user)return;$('auth').hidden=false}
+function auMsg(t,bad){const m=$('au_msg');m.textContent=t||'';m.style.color=bad?'var(--red)':'var(--ink)'}
+async function authDo(mode){const email=$('au_mail').value.trim(),pw=$('au_pw').value;auMsg('');
+ if(!email||pw.length<6)return auMsg('Saisis ton e-mail et un mot de passe d\'au moins 6 caractères.',true);
+ $('au_in').disabled=$('au_up').disabled=true;
+ try{if(mode==='in'){const r=await sb.auth.signInWithPassword({email,password:pw});if(r.error)throw r.error}
+  else{const r=await sb.auth.signUp({email,password:pw});if(r.error)throw r.error;if(!r.data.session)auMsg('Compte créé. Ouvre le mail de confirmation, clique sur le lien, puis reviens te connecter.')}}
+ catch(e){auMsg(errMsg(e),true)}
+ finally{$('au_in').disabled=$('au_up').disabled=false}}
+$('au_in').onclick=()=>authDo('in');$('au_up').onclick=()=>authDo('up');
+$('au_pw').addEventListener('keydown',e=>{if(e.key==='Enter')authDo('in')});
+function renderSync(){const c=$('sy');
+ if(!cloud){c.innerHTML='<h3>Synchronisation</h3><p class="sub">Non configurée : les données restent sur cet appareil. Pour partager le stock entre ton téléphone et ton PC, suis le guide SYNCHRONISATION.md puis renseigne config.js.</p>';return}
+ const t=lastSync?lastSync.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+ c.innerHTML=`<h3>Synchronisation</h3><p class="sub">${user?'Connecté : '+esc(user.email||''):'Non connecté'}${t?' · dernière synchro à '+t:''}${pending?' · '+pending+' modification'+(pending>1?'s':'')+' en attente':''}${online?'':' · hors ligne'}</p>${syncErr?`<div class="warn">${esc(syncErr)}</div>`:''}<div class="acts two"><button class="btn" id="sy_now" type="button"${user?'':' disabled'}>Synchroniser</button><button class="btn sec" id="sy_out" type="button"${user?'':' disabled'}>Se déconnecter</button></div>`;
+ $('sy_now').onclick=()=>{syncNow()};$('sy_out').onclick=async()=>{await sb.auth.signOut()}}
+window.addEventListener('online',()=>{online=true;refreshStatus();syncNow()});
+window.addEventListener('offline',()=>{online=false;refreshStatus()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user)syncNow()});
+setInterval(()=>{if(user&&!document.hidden)syncNow()},60000);
+
 /* ---------- rendu et démarrage ---------- */
 function renderAll(){renderKpi();if(view==='list')renderList();if(view==='dash')renderDash();if(view==='set')renderSet()}
 initAdd();renderAll();
 (async()=>{
- try{IDB=await idbOpen();P=await tx('pieces','readonly',s=>s.getAll())||[];if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}
+ try{IDB=await idbOpen();P=await tx('pieces','readonly',s=>s.getAll())||[];if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});await countPending()}
  catch(e){IDB=null;$('ro').hidden=false}
  loaded=true;setSync('ok');renderAll();addForm.draw();
+ if(cloud){
+  sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{if(session&&session.user)startSync(session.user);else if(ev==='SIGNED_OUT')stopSync()},0)});
+  try{const r=await sb.auth.getSession();if(r.data&&r.data.session)startSync(r.data.session.user);else showAuth()}catch(e){showAuth()}
+ }
  if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>
