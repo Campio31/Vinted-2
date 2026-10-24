@@ -53,6 +53,21 @@ h1{font-size:22px;margin:0;font-weight:800}
 .pill.g-B,.chip.g-B.on{background:var(--tag);border-color:var(--tag);color:#17233B}
 .pill.g-C,.chip.g-C.on{background:var(--red);border-color:var(--red);color:#fff}
 .pill.g-B{color:#17233B}
+.pill.sm{min-width:0;padding:0 8px;font-size:12px}
+.qrow{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.qrow.open{border-color:var(--mint);box-shadow:var(--shadow)}
+.qtop{display:flex;align-items:center;gap:12px}
+.qtop .m{flex:1;min-width:0}.qtop .m b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qtop .m small{color:var(--mute);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qtop .p{text-align:right;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qtop .p small{display:block;font-weight:500;color:var(--mute);font-size:12px}
+.qtop .btn.sm{min-height:46px;padding:8px 16px}
+.qform{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.pc-top{display:flex;align-items:center;gap:12px}.pc-top .big{font-size:34px;font-weight:800;line-height:1.1}
+.pc-t{display:grid;gap:6px;margin-top:12px}
+.pc-r{display:grid;grid-template-columns:1fr auto;gap:0 10px;padding:8px 10px;border-radius:10px;background:var(--soft)}
+.pc-r b{font-variant-numeric:tabular-nums}.pc-r small{grid-column:1/-1;color:var(--mute)}
+.pc-r.on{outline:2px solid var(--mint);outline-offset:-2px}
 .chip.cl{display:inline-flex;align-items:center}
 .chip.cl .sw{width:14px;height:14px;border-radius:50%;background:var(--c);border:1px solid rgba(128,128,128,.55);margin-right:7px;flex:none}
 .chip.cl.on{background:var(--c);color:var(--ct);border-color:var(--ink)}
@@ -127,7 +142,7 @@ details.more .l{margin-top:14px}
 .lg{display:flex;gap:14px;font-size:12px;color:var(--mute);margin-top:8px}
 .lg span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--denim)}
 .lg span.p:before{background:var(--mint)}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:20}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:20}
 nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11.5px;font-weight:600;color:var(--mute);cursor:pointer;min-height:52px;border-radius:10px}
 nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav button.on{color:var(--denim)}
@@ -184,6 +199,10 @@ nav button.on{color:var(--denim)}
  <div id="ro" class="warn" hidden>Le stockage du navigateur est indisponible (navigation privée ?). Les données seront perdues à la fermeture : exporte une sauvegarde JSON.</div>
  <main>
   <section id="v-add" class="view on"><div class="kpis" id="kp"></div><div class="card frm" id="fadd"></div></section>
+  <section id="v-quick" class="view">
+   <div class="srch"><input type="search" id="qs" placeholder="Code ou marque (ex. TsT-UNi0A, Nike)" autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+   <div id="qres"></div>
+  </section>
   <section id="v-list" class="view">
    <div class="srch"><input type="search" id="q" placeholder="Rechercher (marque, type, code, taille…)" autocomplete="off"></div>
    <div class="chips" id="flt" style="margin-bottom:12px"></div>
@@ -221,6 +240,7 @@ nav button.on{color:var(--denim)}
  <nav id="nav">
   <div class="brand">Stock Friperie</div>
   <button data-v="add" class="on" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Ajouter</button>
+  <button data-v="quick" type="button"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Vendre</button>
   <button data-v="list" type="button"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>Stock</button>
   <button data-v="dash" type="button"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Bilan</button>
   <button data-v="set" type="button"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Export</button>
@@ -291,8 +311,8 @@ async function savePhoto(file){
  await tx('photos','readwrite',s=>s.put({id,blob}));return id}
 
 /* ---------- navigation ---------- */
-const TITLES={add:'Ajouter',list:'Stock',dash:'Bilan',set:'Export'};
-function go(v){view=v;document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('ttl').textContent=TITLES[v];window.scrollTo(0,0);renderAll()}
+const TITLES={add:'Ajouter',quick:'Vente rapide',list:'Stock',dash:'Bilan',set:'Export'};
+function go(v){view=v;document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('ttl').textContent=TITLES[v];window.scrollTo(0,0);renderAll();if(v==='quick'&&!matchMedia('(pointer:coarse)').matches)setTimeout(()=>$('qs').focus(),50)}
 $('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
 
 /* ---------- aides de saisie ---------- */
@@ -471,20 +491,33 @@ function openSheet(id,m){
    ...(sold(p)?[['Vendu',eur(p.pv)+' · '+(p.canal||'Vinted')+' · '+fd(p.dv)],['Frais',p.frais?eur(p.frais):'']]:[]),
    ...(p.retours||[]).map(r=>['Retour',fd(r.d)+(isnum(r.p)?' · '+eur(r.p):'')]),['Note',p.note]].filter(r=>r[1]);
   c.innerHTML=head(esc(title(p)))+(p.photo?phImg(p.photo,'big-ph'):'')+`<div class="card"><dl class="kv">${rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>${sold(p)?`<div class="pv" style="color:${profit(p)>=0?'var(--mint)':'var(--red)'}">Bénéfice net : ${eur(profit(p))}</div>`:''}</div>
-  <div class="acts">${avail(p)?'<button class="btn mint" id="a_sell" type="button">Marquer comme vendu</button>':''}${sold(p)?'<button class="btn sec" id="a_ret" type="button">Enregistrer un retour</button>':''}${p.statut==='Pas Disponible'?'<button class="btn sec" id="a_dis" type="button">Remettre en stock</button>':''}${avail(p)?'<button class="btn sec" id="a_indis" type="button">Marquer indisponible</button>':''}
+  ${avail(p)?'<div class="card" id="pc"></div>':''}<div class="acts">${avail(p)?'<button class="btn mint" id="a_sell" type="button">Marquer comme vendu</button><button class="btn sec" id="a_ann" type="button">Créer l\'annonce Vinted</button>':''}${sold(p)?'<button class="btn sec" id="a_ret" type="button">Enregistrer un retour</button>':''}${p.statut==='Pas Disponible'?'<button class="btn sec" id="a_dis" type="button">Remettre en stock</button>':''}${avail(p)?'<button class="btn sec" id="a_indis" type="button">Marquer indisponible</button>':''}
   <div class="acts two" style="margin:0"><button class="btn sec" id="a_edit" type="button">Modifier</button><button class="btn sec" id="a_del" type="button">Supprimer</button></div></div>`;
   const on=(i,f)=>{if($(i))$(i).onclick=f};
   on('a_sell',()=>openSheet(id,'sell'));on('a_ret',()=>openSheet(id,'ret'));on('a_edit',()=>openSheet(id,'edit'));on('a_del',()=>openSheet(id,'del'));
   on('a_indis',()=>{save(Object.assign({},p,{statut:'Pas Disponible'}));closeSheet();toast('Marquée indisponible',()=>save(p))});
   on('a_dis',()=>{save(Object.assign({},p,{statut:'Disponible'}));closeSheet();toast('Remise en stock',()=>save(p))});
-  hydrate();
+  on('a_ann',()=>openSheet(id,'ann'));
+  hydrate();if(avail(p))renderAdvice(p);
  }
+ if(m==='ann'){const a=advice(p);
+  c.innerHTML=head('Annonce Vinted')+`<div class="card"><div class="fld"><label class="l" for="an_t">Titre <span id="an_c" style="text-transform:none;letter-spacing:0"></span></label><input type="text" id="an_t" maxlength="60"></div>
+  <div class="fld"><label class="l" for="an_d">Description</label><textarea id="an_d" rows="15" style="min-height:300px;font-size:15px"></textarea></div>
+  <dl class="kv" style="margin-top:14px"><dt>Catégorie</dt><dd>${esc(vCategory(p))}</dd><dt>État à choisir</dt><dd>${esc(vCond(p))}</dd><dt>Prix conseillé</dt><dd>${a.ok?esc(eur(a.reco))+' ('+esc(a.tier.toLowerCase())+')':a.fallback?esc(eur(a.fallback))+' (repère 2,5 × l\'achat)':'données insuffisantes'}</dd></dl>
+  <div class="hint">Pour de meilleurs résultats : 4 à 6 photos (de face, de dos, étiquette, défauts) en lumière naturelle. Vérifie la catégorie dans Vinted, elle peut varier.</div></div>
+  <div class="acts two"><button class="btn" id="an_ct" type="button">Copier le titre</button><button class="btn" id="an_cd" type="button">Copier la description</button></div>
+  <div class="acts"><button class="btn sec" id="an_all" type="button">Copier le titre et la description</button><div class="acts two" style="margin:0"><button class="btn sec" id="an_rg" type="button">Régénérer</button><button class="btn sec" id="g_no" type="button">Retour</button></div></div>`;
+  const fill=()=>{$('an_t').value=vTitle(p);$('an_d').value=vDesc(p);cnt()},cnt=()=>{$('an_c').textContent=$('an_t').value.length+'/60'};
+  fill();$('an_t').oninput=cnt;
+  $('an_ct').onclick=()=>copyText($('an_t').value,'Titre');$('an_cd').onclick=()=>copyText($('an_d').value,'Description');
+  $('an_all').onclick=()=>copyText($('an_t').value+'\n\n'+$('an_d').value,'Annonce');
+  $('an_rg').onclick=()=>{fill();toast('Annonce régénérée')};$('g_no').onclick=()=>openSheet(id)}
  if(m==='edit'){c.innerHTML=head('Modifier')+`<div class="card frm" id="fed"></div>`;
   mkForm($('fed'),Object.assign({},p),{mode:'edit',open:true,onCancel:()=>openSheet(id),onSubmit(S){const q=Object.assign({},p,S);q.id=p.id;q.statut=p.statut;if(!S.photo)delete q.photo;if(!q.code||combo(q)!==combo(p)){const cd=genCode(q);if(cd)q.code=cd;else delete q.code}save(q);openSheet(id);toast('Enregistré ✓')}})}
  if(m==='del'){c.innerHTML=head('Supprimer cette pièce ?')+`<div class="card"><p style="margin:0"><b>${esc(title(p))}</b> sera retirée du stock et du bilan.</p></div><div class="acts two"><button class="btn sec" id="d_no" type="button">Garder</button><button class="btn red" id="d_ok" type="button">Supprimer</button></div>`;
   $('d_no').onclick=()=>openSheet(id);$('d_ok').onclick=()=>{remove(id);closeSheet();toast('Pièce supprimée',()=>save(p))}}
- if(m==='sell'){c.innerHTML=head('Marquer comme vendu')+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · acheté ${eur(p.achat)}</p>
-  <div class="fld" id="s_w"><label class="l" for="s_prix">Prix de vente</label><div class="price"><input type="text" inputmode="decimal" id="s_prix" placeholder="0,00"><span>€</span></div></div>
+ if(m==='sell'){const adv=advice(p);c.innerHTML=head('Marquer comme vendu')+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · acheté ${eur(p.achat)}</p>
+  <div class="fld" id="s_w"><label class="l" for="s_prix">Prix de vente</label><div class="price"><input type="text" inputmode="decimal" id="s_prix" placeholder="0,00" value="${adv.ok?String(adv.reco).replace('.',','):''}"><span>€</span></div>${adv.ok?`<div class="hint">Prix conseillé : ${eur(adv.reco)} (${adv.n} ventes comparables). Modifie-le si besoin.</div>`:''}</div>
   <div class="fld"><label class="l" for="s_plat">Vendu sur</label><input type="text" id="s_plat" value="Vinted"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${x==='Vinted'?' on':''}" data-t="s_plat" data-v="${x}">${x}</button>`).join('')}</div></div>
   <div class="row2 fld"><div><label class="l" for="s_date">Date de vente</label><input type="date" id="s_date" value="${today()}"></div><div><label class="l" for="s_frais">Frais</label><div class="price"><input type="text" inputmode="decimal" id="s_frais" value="0"><span>€</span></div></div></div>
   <div class="hint">Frais : commission, envoi à ta charge… Sur Vinted, les frais de protection sont payés par l'acheteur.</div><div class="pv" id="s_pv"></div></div>
@@ -525,7 +558,7 @@ function renderDash(){
  ${rets.length?`<div class="kpis two"><div class="kpi"><b>${rets.length}</b><span>retour${rets.length>1?'s':''} ${lbl}</span></div><div class="kpi"><b>${eurR(retSum)}</b><span>remboursés${S.ca?' ('+(retSum/S.ca*100).toFixed(0)+' % du CA)':''}</span></div></div>`:''}
  <div class="card"><h3>Stock actuel</h3><p class="sub">${st.length} pièce${st.length>1?'s':''} à vendre</p>
   <div class="kpis two" style="margin:0"><div class="kpi"><b>${eurR(stCost)}</b><span>argent immobilisé</span></div><div class="kpi"><b>${st.length?avgAge.toFixed(0)+' j':'—'}</b><span>ancienneté moyenne</span></div></div>
-  ${old.length?`<div style="margin-top:14px"><span class="l">À relancer ou baisser (60 jours et plus) · ${old.length}</span>${old.slice(0,5).map(x=>`<button type="button" class="li" data-id="${esc(x.id)}" style="margin-bottom:6px"><div class="th">${esc((x.marque||'?').slice(0,2))}</div><div class="m"><b>${esc(title(x))}</b><small>${esc([x.taille,x.cat].filter(Boolean).join(' · '))}</small></div><div class="p"><span class="tag x">${age(x)} j</span></div></button>`).join('')}</div>`:'<div class="hint" style="margin-top:12px">Aucune pièce ne dort depuis plus de 60 jours.</div>'}</div>
+  ${old.length?`<div style="margin-top:14px"><span class="l">À relancer ou baisser (60 jours et plus) · ${old.length}</span>${old.slice(0,5).map(x=>`<button type="button" class="li" data-id="${esc(x.id)}" style="margin-bottom:6px"><div class="th">${esc((x.marque||'?').slice(0,2))}</div><div class="m"><b>${esc(title(x))}</b><small>${esc([x.taille,x.cat].filter(Boolean).join(' · '))}</small></div><div class="p"><span class="tag x">${age(x)} j</span>${(a=>a.ok?`<small>conseillé ${eur(a.reco)}</small>`:'')(advice(x))}</div></button>`).join('')}</div>`:'<div class="hint" style="margin-top:12px">Aucune pièce ne dort depuis plus de 60 jours.</div>'}</div>
  <div class="card"><h3>Six derniers mois</h3><p class="sub">Chiffre d'affaires et bénéfice net par mois de vente</p><div class="mo">${ms.map(x=>`<div><b>${x.n?eurR(x.ben):''}</b><div class="pair"><i class="c" style="height:${x.ca/mxm*100}%;${x.ca?'':'display:none'}"></i><i class="p" style="height:${Math.max(0,x.ben)/mxm*100}%;${x.ben>0?'':'display:none'}"></i></div>${mn(x.m)}</div>`).join('')}</div><div class="lg"><span>Chiffre d'affaires</span><span class="p">Bénéfice net</span></div></div>
  <div class="card"><h3>Par plateforme</h3><p class="sub">Bénéfice net ${lbl}</p>${hbars(pl.map(g=>({k:g.k,v:g.ben,sub:g.n+' vente'+(g.n>1?'s':'')+' · '+eur(g.ca)})),eurR)}</div>
  <div class="card"><h3>Par catégorie</h3><p class="sub">Bénéfice net ${lbl}</p>${hbars(ct.map(g=>({k:g.k,v:g.ben,sub:g.n+' vente'+(g.n>1?'s':'')})),eurR)}</div>
@@ -533,6 +566,105 @@ function renderDash(){
  ${sr.length?`<div class="card"><h3>Provenance</h3><p class="sub">Bénéfice net ${lbl}, selon l'endroit d'achat</p>${hbars(sr.map(g=>({k:g.k,v:g.ben,sub:g.n+' vente'+(g.n>1?'s':'')})),eurR)}</div>`:''}`;hydrate()}
 $('per').onclick=e=>{const b=e.target.closest('[data-p]');if(b){period=+b.dataset.p;renderDash()}};
 $('dsh').onclick=e=>{const b=e.target.closest('.li');if(b)openSheet(b.dataset.id)};
+
+/* ---------- prix conseillé (calculé à partir de tes ventes) ---------- */
+const med=a=>{if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const qtl=(a,q)=>{const s=[...a].sort((x,y)=>x-y);if(!s.length)return 0;const i=(s.length-1)*q,lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo)};
+const nice=v=>v<10?Math.round(v*2)/2:Math.round(v);
+const nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+const delai=p=>ok(p.dv)&&(ok(p.pub)||ok(p.entree))?Math.max(0,days(ok(p.pub)?p.pub:p.entree,p.dv)):null;
+const targetDays=()=>{const d=LSg('targetDays',14);return[7,14,30].includes(d)?d:14};
+function comps(p){
+ const S=P.filter(x=>sold(x)&&x.id!==p.id&&isnum(x.pv)&&x.pv>0),mq=nrm(p.marque);
+ const sm=x=>mq&&nrm(x.marque)===mq,sc=x=>x.cat===p.cat,st=x=>p.sub&&x.sub===p.sub;
+ const lv=[['même marque, catégorie et type',x=>sm(x)&&sc(x)&&st(x),3],['même marque et catégorie',x=>sm(x)&&sc(x),3],['même marque',sm,4],['même catégorie et type',x=>sc(x)&&st(x),4],['même catégorie',sc,5]];
+ for(const [label,f,min] of lv){let g=S.filter(f);if(g.length>=min){const sg=p.grade?g.filter(x=>x.grade===p.grade):[];let l=label;if(sg.length>=3){g=sg;l+=', grade '+p.grade}return{label:l,items:g}}}
+ return{label:'',items:[]}}
+function advice(p,td){td=td||targetDays();const c=comps(p),it=c.items;
+ if(it.length<3){const f=isnum(p.achat)&&p.achat>0?nice(p.achat*2.5):0;return{ok:false,n:it.length,fallback:f,td}}
+ const sorted=[...it].sort((a,b)=>a.pv-b.pv),n=sorted.length,a=Math.ceil(n/3),b=Math.ceil(2*n/3);
+ const mk=(name,g)=>{const d=g.map(delai).filter(v=>v!==null);return{name,n:g.length,price:g.length?med(g.map(x=>x.pv)):0,delai:d.length?med(d):null}};
+ const tiers=[mk('Vente rapide',sorted.slice(0,a)),mk('Équilibré',sorted.slice(a,b)),mk('Ambitieux',sorted.slice(b))].filter(t=>t.n>0);
+ let idx=-1;tiers.forEach((t,i)=>{if(t.delai!==null&&t.delai<=td)idx=i});
+ let note='';
+ if(idx<0){const withD=tiers.map((t,i)=>[t,i]).filter(x=>x[0].delai!==null);idx=withD.length?withD.sort((x,y)=>x[0].delai-y[0].delai)[0][1]:Math.min(1,tiers.length-1);if(withD.length)note='Aucun palier ne se vend en '+td+' jours : on retient le plus rapide.'}
+ const ag=avail(p)?age(p):0;let reco=tiers[idx].price;
+ const cut=ag>=105?0.2:ag>=75?0.15:ag>=45?0.1:0;
+ if(cut){reco=reco*(1-cut);note=(note?note+' ':'')+'En stock depuis '+ag+' jours : prix baissé de '+Math.round(cut*100)+' %.'}
+ reco=nice(reco);
+ const ach=p.achat||0;if(reco<ach)note=(note?note+' ':'')+'Ce prix est inférieur au prix d\'achat.';
+ return{ok:true,n,label:c.label,tiers,reco,tier:tiers[idx].name,td,note,margin:reco-ach}}
+function renderAdvice(p){const box=$('pc');if(!box)return;const a=advice(p);
+ const chips=[7,14,30].map(d=>`<button type="button" class="chip sm${a.td===d?' on':''}" data-td="${d}">${d} jours</button>`).join('');
+ let body;
+ if(!a.ok)body=`<p class="sub" style="margin:0">Pas assez de ventes comparables dans ta base (${a.n} trouvée${a.n>1?'s':''}, il en faut au moins 3).</p>${a.fallback?`<div class="pv">Repère : ${eur(a.fallback)} (2,5 × le prix d'achat)</div>`:''}`;
+ else body=`<div class="pc-top"><div class="big">${eur(a.reco)}</div><span class="tag">${esc(a.tier)}</span></div>
+  <div class="hint" style="margin-top:2px">${a.margin>=0?'+':''}${eur(a.margin)} par rapport au prix d'achat · basé sur ${a.n} ventes (${esc(a.label)})</div>
+  <div class="pc-t">${a.tiers.map(t=>`<div class="pc-r${t.name===a.tier?' on':''}"><span>${esc(t.name)}</span><b>${eur(nice(t.price))}</b><small>${t.delai!==null?'vendu en '+Math.round(t.delai)+' j':'délai inconnu'} · ${t.n} vente${t.n>1?'s':''}</small></div>`).join('')}</div>
+  ${a.note?`<div class="hint">${esc(a.note)}</div>`:''}`;
+ box.innerHTML=`<h3>Prix conseillé</h3><span class="l" style="margin-top:8px">Je veux vendre en moins de</span><div class="chips" style="margin-bottom:12px">${chips}</div>${body}<div class="hint">Estimation calculée à partir de tes ventes passées, à ajuster selon l'état réel de la pièce.</div>`;
+ box.onclick=e=>{const b=e.target.closest('[data-td]');if(b){LSs('targetDays',+b.dataset.td);renderAdvice(p)}}}
+
+/* ---------- annonce Vinted ---------- */
+const CATLBL={Tshirt:'T-shirt',Sweat:'Sweat',Chemise:'Chemise',Pantalon:'Pantalon',Veste:'Veste',Short:'Short',Polo:'Polo',Maillot:'Maillot',RobeJupe:'Robe ou jupe',Autres:'Vêtement'};
+const TYPELBL={'Tshirt|T-Imprimé':'T-shirt imprimé','Tshirt|T-Unis':'T-shirt uni','Tshirt|T-Rayures':'T-shirt rayé','Sweat|Rond Col Pull':'Pull col rond','Sweat|V Col Pull':'Pull col V','Sweat|Pull Col Rond':'Pull col rond','Sweat|Pull Col V':'Pull col V','Sweat|Sweat à capuche':'Sweat à capuche','Sweat|Pull demi-zip':'Pull demi-zip','Sweat|Pull Col Roulé':'Pull col roulé','Sweat|Survetements':'Survêtement','Sweat|Veste':'Veste zippée','Pantalon|Droite':'Pantalon droit','Pantalon|Slim':'Pantalon slim','Pantalon|Skinny':'Pantalon skinny','Pantalon|Super skinny':'Pantalon super skinny','Pantalon|Bootcut':'Pantalon bootcut','Veste|Blazers':'Blazer','Veste|Cabans':'Caban','Veste|Jeans':'Veste en jean','Veste|Chemise':'Veste chemise','Veste|Survetement':'Veste de survêtement','Chemise|C-Unis':'Chemise unie','Chemise|C-Carreaux':'Chemise à carreaux','Chemise|C-Rayures':'Chemise rayée','Chemise|C-Motifs':'Chemise à motifs','Chemise|C-Tie&Dye':'Chemise tie and dye','Chemise|C-Jeans':'Chemise en jean','Polo|P-Unis':'Polo uni','Polo|P-Rayures':'Polo rayé','Polo|P-Motifs':'Polo à motifs','Maillot|Football':'Maillot de football','Maillot|Basket':'Maillot de basket','Short|Sport':'Short de sport','Short|Jeans':'Short en jean','RobeJupe|Longueur Genou':'Robe longueur genou','RobeJupe|Sweat':'Robe sweat'};
+const VCAT={Tshirt:'T-shirts et débardeurs',Sweat:'Pulls et sweats',Chemise:'Chemises',Pantalon:'Pantalons',Veste:'Manteaux et vestes',Short:'Shorts',Polo:'T-shirts et polos',Maillot:'T-shirts et maillots de sport',RobeJupe:'Robes et jupes',Autres:'Autres vêtements'};
+const typeLbl=p=>TYPELBL[p.cat+'|'+p.sub]||(p.sub&&['Blouson','Doudoune','Bomber','Parka','Polaire','Perfecto','Cardigan','Pyjama','Manteau long','Coupe-vent','Duffle-Coat','Blouson Teddy','Mini jupe','Robe de soirée','Sac à main'].includes(p.sub)?p.sub:(CATLBL[p.cat]||p.cat||'Vêtement'));
+const brandOk=p=>p.marque&&!/^non (identifi|renseign)/i.test(p.marque)?p.marque:'';
+const collabOk=p=>p.collab&&!/^aucun/i.test(p.collab)?p.collab:'';
+const vCond=p=>/^neuf/i.test(p.etat||'')?'Neuf sans étiquette':p.grade==='A'?'Très bon état':p.grade==='B'?'Bon état':p.grade==='C'?'Satisfaisant':'Bon état';
+function vTitle(p){const type=typeLbl(p),m=brandOk(p),mod=p.modele||'',col=((p.coul&&p.coul[0])||'').toLowerCase(),tail=p.taille?' - Taille '+p.taille:'';
+ const tries=[[type,m,mod,collabOk(p),col],[type,m,mod,'',col],[type,m,'','',col],[type,m,'','','']];
+ for(const t of tries){const s=t.filter(Boolean).join(' ')+tail;if(s.length<=60)return s}
+ return(type+' '+m+tail).slice(0,60)}
+function vDesc(p){
+ const type=typeLbl(p),m=brandOk(p),cols=(p.coul||[]).map(c=>c.toLowerCase()),colTxt=cols.length>1?cols.slice(0,-1).join(', ')+' et '+cols[cols.length-1]:(cols[0]||''),genre={Homme:'Homme',Femme:'Femme',Enfant:'Enfant','Les deux':'Mixte'}[p.genre]||'';
+ const l1=[type,m,p.modele,collabOk(p),colTxt].filter(Boolean).join(' ')+(p.taille?', taille '+p.taille:'')+'.';
+ const stateTxt={A:'Très bon état, aucun défaut visible.',B:'Bon état, légères traces d\'usure normales pour un article porté.',C:'État satisfaisant, des signes d\'usure sont visibles (voir les photos).'}[p.grade]||'';
+ const def=p.etat&&!/^(ras|neuf|légères traces d'usure)$/i.test(p.etat)?'Point à signaler : '+p.etat.toLowerCase()+' (visible sur les photos).':'';
+ const det=[['Marque',m],['Modèle',p.modele],['Taille',p.taille],['Genre',genre],['Couleur',cols.join(', ')],['Matière',(p.mat||[]).join(', ')],['Collab',collabOk(p)],['Fabriqué en',p.madein]].filter(r=>r[1]);
+ const dims=[...DH,...DB].filter(([k])=>p[k]).map(([k,l])=>'• '+l+' : '+String(p[k]).replace('.',',')+' cm');
+ const tag=s=>'#'+nrm(s).replace(/[^a-z0-9]+/g,'');
+ const tags=[...new Set([m&&tag(m),tag(CATLBL[p.cat]||''),genre&&tag(genre),'#secondemain','#friperie',p.sub&&TYPELBL[p.cat+'|'+p.sub]&&tag(TYPELBL[p.cat+'|'+p.sub])].filter(x=>x&&x.length>1))].join(' ');
+ return[l1,[stateTxt,def].filter(Boolean).join(' '),'Détails\n'+det.map(r=>'• '+r[0]+' : '+r[1]).join('\n'),dims.length?'Mesures à plat\n'+dims.join('\n'):'','Envoi soigné et rapide, suivi inclus. Lots possibles : ajoute plusieurs articles à tes favoris et écris-moi pour réduire les frais de port.',tags].filter(Boolean).join('\n\n')}
+function vCategory(p){const g=p.genre==='Femme'?'Femmes':p.genre==='Enfant'?'Enfants':'Hommes';return g+' › Vêtements › '+(VCAT[p.cat]||'Autres vêtements')}
+async function copyText(t,label){try{await navigator.clipboard.writeText(t);toast(label+' copié')}catch(e){const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(label+' copié')}catch(er){toast('Copie impossible : sélectionne le texte à la main')}ta.remove()}}
+
+/* ---------- vente rapide ---------- */
+let qSel=null,qF={};
+function qCand(){const q=nrm($('qs').value);let L=P.filter(avail);
+ if(q){const sc=p=>{const c=nrm(p.code);if(c===q)return 0;if(c.startsWith(q))return 1;if(c.includes(q))return 2;if(nrm(p.marque).startsWith(q))return 3;return[p.marque,p.cat,p.sub,p.taille,p.id,p.modele,p.ballot].some(x=>x&&nrm(x).includes(q))?4:9};
+  L=L.map(p=>[sc(p),p]).filter(x=>x[0]<9).sort((a,b)=>a[0]-b[0]||(b[1].entree||'').localeCompare(a[1].entree||'')).map(x=>x[1])}
+ else L=[...L].sort((a,b)=>(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0));
+ return L}
+function qReadForm(){const p=$('qp');if(p){qF.prix=p.value;qF.frais=$('qf').value}}
+function qProfit(p){const x=num(qF.prix),f=num(qF.frais)||0;return isNaN(x)?null:x-(p.achat||0)-f}
+function renderQuick(){const q=$('qs').value.trim(),L=qCand(),shown=L.slice(0,30);
+ const row=p=>{const open=qSel===p.id,adv=open?null:advice(p);
+  const sub=[p.code,p.taille,p.grade&&`<span class="pill sm g-${esc(p.grade)}">${esc(p.grade)}</span>`].filter(Boolean).map(x=>x.startsWith('<')?x:esc(x)).join(' · ');
+  let form='';
+  if(open){const pr=qProfit(p);form=`<div class="qform"><div class="row2"><div><label class="l" for="qp">Prix de vente</label><div class="price"><input type="text" inputmode="decimal" id="qp" value="${esc(qF.prix)}" placeholder="0,00"><span>€</span></div></div><div><label class="l" for="qf">Frais</label><div class="price"><input type="text" inputmode="decimal" id="qf" value="${esc(qF.frais)}"><span>€</span></div></div></div>
+   <div class="chips" style="margin-top:12px">${CANAUX.map(x=>`<button type="button" class="chip sm${qF.canal===x?' on':''}" data-qcn="${x}">${x}</button>`).join('')}</div>
+   <div class="pv" id="qpv">${pr===null?'Bénéfice net : —':'Bénéfice net : '+eur(pr)}</div>
+   <div class="acts"><button type="button" class="btn mint" id="qok">Confirmer la vente</button></div></div>`}
+  return`<div class="qrow${open?' open':''}"><div class="qtop"><div class="m"><b>${esc(title(p))}</b><small>${sub}</small></div><div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${adv&&adv.ok?'conseillé '+eur(adv.reco):'acheté'}</small></div>${open?'<button type="button" class="btn sm sec" data-qx="1">Annuler</button>':`<button type="button" class="btn mint sm" data-qv="${esc(p.id)}">Vendu</button>`}</div>${form}</div>`};
+ $('qres').innerHTML=(shown.length?(q?'':'<span class="l">Dernières pièces ajoutées</span>')+shown.map(row).join('')+(L.length>30?`<div class="hint">${L.length-30} autres résultats : précise ta recherche.</div>`:''):`<div class="empty">${P.length?'Aucune pièce en stock ne correspond.':'Ton stock est vide.'}</div>`)}
+$('qs').addEventListener('input',()=>{qSel=null;renderQuick()});
+$('qres').addEventListener('click',e=>{
+ const v=e.target.closest('[data-qv]');
+ if(v){const p=P.find(x=>x.id===v.dataset.qv);if(!p)return;const adv=advice(p),canal=LSg('lastCanal','Vinted');qSel=p.id;qF={prix:adv.ok?String(adv.reco).replace('.',','):(adv.fallback?String(adv.fallback).replace('.',','):''),canal,frais:String(LSg('fr_'+canal,0)).replace('.',',')};renderQuick();const i=$('qp');if(i){i.focus();i.select()}return}
+ if(e.target.closest('[data-qx]')){qSel=null;renderQuick();return}
+ const c=e.target.closest('[data-qcn]');
+ if(c){qReadForm();qF.canal=c.dataset.qcn;qF.frais=String(LSg('fr_'+qF.canal,0)).replace('.',',');renderQuick();return}
+ if(e.target.closest('#qok'))qConfirm()});
+$('qres').addEventListener('input',e=>{if(e.target.id==='qp'||e.target.id==='qf'){qReadForm();const p=P.find(x=>x.id===qSel),pr=p&&qProfit(p);$('qpv').textContent=pr===null||pr===undefined?'Bénéfice net : —':'Bénéfice net : '+eur(pr)}});
+$('qres').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='qp'||e.target.id==='qf')){e.preventDefault();qConfirm()}});
+function qConfirm(){const p=P.find(x=>x.id===qSel);if(!p)return;qReadForm();const x=num(qF.prix);
+ if(isNaN(x)||x<0){$('qp').closest('.price').style.outline='2px solid var(--red)';toast('Indique le prix de vente');return}
+ const fr=num(qF.frais)||0,canal=qF.canal||'Vinted';LSs('lastCanal',canal);LSs('fr_'+canal,fr);
+ const q=Object.assign({},p,{statut:'Vendu',pv:x,canal,dv:today(),frais:fr});save(q);qSel=null;renderQuick();
+ toast('Vendu · bénéfice '+eur(profit(q)),()=>{save(p);renderQuick()});
+ const s=$('qs');s.focus();s.select()}
 
 /* ---------- export / import ---------- */
 function renderSet(){renderSync();const n=P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?n+' pièce'+(n>1?'s':'')+' dans les fichiers.':'Aucune pièce à exporter pour le moment.')+(lb?' Dernière sauvegarde JSON : '+fd(lb)+'.':' Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.');
@@ -695,7 +827,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user)sync
 setInterval(()=>{if(user&&!document.hidden)syncNow()},60000);
 
 /* ---------- rendu et démarrage ---------- */
-function renderAll(){renderKpi();if(view==='list')renderList();if(view==='dash')renderDash();if(view==='set')renderSet()}
+function renderAll(){renderKpi();if(view==='quick')renderQuick();if(view==='list')renderList();if(view==='dash')renderDash();if(view==='set')renderSet()}
 initAdd();renderAll();
 (async()=>{
  try{IDB=await idbOpen();P=await tx('pieces','readonly',s=>s.getAll())||[];if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});await countPending()}
