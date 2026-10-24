@@ -313,7 +313,17 @@ input[type=text],input[type=number],input[type=date],input[type=search],select,t
 .tl{background:var(--card);border-radius:22px;position:relative}
 .tl .im{display:flex;align-items:center;justify-content:center;width:100%;height:108px;border:0;border-radius:22px 22px 0 0;padding:0;overflow:hidden;cursor:pointer}
 .tl .im img{width:100%;height:100%;object-fit:cover}
-.tl .im svg{width:48px;height:48px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linejoin:round}
+.tl .im svg{width:52px;height:52px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.th svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.pot{border-radius:20px;padding:12px 14px;margin-bottom:10px;background:var(--soft)}
+.pot .pt{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pot .pt b{font-size:22px;font-weight:800;font-stretch:72%}
+.pot .ps{font-size:13px;margin-top:3px;color:var(--mute)}
+.pot .ps.w{color:var(--ink);font-weight:600}
+.pot-g{background:color-mix(in srgb,var(--mint) 20%,var(--card))}.pot-g .pt b{color:var(--mint)}
+.pot-o{background:color-mix(in srgb,var(--tag) 24%,var(--card))}
+.pot-r{background:color-mix(in srgb,var(--red) 18%,var(--card))}.pot-r .pt b{color:var(--red)}
+.pot.sat .ps.w{color:var(--red)}
 .tl .hl{position:absolute;left:50%;top:8px;width:11px;height:11px;margin-left:-6px;border-radius:50%;background:var(--bg);border:1.5px solid var(--ink);z-index:2}
 .tl .pr{position:absolute;left:10px;top:96px;z-index:2;background:var(--acc);color:#111;font-weight:800;font-stretch:68%;font-size:19px;line-height:1.2;padding:1px 12px 1px 13px;border-radius:5px 15px 15px 5px}
 .tl .pr.g{background:var(--mint);color:#fff}.tl .pr.n{background:var(--soft);color:var(--ink)}
@@ -579,6 +589,13 @@ function mkForm(host,S,o){
   return`<div class="chips" data-g="${f}" ${multi?'data-multi="1"':''}>${set.map(v=>chip(f,v,cur.includes(v))).join('')}${allowNew?(newField===f?`<input type="text" class="newin" data-n="${f}" placeholder="Nouveau…" style="width:150px">`:`<button type="button" class="chip add" data-new="${f}">+ autre</button>`):''}</div>`};
  const hasSub=()=>!!(S.cat&&(mrg(SUBS0[S.cat],subsOf(S.cat)).length||S.sub));
  function advance(k){if(edit)return;G.delete(k);let i=ORDER.indexOf(k)+1;if(ORDER[i]==='sub'&&!hasSub())i++;const n=ORDER[i];if(n){G.add(n);focusKey=n}}
+ function potHTML(){const p=potential(S);let lvl='n',tt='Choisis une catégorie',l1='Le potentiel de vente apparaît d\'après tes ventes passées.',l2='';
+  if(S.cat){if(!p.ok){tt='Pas assez de données';l1=p.n+' vente'+(p.n>1?'s':'')+' comparable'+(p.n>1?'s':'')+' dans ta base (il en faut 3 au moins).'}
+   else{lvl=p.lvl;tt={g:'Fort',o:'Moyen',r:'Faible'}[p.lvl];l1=p.n+' ventes comparables · '+(p.dm!==null?'délai médian '+Math.round(p.dm)+' j · ':'')+'prix médian '+eur(p.pm)}
+   if(p.stock>0){const cr=['catégorie'];if((S.marque||'').trim())cr.unshift('marque');if(S.taille)cr.push('taille');
+    l2=(p.stock>=3?'Attention : ':'')+'déjà '+p.stock+' en stock (même '+(cr.length>1?cr.slice(0,-1).join(', ')+' et '+cr[cr.length-1]:cr[0])+')'}}
+  return`<div class="pot pot-${lvl}${p.stock>=3?' sat':''}" id="pot"><div class="pt"><span class="mono">potentiel de vente</span><b>${esc(tt)}</b></div><div class="ps">${esc(l1)}</div>${l2?`<div class="ps w">${esc(l2)}</div>`:''}</div>`}
+ function updatePot(){const e=host.querySelector('#pot');if(!e)return;const t=document.createElement('div');t.innerHTML=potHTML();e.replaceWith(t.firstChild)}
  function progHTML(){const L=['cat','sub','marque','taille','genre','grade','achat','renta','prov'].filter(k=>k!=='sub'||hasSub());
   const filled=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='renta'?num(S.pvise)>0:k==='marque'?!!(S.marque||'').trim():!!S[k];
   const n=L.length,d=L.filter(filled).length;
@@ -591,14 +608,13 @@ function mkForm(host,S,o){
   const cats=mrg(CATS0,freq('cat')),subs=S.cat?mrg(SUBS0[S.cat],subsOf(S.cat)):[],sizes=sizesFor(S.cat),provs=[...new Set([...PROV0,...freq('prov')])];
   const sizesSorted=sizes.sort((a,b)=>{const ia=SIZES.indexOf(a),ib=SIZES.indexOf(b);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return-1;if(ib>=0)return 1;return String(a).localeCompare(String(b),'fr',{numeric:true})});
   const rb=recentBrands(),sug=suggestBrand(S.marque);
-  if(G.has('renta')&&!S._vt&&(S.pvise===undefined||S.pvise==='')){const a0=advice(S);if(a0.ok)S.pvise=a0.reco;else if(num(S.achat)>0)S.pvise=nice(num(S.achat)*2.5)}
   const vv=num(S.pvise),aa=num(S.achat);let rsum='';if(vv>0&&aa>=0){const r0=renta(aa,vv,defFrais(vv,'Vinted'),estDelai(S,vv));rsum=`${esc(eur(vv))}<i class="dot f-${r0.c}"></i>`}
   const recoA=advice(S);
   const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['mat','coul','etat','modele','madein','collab','ballot','pub','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length;
   const sums={cat:S.cat,sub:S.sub,marque:S.marque,taille:S.taille,genre:S.genre,achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:S.prov,photo:S.photo?'Ajoutée':'',dim:dimN?dimN+' valeur'+(dimN>1?'s':''):'',det:detN?detN+' renseigné'+(detN>1?'s':''):''};
   const sec=(k,label,body,opt)=>{opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
    return`<div class="grp${op?' open':''}${errs[k]?' err':''}" data-sec="${k}"><button type="button" class="gh" data-tg="${k}" aria-expanded="${op}"><span class="l">${label}</span><span class="gs">${sm}${sm?'<i class="ckm"></i>':''}</span><span class="gc" aria-hidden="true"></span></button>${op?`<div class="gb">${body}${opt.next&&!edit?`<div class="acts" style="margin-top:12px"><button type="button" class="btn sec sm" data-next="${k}">${opt.next} ›</button></div>`:''}</div>`:''}</div>`};
-  host.innerHTML=(edit?'':progHTML())+
+  host.innerHTML=(edit?'':progHTML()+potHTML())+
    sec('cat','Catégorie',group('cat',cats,false,true))+
    (hasSub()?sec('sub','Type',group('sub',subs,false,true)):'')+
    sec('marque','Marque',`${rb.length?`<div class="chips" style="margin-bottom:8px">${rb.map(b=>chip('marque',b,S.marque===b,true)).join('')}</div>`:''}
@@ -650,7 +666,7 @@ function mkForm(host,S,o){
   if(e.key==='Enter'&&e.target.id==='fv'){e.preventDefault();advance('renta');draw()}});
  host.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('newin'))addNew(e.target)});
  host.addEventListener('input',e=>{const t=e.target;
-  if(t.id==='fm'){S.marque=t.value;delete errs.marque;const s=suggestBrand(t.value);$('sg').innerHTML=s?`<button type="button" class="chip sm" data-sug="${esc(s)}">Tu voulais dire ${esc(s)} ?</button>`:''}
+  if(t.id==='fm'){S.marque=t.value;delete errs.marque;updatePot();const s=suggestBrand(t.value);$('sg').innerHTML=s?`<button type="button" class="chip sm" data-sug="${esc(s)}">Tu voulais dire ${esc(s)} ?</button>`:''}
   else if(t.id==='fa'){const v=t.value.replace(',','.');S.achat=v===''?'':v;delete errs.achat;updateRenta()}
   else if(t.id==='fv'){const v=t.value.replace(',','.');S.pvise=v;S._vt=1;updateRenta()}
   else if(t.dataset.d){S[t.dataset.d]=t.value.replace(',','.')}
@@ -674,13 +690,12 @@ function mkForm(host,S,o){
 }
 
 /* ---------- vue Ajouter ---------- */
-const KEEP=['prov','genre','grade','ballot'];
-function freshState(prev){const s={entree:today()};const d=LSg('defs',{});KEEP.forEach(k=>{if(d[k])s[k]=d[k]});if(prev)KEEP.forEach(k=>{if(prev[k])s[k]=prev[k]});return s}
+/* Le formulaire démarre toujours vide : aucune valeur n'est présélectionnée (seule la date d'entrée vaut aujourd'hui) */
+function freshState(){return{entree:today()}}
 function initAdd(){
  addForm=mkForm($('fadd'),freshState(),{mode:'add',onSubmit(S,dup){
   const p=Object.assign({},S,{id:nextId(),statut:'Disponible',cree:Date.now()});if(!p.entree)p.entree=today();
   p.code=genCode(p);if(p.collab==='')delete p.collab;
-  const d={};KEEP.forEach(k=>{if(S[k])d[k]=S[k]});LSs('defs',d);
   const sv=save(p);
   toast('Ajouté ✓ · '+P.filter(avail).length+' en stock',()=>{remove(sv.id);toast('Annulé')});
   addForm.reset(dup?Object.assign({},S,{photo:'',id:undefined,code:undefined}):freshState(S));
@@ -703,14 +718,34 @@ function renderList(){
  ps.sort((a,b)=>(filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
  const tot=ps.length;ps=ps.slice(0,lim);
  $('lst').innerHTML=ps.length?ps.map(p=>{if(lmode==='grid')return pieceTile(p,qSel===p.id);if(avail(p))return pieceRow(p,qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>vendu ${eur(p.pv)}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?a+' j':''}</small></div>`;
-  return`<button type="button" class="li" data-id="${esc(p.id)}">${p.photo?phImg(p.photo,'th'):`<div class="th">${esc((p.marque||'?').slice(0,2))}</div>`}<div class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><small>${esc([p.taille,p.cat,p.genre].filter(Boolean).join(' · '))} ${tagOf(p)}</small></div>${pr}</button>`}).join('')+(tot>lim?`<button type="button" class="btn sec" id="more">Afficher plus (${tot-lim})</button>`:''):'<div class="empty">Aucune pièce.</div>';
+  return`<button type="button" class="li" data-id="${esc(p.id)}">${p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`}<div class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><small>${esc([p.taille,p.cat,p.genre].filter(Boolean).join(' · '))} ${tagOf(p)}</small></div>${pr}</button>`}).join('')+(tot>lim?`<button type="button" class="btn sec" id="more">Afficher plus (${tot-lim})</button>`:''):'<div class="empty">Aucune pièce.</div>';
  hydrate();
 }
 let lmode=LSg('lmode','grid');
 const PASTEL={Bleu:['#CFE0FF','#2B5CFF'],Noir:['#E3E5EA','#4b5568'],Gris:['#E3E5EA','#4b5568'],Blanc:['#F1F1F1','#6b6f78'],Rouge:['#FFD9D6','#b3261e'],Orange:['#FFE3D2','#c2551f'],Vert:['#D9F2E6','#256b4a'],Rose:['#F9DDEB','#b3366b'],Violet:['#E6DDF7','#5b3fa8'],Jaune:['#FFF1BF','#8a6a00'],Beige:['#F0E6D6','#7a6040'],Marron:['#EBDDD0','#6b4423']};
 const PASTEL0=[['#CFE0FF','#2B5CFF'],['#E3E5EA','#4b5568'],['#FFE3D2','#c2551f'],['#D9F2E6','#256b4a']];
 const pastel=p=>PASTEL[(p.coul||[])[0]]||PASTEL0[[...(p.cat||'x')].reduce((a,c)=>a+c.charCodeAt(0),0)%PASTEL0.length];
-const SHIRT='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/></svg>';
+/* icône du vêtement selon la catégorie (utilisée quand il n'y a pas de photo) */
+const ICONS={
+ tshirt:'<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+ polo:'<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3-2 3h-2z"/><path d="M12 6.5V11"/><path d="M10 3.2 12 6.5l2-3.3"/>',
+ chemise:'<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3"/><path d="M8 3l4 4 4-4"/><path d="M12 7v14"/><path d="M12 11h.01M12 15h.01M12 19h.01"/>',
+ sweat:'<path d="M9 3 5 5 2 14l3.2 1L6 11.5V21h12v-9.5l.8 3.5 3.2-1-3-9-4-2"/><path d="M9 3c.5 3.5 5.5 3.5 6 0"/><path d="M9.5 16h5"/>',
+ veste:'<path d="M8 3 3 5.5 2 20h5V9"/><path d="M16 3l5 2.5L22 20h-5V9"/><path d="M8 3l4 4 4-4"/><path d="M7 9h10v12H7z"/><path d="M12 7v14"/>',
+ pantalon:'<path d="M7 3h10l1.5 18h-5L12 10l-1.5 11h-5z"/><path d="M7 6.5h10"/>',
+ short:'<path d="M6 5h12l1.5 12h-6L12 10.5 10.5 17h-6z"/><path d="M6 8.5h12"/>',
+ maillot:'<path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3"/><path d="M9.5 3.3 12 7l2.5-3.7"/><path d="M12 12v4"/>',
+ robe:'<path d="M9 3l1 5-3 13h10l-3-13 1-5"/><path d="M10 8h4"/>',
+ chaussures:'<path d="M3 16c0-2.3 1.2-3.4 3-3.4l2-4.2 3 2 2 1c3 .6 6 2 7 4.200V18H3z"/><path d="M3 18h18"/>',
+ sac:'<path d="M5 8h14l1 13H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+ cintre:'<path d="M12 7a2.5 2.5 0 1 0-2.5-2.5"/><path d="M12 7v2L3 16.500h18L12 9"/>'};
+function iconKey(p){const c=nrm(p.cat),s=nrm(p.sub);
+ if(/sac/.test(s)||/sac|accessoire/.test(c))return'sac';if(/chaussure|basket|sneaker|botte/.test(c))return'chaussures';
+ if(/tshirt|tee/.test(c))return'tshirt';if(/polo/.test(c))return'polo';if(/chemise/.test(c)||/cardigan/.test(s))return'chemise';
+ if(/sweat|pull|hoodie/.test(c))return'sweat';if(/veste|manteau|blouson|doudoune/.test(c))return'veste';
+ if(/pantalon|jean|jogging/.test(c))return'pantalon';if(/short/.test(c))return'short';if(/maillot/.test(c))return'maillot';
+ if(/robe|jupe/.test(c))return'robe';if(/pyjama/.test(s))return'tshirt';return'cintre'}
+const catSvg=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[iconKey(p)]}</svg>`;
 const fmtP=v=>Number.isInteger(v)?v+' €':fN(v)+' €';
 function pieceTile(p,open){if(open)return pieceRow(p,true);
  const [bg,fg]=pastel(p),isA=avail(p),adv=isA?advice(p):null;let price='',cls='',dot='';
@@ -719,7 +754,7 @@ function pieceTile(p,open){if(open)return pieceRow(p,true);
  else if(sold(p)){const g=profit(p);price=(g>=0?'+':'−')+fmtP(Math.abs(g));cls=g>=0?'g':'n'}
  else{price='Indispo';cls='n'}
  const sub=[p.code?esc(p.code):'',esc(p.taille||'')].filter(Boolean).join(' · ');
- return`<div class="tl"><span class="hl"></span><button type="button" class="im" data-id="${esc(p.id)}" style="background:${bg};color:${fg}" aria-label="Ouvrir la fiche">${p.photo?phImg(p.photo):SHIRT}</button><span class="pr ${cls}">${price}</span><div class="bd"><button type="button" class="ti" data-id="${esc(p.id)}"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><span class="cdm">${sub}</span></button>${isA?`<div class="ft">${dot}<button type="button" class="vb" data-qv="${esc(p.id)}">Vendu</button></div>`:`<div class="st">${sold(p)?'Vendu '+eur(p.pv)+' · '+esc(p.canal||'Vinted'):'Marquée indisponible'}</div>`}</div></div>`}
+ return`<div class="tl"><span class="hl"></span><button type="button" class="im" data-id="${esc(p.id)}" style="background:${bg};color:${fg}" aria-label="Ouvrir la fiche">${p.photo?phImg(p.photo):catSvg(p)}</button><span class="pr ${cls}">${price}</span><div class="bd"><button type="button" class="ti" data-id="${esc(p.id)}"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><span class="cdm">${sub}</span></button>${isA?`<div class="ft">${dot}<button type="button" class="vb" data-qv="${esc(p.id)}">Vendu</button></div>`:`<div class="st">${sold(p)?'Vendu '+eur(p.pv)+' · '+esc(p.canal||'Vinted'):'Marquée indisponible'}</div>`}</div></div>`}
 $('flt').onclick=e=>{const m=e.target.closest('[data-lm]');if(m){lmode=m.dataset.lm;LSs('lmode',lmode);qSel=null;renderList();return}const b=e.target.closest('[data-flt]');if(b){filt=b.dataset.flt;lim=60;renderList()}};
 $('q').oninput=()=>{lim=60;renderList()};
 $('lst').onclick=e=>{if(e.target.closest('#more')){lim+=60;renderList();return}if(sellClick(e,renderList))return;const b=e.target.closest('[data-id]');if(b)openSheet(b.dataset.id)};
@@ -811,7 +846,7 @@ function renderDash(){
  ${rets.length?`<div class="kpis two"><div class="kpi"><b>${rets.length}</b><span>retour${rets.length>1?'s':''} ${lbl}</span></div><div class="kpi"><b>${eurR(retSum)}</b><span>remboursés${S.ca?' ('+(retSum/S.ca*100).toFixed(0)+' % du CA)':''}</span></div></div>`:''}
  <div class="card"><h3>Stock actuel</h3><p class="sub">${st.length} pièce${st.length>1?'s':''} à vendre</p>
   <div class="kpis two" style="margin:0"><div class="kpi"><b>${eurR(stCost)}</b><span>argent immobilisé</span></div><div class="kpi"><b>${st.length?avgAge.toFixed(0)+' j':'—'}</b><span>ancienneté moyenne</span></div></div>
-  ${old.length?`<div style="margin-top:14px"><span class="l">À relancer ou baisser (60 jours et plus) · ${old.length}</span>${old.slice(0,5).map(x=>`<button type="button" class="li" data-id="${esc(x.id)}" style="margin-bottom:6px"><div class="th">${esc((x.marque||'?').slice(0,2))}</div><div class="m"><b>${esc(title(x))}</b><small>${esc([x.taille,x.cat].filter(Boolean).join(' · '))}</small></div><div class="p"><span class="tag x">${age(x)} j</span>${(a=>a.ok?`<small>conseillé ${eur(a.reco)}</small>`:'')(advice(x))}</div></button>`).join('')}</div>`:'<div class="hint" style="margin-top:12px">Aucune pièce ne dort depuis plus de 60 jours.</div>'}</div>
+  ${old.length?`<div style="margin-top:14px"><span class="l">À relancer ou baisser (60 jours et plus) · ${old.length}</span>${old.slice(0,5).map(x=>`<button type="button" class="li" data-id="${esc(x.id)}" style="margin-bottom:6px"><div class="th">${catSvg(x)}</div><div class="m"><b>${esc(title(x))}</b><small>${esc([x.taille,x.cat].filter(Boolean).join(' · '))}</small></div><div class="p"><span class="tag x">${age(x)} j</span>${(a=>a.ok?`<small>conseillé ${eur(a.reco)}</small>`:'')(advice(x))}</div></button>`).join('')}</div>`:'<div class="hint" style="margin-top:12px">Aucune pièce ne dort depuis plus de 60 jours.</div>'}</div>
  <div class="card"><h3>Six derniers mois</h3><p class="sub">Chiffre d'affaires et bénéfice net par mois de vente</p><div class="mo">${ms.map(x=>`<div><b>${x.n?eurR(x.ben):''}</b><div class="pair"><i class="c" style="height:${x.ca/mxm*100}%;${x.ca?'':'display:none'}"></i><i class="p" style="height:${Math.max(0,x.ben)/mxm*100}%;${x.ben>0?'':'display:none'}"></i></div>${mn(x.m)}</div>`).join('')}</div><div class="lg"><span>Chiffre d'affaires</span><span class="p">Bénéfice net</span></div></div>
  <div class="card"><h3>Par plateforme</h3><p class="sub">Bénéfice net ${lbl}</p>${hbars(pl.map(g=>({k:g.k,v:g.ben,sub:g.n+' vente'+(g.n>1?'s':'')+' · '+eur(g.ca)})),eurR)}</div>
  <div class="card"><h3>Par catégorie</h3><p class="sub">Bénéfice net ${lbl}</p>${hbars(ct.map(g=>({k:g.k,v:g.ben,sub:g.n+' vente'+(g.n>1?'s':'')})),eurR)}</div>
@@ -907,6 +942,12 @@ function renta(achat,prix,frais,delai,sale){const td=targetDays(),net=prix-achat
  else{c='o';if(!okM)why.push('Marge sous '+eur(cfg.minM));if(!okR)why.push('Rendement sous '+cfg.roi+' %');if(lent)why.push(sale?'Pièce restée '+Math.round(delai)+' j en stock':'Délai ≈ '+Math.round(delai)+' j pour '+td+' j visés')}
  return{net,roi,c,why,delai,sale:!!sale,label:(sale?feuS:feuL)[c]}}
 const rentaHTML=r=>`<div class="feu f-${r.c}"><i></i><b>${r.label}</b><span>Bénéfice net ${eur(r.net)}${r.roi!==null?' · ROI '+Math.round(r.roi*100)+' %':''}${r.delai!=null?(r.sale?' · en stock '+Math.round(r.delai)+' j':' · vente ≈ '+Math.round(r.delai)+' j'):''}</span></div>${r.why.length?`<div class="hint">${esc(r.why.join(' · '))}</div>`:''}`;
+/* potentiel de vente : d'après les ventes comparables (même marque et catégorie, puis critères plus larges) et le stock déjà présent */
+function potential(p){if(!p.cat)return{ok:false,n:0,stock:0};const c=comps(p),it=c.items,mq=nrm(p.marque);
+ const stock=P.filter(x=>avail(x)&&x.cat===p.cat&&(!mq||nrm(x.marque)===mq)&&(!p.taille||x.taille===p.taille)).length;
+ if(it.length<3)return{ok:false,n:it.length,stock,label:c.label};
+ const d=it.map(delai).filter(v=>v!==null),dm=d.length?med(d):null,pm=med(it.map(x=>x.pv)),td=targetDays();
+ return{ok:true,n:it.length,dm,pm,stock,label:c.label,lvl:dm===null?'o':dm<=td?'g':dm<=2*td?'o':'r'}}
 function estDelai(p,prix,a){a=a||advice(p);if(!a.ok)return null;let best=null;a.tiers.forEach(t=>{if(t.delai===null)return;if(!best||Math.abs(t.price-prix)<Math.abs(best.price-prix))best=t});return best?best.delai:null}
 
 /* ---------- objectifs mensuel et annuel (bénéfice net, chiffre d'affaires ou les deux) ---------- */
@@ -951,7 +992,7 @@ function sellForm(p){return`<div class="qform"><div class="row2"><div><label cla
  ${qF.canal==='TikTok Live'?`<div style="margin-top:12px"><label class="l" for="qb">@pseudo de l'acheteur (facultatif)</label><input type="text" id="qb" value="${esc(qF.pseudo)}" placeholder="@pseudo" autocapitalize="none" autocomplete="off"></div>`:''}
  <div id="qpv">${sellCalc(p)}</div><div class="acts"><button type="button" class="btn mint" id="qok">Confirmer la vente</button></div></div>`}
 function pieceRow(p,open){const adv=open?null:advice(p);
- const th=p.photo?phImg(p.photo,'th'):`<div class="th">${esc((p.marque||'?').slice(0,2))}</div>`;
+ const th=p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`;
  const a=age(p),sub=[p.code?esc(p.code):'',esc(p.taille||''),p.grade?`<span class="pill sm g-${esc(p.grade)}">${esc(p.grade)}</span>`:'',ok(p.entree)?a+' j':''].filter(Boolean).join(' · ');
  return`<div class="qrow${open?' open':''}"><div class="qtop"><button type="button" class="qm" data-id="${esc(p.id)}">${th}<span class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><small>${sub}</small></span></button><div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${adv&&adv.ok?'conseillé '+eur(adv.reco):'acheté'}</small></div>${open?'<button type="button" class="btn sm sec" data-qx="1">Annuler</button>':`<button type="button" class="btn mint sm" data-qv="${esc(p.id)}">Vendu</button>`}</div>${open?sellForm(p):''}</div>`}
 function sellOpen(id){const p=P.find(x=>x.id===id);if(!p)return;const canal=LSg('lastCanal','Vinted'),pr=priceFor(p);qSel=id;qF={prix:pr?fN(pr):'',canal,frais:'',ft:false,pseudo:''};qF.frais=fN(defFrais(pr||0,canal))}
