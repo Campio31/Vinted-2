@@ -574,7 +574,11 @@ function canon(v){v=(v||'').trim();return allBrands().find(b=>b.toLowerCase()===
 const L=(x,n)=>String(x==null?'':x).slice(0,n);
 const mod=p=>(p.modele==null||p.modele===''?'0':String(p.modele));
 const combo=p=>[p.cat,p.sub,p.marque,mod(p),p.grade].join('\u0001');
-function genCode(p){if(!p.cat||!p.sub||!p.marque||!p.grade)return undefined;const pre=L(p.cat,2)+L(p.sub,3)+L(p.marque,2)+L(mod(p),3)+L(p.grade,1);let n=0;P.forEach(q=>{if(q.id!==p.id&&combo(q)===combo(p))n++});let c;do{n++;c=pre+'-'+pad(n,3)}while(P.some(q=>q.id!==p.id&&q.code===c));return c}
+/* Le code garde son numéro tant que son début (catégorie, type, marque, modèle, grade) ne change pas, majuscules ou non.
+   Un nouveau code prend le plus grand numéro existant pour ce début, plus un : jamais de doublon. */
+function genCode(p){if(!p.cat||!p.sub||!p.marque||!p.grade)return undefined;const pre=L(p.cat,2)+L(p.sub,3)+L(p.marque,2)+L(mod(p),3)+L(p.grade,1),pl=pre.toLowerCase()+'-',others=P.filter(q=>q.id!==p.id&&q.code);
+ if(p.code&&p.code.toLowerCase().startsWith(pl)&&!others.some(q=>q.code.toLowerCase()===p.code.toLowerCase()))return p.code;
+ let n=0;others.forEach(q=>{if(q.code.toLowerCase().startsWith(pl)){const k=parseInt(q.code.slice(pl.length),10);if(k>n)n=k}});return pre+'-'+pad(n+1,3)}
 
 /* ---------- formulaire (ajout et modification) ---------- */
 const SIZES=['XS','S','M','L','XL','XXL','3XL'],NUM=['32','34','36','38','40','42','44','46','48','50'];
@@ -786,7 +790,7 @@ $('lst').onclick=e=>{if(e.target.closest('#more')){lim+=60;renderList();return}i
 function closeSheet(){$('sheet').hidden=true}
 $('sheet').onclick=e=>{if(e.target===$('sheet')||e.target.closest('[data-x]'))closeSheet()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeSheet()});
-document.addEventListener('click',e=>{const c=e.target.closest('.chip[data-t]');if(!c)return;const inp=$(c.dataset.t),on=!c.classList.contains('on');inp.value=on?c.dataset.v:'';c.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c&&on))});
+document.addEventListener('click',e=>{const c=e.target.closest('.chip[data-t]');if(!c)return;const inp=$(c.dataset.t),on=/^(s|e)_plat$/.test(c.dataset.t)||!c.classList.contains('on');inp.value=on?c.dataset.v:'';c.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c&&on))});
 const CANAUX=['Vinted','TikTok Live','Autre'];
 function openSheet(id,m){
  const p=P.find(x=>x.id===id);if(!p)return closeSheet();$('sheet').hidden=false;const c=$('shc');m=m||'view';
@@ -798,13 +802,14 @@ function openSheet(id,m){
    ...(sold(p)?[['Vendu',eur(p.pv)+' · '+(p.canal||'Vinted')+' · '+fd(p.dv)],['Frais',p.frais?eur(p.frais):'']]:[]),
    ...(p.retours||[]).map(r=>['Retour',fd(r.d)+(isnum(r.p)?' · '+eur(r.p):'')]),['Note',p.note]].filter(r=>r[1]);
   c.innerHTML=head(esc(title(p)))+(p.photo?phImg(p.photo,'big-ph'):'')+`<div class="card"><dl class="kv">${rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>${sold(p)?`<div class="pv" style="color:${profit(p)>=0?'var(--mint)':'var(--red)'}">Bénéfice net : ${eur(profit(p))}</div>`:''}</div>
-  ${avail(p)?'<div class="card" id="pc"></div>':''}<div class="acts">${avail(p)?'<button class="btn mint" id="a_sell" type="button">Marquer comme vendu</button><button class="btn sec" id="a_ann" type="button">Créer l\'annonce Vinted</button>':''}${sold(p)?'<button class="btn sec" id="a_ret" type="button">Enregistrer un retour</button>':''}${p.statut==='Pas Disponible'?'<button class="btn sec" id="a_dis" type="button">Remettre en stock</button>':''}${avail(p)?'<button class="btn sec" id="a_indis" type="button">Marquer indisponible</button>':''}
+  ${avail(p)?'<div class="card" id="pc"></div>':''}<div class="acts">${avail(p)?'<button class="btn mint" id="a_sell" type="button">Marquer comme vendu</button><button class="btn sec" id="a_ann" type="button">Créer l\'annonce Vinted</button>':''}${sold(p)?'<button class="btn" id="a_esale" type="button">Modifier la vente</button><button class="btn sec" id="a_ret" type="button">Enregistrer un retour</button><button class="btn sec" id="a_unsell" type="button">Annuler la vente</button>':''}${p.statut==='Pas Disponible'?'<button class="btn sec" id="a_dis" type="button">Remettre en stock</button>':''}${avail(p)?'<button class="btn sec" id="a_indis" type="button">Marquer indisponible</button>':''}
   <div class="acts two" style="margin:0"><button class="btn sec" id="a_edit" type="button">Modifier</button><button class="btn sec" id="a_del" type="button">Supprimer</button></div></div>`;
   const on=(i,f)=>{if($(i))$(i).onclick=f};
   on('a_sell',()=>openSheet(id,'sell'));on('a_ret',()=>openSheet(id,'ret'));on('a_edit',()=>openSheet(id,'edit'));on('a_del',()=>openSheet(id,'del'));
   on('a_indis',()=>{save(Object.assign({},p,{statut:'Pas Disponible'}));closeSheet();toast('Marquée indisponible',()=>save(p))});
   on('a_dis',()=>{save(Object.assign({},p,{statut:'Disponible'}));closeSheet();toast('Remise en stock',()=>save(p))});
-  on('a_ann',()=>openSheet(id,'ann'));
+  on('a_ann',()=>openSheet(id,'ann'));on('a_esale',()=>openSheet(id,'esale'));
+  on('a_unsell',()=>{const q=Object.assign({},p,{statut:'Disponible'});['pv','dv','canal','frais','vt','acheteur','exp'].forEach(k=>delete q[k]);save(q);closeSheet();toast('Vente annulée : pièce remise en stock',()=>save(p))});
   hydrate();if(avail(p))renderAdvice(p);
  }
  if(m==='ann'){const a=advice(p);
@@ -837,6 +842,22 @@ function openSheet(id,m){
   $('g_no').onclick=()=>openSheet(id);
   $('s_ok').onclick=()=>{const x=num($('s_prix').value);$('s_w').classList.toggle('err',isNaN(x)||x<0);if(isNaN(x)||x<0)return toast('Indique le prix de vente');
    const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:$('s_plat').value.trim()||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0});save(q);closeSheet();toast('Vendu · bénéfice '+eur(profit(q)),()=>save(p))}}
+ if(m==='esale'){c.innerHTML=head('Modifier la vente')+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · acheté ${eur(p.achat)}</p>
+  <div class="fld" id="e_w"><label class="l" for="e_prix">Prix de vente</label><div class="price"><input type="text" inputmode="decimal" id="e_prix" value="${fN(p.pv||0)}"><span>€</span></div></div>
+  <div class="row2 fld"><div><label class="l" for="e_date">Date de vente</label><input type="date" id="e_date" value="${esc(ok(p.dv)?p.dv:today())}"></div><div><label class="l" for="e_frais">Frais</label><div class="price"><input type="text" inputmode="decimal" id="e_frais" value="${fN(p.frais||0)}"><span>€</span></div></div></div>
+  <div class="fld"><label class="l" for="e_plat">Vendu sur</label><input type="text" id="e_plat" value="${esc(p.canal||'Vinted')}"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${(p.canal||'Vinted')===x?' on':''}" data-t="e_plat" data-v="${x}">${x}</button>`).join('')}</div></div>
+  <div class="fld"><label class="l" for="e_ps">@pseudo de l'acheteur (facultatif)</label><input type="text" id="e_ps" value="${esc(p.acheteur?'@'+p.acheteur:'')}" placeholder="@pseudo" autocapitalize="none" autocomplete="off"></div>
+  <div class="pv" id="e_pv"></div></div>
+  <div class="acts"><button class="btn mint" id="e_ok" type="button">Enregistrer la vente</button>${back}</div>`;
+  const pv=()=>{const x=num($('e_prix').value),f=num($('e_frais').value)||0,d=$('e_date').value,from=ok(p.pub)?p.pub:p.entree;
+   if(isNaN(x)){$('e_pv').textContent='Bénéfice net : —';return}
+   $('e_pv').innerHTML=rentaHTML(renta(p.achat||0,x,f,ok(d)&&ok(from)?Math.max(0,days(from,d)):null,true))+(ok(d)&&ok(from)&&d<from?'<div class="hint">La date de vente est avant la date d\'entrée de la pièce.</div>':'')};
+  pv();['e_prix','e_frais','e_date'].forEach(i=>$(i).addEventListener('input',pv));
+  $('g_no').onclick=()=>openSheet(id);
+  $('e_ok').onclick=()=>{const x=num($('e_prix').value),d=$('e_date').value;$('e_w').classList.toggle('err',isNaN(x)||x<0);
+   if(isNaN(x)||x<0)return toast('Indique le prix de vente');if(!ok(d))return toast('Indique la date de vente');
+   const q=Object.assign({},p,{pv:x,dv:d,canal:$('e_plat').value.trim()||'Autre',frais:num($('e_frais').value)||0}),ps=$('e_ps').value.trim().replace(/^@+/,'');if(ps)q.acheteur=ps;else delete q.acheteur;
+   save(q);openSheet(id);toast('Vente modifiée ✓',()=>{save(p);openSheet(id)})}}
  if(m==='ret'){c.innerHTML=head('Enregistrer un retour')+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · vendu ${eur(p.pv)}. La pièce repasse en stock et la vente est retirée du bilan.</p>
   <div class="row2"><div><label class="l" for="r_date">Date du retour</label><input type="date" id="r_date" value="${today()}"></div><div><label class="l" for="r_p">Montant remboursé</label><div class="price"><input type="text" inputmode="decimal" id="r_p" value="${String(p.pv||'').replace('.',',')}"><span>€</span></div></div></div></div>
   <div class="acts"><button class="btn" id="r_ok" type="button">Valider le retour</button>${back}</div>`;
