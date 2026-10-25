@@ -16,6 +16,8 @@
 <script>try{document.documentElement.dataset.theme=JSON.parse(localStorage.getItem('theme')||'"light"')}catch(e){}</script>
 <script src="vendor/xlsx.full.min.js"></script>
 <script src="vendor/supabase.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script src="vendor/jsQR.js"></script>
 <script src="config.js"></script>
 <style>
 /* Mobile: barre d'onglets en bas. PC (≥ 900 px): menu à gauche, contenu plus large, bilan en deux colonnes. */
@@ -415,11 +417,58 @@ input.big-in{border-radius:18px}
  #toast{bottom:24px}#upd{bottom:24px}#bk{bottom:84px}
  .gcard{margin-bottom:0}#dsh>.gcard{grid-column:1/-1}
 }
+/* ===== outils ===== */
+.coachc{display:block;width:100%;text-align:left;border:0;cursor:pointer;grid-column:1/-1}.coachc b{display:block;font-size:16px}.coachc span{color:var(--mute);font-size:13px}
+.hr{display:flex;align-items:center;gap:8px}
+.ib{width:40px;height:40px;border-radius:50%;border:0;background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.ib svg,.tic svg,.micbig svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tools{display:grid;gap:8px}
+.tool{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:0;border-radius:20px;padding:14px;cursor:pointer;min-height:68px}
+.tool .tic{width:44px;height:44px;border-radius:14px;background:var(--hero);color:var(--hero-on);display:flex;align-items:center;justify-content:center;flex:none}
+.tool .tx{min-width:0}.tool b{display:block;font-size:16px}.tool small{display:block;color:var(--mute);font-size:13px}
+.cl{display:flex;gap:12px;background:var(--card);border-radius:18px;padding:12px 14px;margin-bottom:8px;align-items:flex-start}
+.cl i{width:12px;height:12px;border-radius:50%;margin-top:5px;flex:none;background:var(--mute)}
+.cl-g i{background:var(--mint)}.cl-o i{background:var(--tag)}.cl-r i{background:var(--red)}
+.cl b{display:block}.cl span{display:block;color:var(--mute);font-size:14px;margin-top:2px}
+#cb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(216px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;gap:10px;align-items:center;max-width:94vw;border-radius:999px;background:var(--hero);color:var(--hero-on);padding:8px 8px 8px 16px;font-weight:600}
+#cb button{border:0;border-radius:10px;min-height:40px;padding:0 14px;font-weight:700;cursor:pointer}
+#cb #cb_go{background:var(--acc);color:#111}#cb #cb_x{background:transparent;color:var(--hero-on);font-size:20px;padding:0 10px}
+.blr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.1fr) 64px 36px;gap:6px;margin-bottom:6px;align-items:center}
+.blr input,.blr select{min-height:42px;padding:8px 10px;font-size:14px}
+.bx{border:0;background:var(--soft);border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--ink)}
+.hist{width:100%;height:auto;display:block;margin-top:6px}
+.pr2b{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:6px}.pr2b span{color:var(--mute);min-width:0}.pr2b b{font-weight:600;text-align:right}
+.nbx{border-radius:18px;padding:12px;margin-top:10px;background:var(--soft)}.nbx.main{background:var(--card);outline:2px solid var(--ink)}
+.nbx .nh b{font-size:15px}.nbx .nt{margin-top:6px;white-space:pre-wrap}
+.qrl{max-height:260px;overflow:auto;border-radius:14px;background:var(--bg);padding:4px}
+.qrr{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;font-size:14px;cursor:pointer}
+.qrr input{width:20px;height:20px;accent-color:var(--acc);flex:none}.qrr span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.qrr em{font-style:normal;font-family:var(--fm);font-size:12px;background:var(--soft);border-radius:999px;padding:2px 9px;flex:none}
+.micbig{width:84px;height:84px;border-radius:50%;border:0;background:var(--acc);color:#111;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.micbig svg{width:36px;height:36px}.micbig.on{animation:pulse 1.2s infinite}
+.vres{border-radius:18px;padding:12px 14px;margin-bottom:8px;background:var(--soft)}.vres.g{background:color-mix(in srgb,var(--mint) 22%,var(--card))}.vres.o{background:color-mix(in srgb,var(--tag) 26%,var(--card))}
+#scan{position:fixed;inset:0;z-index:90;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px}
+#scan video{width:100%;max-width:520px;max-height:70dvh;object-fit:cover;border-radius:24px;background:#111}
+#scan .sst{color:#fff;font-weight:600;text-align:center}
+.sfr{position:absolute;width:min(62vw,300px);height:min(62vw,300px);border:3px solid var(--acc);border-radius:22px;pointer-events:none;top:50%;left:50%;transform:translate(-50%,-62%)}
+.ex-bac{display:inline-block;font-family:var(--fm);font-size:11px;background:var(--hero);color:var(--hero-on);border-radius:999px;padding:1px 8px;margin-left:6px}
+.prepl .pre{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:16px;padding:10px 12px;margin-bottom:6px}
+.prepl .pre .bacb{font-family:var(--fd);font-stretch:68%;font-weight:800;font-size:22px;min-width:48px;text-align:center;background:var(--hero);color:var(--hero-on);border-radius:12px;padding:4px 6px}
+.prepl .pre .pm{flex:1;min-width:0}.prepl .pre .pm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}.prepl .pre .pm small{color:var(--mute);font-size:12px}
+#plabels{display:none}
+@media print{
+ body.printing{background:#fff!important;padding:0!important}
+ body.printing>*:not(#plabels){display:none!important}
+ body.printing #plabels{display:grid!important;grid-template-columns:repeat(3,1fr);gap:4mm;padding:6mm}
+ .plb{display:flex;gap:3mm;align-items:center;border:0.3mm solid #000;padding:3mm;break-inside:avoid;color:#000;font-family:Arial,sans-serif}
+ .plb .pq{width:22mm;height:22mm;flex:none}.plb .pq svg{width:100%;height:100%}
+ .plb .pt2{display:flex;flex-direction:column;font-size:8pt;min-width:0}.plb .pt2 b{font-size:20pt;line-height:1}.plb .pc2{font-family:monospace;font-size:7pt}
+}
+@media(min-width:900px){#cb{bottom:144px;left:calc(50% + 112px)}}
 </style>
 </head>
 <body>
 <div id="app">
- <header><h1 id="ttl">Ajouter</h1><div id="sync"><i></i><span>Chargement…</span></div></header>
+ <header><h1 id="ttl">Ajouter</h1><div class="hr"><button type="button" class="ib" id="mic" aria-label="Commande vocale"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button type="button" class="ib" id="tl" aria-label="Outils"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button><div id="sync"><i></i><span>Chargement…</span></div></div></header>
  <div id="ro" class="warn" hidden>Le stockage du navigateur est indisponible (navigation privée ?). Les données seront perdues à la fermeture : exporte une sauvegarde JSON.</div>
  <main>
   <section id="v-add" class="view on"><div class="kpis" id="kp"></div><div class="card frm" id="fadd"></div></section>
@@ -499,6 +548,8 @@ input.big-in{border-radius:18px}
 <div id="sheet" hidden><div id="shc"></div></div>
 <div id="upd" role="status" hidden><span>Nouvelle version disponible</span><button type="button" id="upd_go">Mettre à jour</button><button type="button" id="upd_x" aria-label="Plus tard">×</button></div>
 <div id="bk" role="status" hidden><span>Sauvegarde de la semaine prête</span><button type="button" id="bk_go">Télécharger</button><button type="button" id="bk_x" aria-label="Plus tard">×</button></div>
+<div id="cb" role="status" hidden><span>Ton coach du lundi est prêt</span><button type="button" id="cb_go">Ouvrir</button><button type="button" id="cb_x" aria-label="Plus tard">×</button></div>
+<div id="scan" hidden><video id="scan_v" playsinline muted></video><div class="sfr" aria-hidden="true"></div><div id="scan_s" class="sst">Place le QR dans le cadre</div><button type="button" class="btn sec" id="scan_x">Fermer</button></div>
 <div id="toast" hidden></div>
 
 <script>
@@ -635,7 +686,7 @@ function mkForm(host,S,o){
   const rb=recentBrands(),sug=suggestBrand(S.marque);
   const vv=num(S.pvise),aa=num(S.achat);let rsum='';if(vv>0&&aa>=0){const r0=renta(aa,vv,defFrais(vv,'Vinted'),estDelai(S,vv));rsum=`${esc(eur(vv))}<i class="dot f-${r0.c}"></i>`}
   const recoA=advice(S);
-  const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['mat','coul','etat','modele','madein','collab','ballot','pub','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length;
+  const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['mat','coul','etat','modele','madein','collab','ballot','bac','pub','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length;
   const sums={cat:S.cat,sub:S.sub,marque:S.marque,taille:S.taille,genre:S.genre,achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:S.prov,photo:S.photo?'Ajoutée':'',dim:dimN?dimN+' valeur'+(dimN>1?'s':''):'',det:detN?detN+' renseigné'+(detN>1?'s':''):''};
   const sec=(k,label,body,opt)=>{opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
    return`<div class="grp${op?' open':''}${errs[k]?' err':''}" data-sec="${k}"><button type="button" class="gh" data-tg="${k}" aria-expanded="${op}"><span class="l">${label}</span><span class="gs">${sm}${sm?'<i class="ckm"></i>':''}</span><span class="gc" aria-hidden="true"></span></button>${op?`<div class="gb">${body}${opt.next&&!edit?`<div class="acts" style="margin-top:12px"><button type="button" class="btn sec sm" data-next="${k}">${opt.next} ›</button></div>`:''}</div>`:''}</div>`};
@@ -657,6 +708,7 @@ function mkForm(host,S,o){
     <div class="l">Couleurs</div>${group('coul',mrg(COUL0,freq('coul',1)),true,true)}
     <div class="l">État / défaut</div><select data-k="etat"><option value="">—</option>${mrg(ETAT0,freq('etat')).map(e=>`<option ${S.etat===e?'selected':''}>${esc(e)}</option>`).join('')}</select>
     <div class="l">Ballot</div>${group('ballot',abc(freq('ballot')),false,true)}
+    <div class="l">Bac (emplacement)</div>${group('bac',abc(freq('bac')),false,true)}
     <div class="row2"><div><div class="l">Modèle</div><input type="text" data-k="modele" value="${esc(S.modele)}"></div><div><div class="l">Made in</div><input type="text" data-k="madein" list="dlmi" value="${esc(S.madein)}" placeholder="Pays"><datalist id="dlmi">${abc(mrg(MADEIN0,freq('madein'))).map(b=>`<option value="${esc(b)}">`).join('')}</datalist></div></div>
     <div class="l">Collab / équipe</div><input type="text" data-k="collab" list="dlc" value="${esc(S.collab&&!/^Aucun/.test(S.collab)?S.collab:'')}"><datalist id="dlc">${freq('collab').map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
     <div class="row2"><div><div class="l">Date d'entrée</div><input type="date" data-k="entree" value="${esc(S.entree)}"></div><div><div class="l">Date de publication</div><input type="date" data-k="pub" value="${esc(S.pub)}"></div></div>
@@ -741,7 +793,7 @@ function renderList(){
  $('lst').className=lmode==='grid'?'grid':'';
  if(!P.length){$('lst').innerHTML=`<div class="card empty"><b>${loaded?'Ton stock est vide':'Chargement…'}</b>${loaded?'<br>Ajoute ta première pièce depuis l\'onglet Ajouter, importe ta sauvegarde (onglet Export), ou charge quelques exemples.<br><button class="btn" id="exb" type="button">Charger des exemples</button>':''}</div>`;if($('exb'))$('exb').onclick=loadExamples;return}
  const q=$('q').value.trim().toLowerCase();
- let ps=P.filter(p=>(filt==='Tous'||p.statut===filt)&&(!q||[p.marque,p.cat,p.sub,p.code,p.taille,p.modele,p.ballot,p.id].some(x=>x&&String(x).toLowerCase().includes(q))));
+ let ps=P.filter(p=>(filt==='Tous'||p.statut===filt)&&(!q||[p.marque,p.cat,p.sub,p.code,p.taille,p.modele,p.ballot,p.bac,p.id].some(x=>x&&String(x).toLowerCase().includes(q))));
  ps.sort((a,b)=>(filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
  const tot=ps.length;ps=ps.slice(0,lim);
  $('lst').innerHTML=ps.length?ps.map(p=>{if(lmode==='grid')return pieceTile(p,qSel===p.id);if(avail(p))return pieceRow(p,qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>vendu ${eur(p.pv)}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?a+' j':''}</small></div>`;
@@ -780,7 +832,7 @@ function pieceTile(p,open){if(open)return pieceRow(p,true);
   if(v){const r=renta(p.achat||0,v,defFrais(v,'Vinted'),estDelai(p,v,adv));dot=`<i class="dot f-${r.c}"></i>`}}
  else if(sold(p)){const g=profit(p);price=(g>=0?'+':'−')+fmtP(Math.abs(g));cls=g>=0?'g':'n'}
  else{price='Indispo';cls='n'}
- const sub=[p.code?esc(p.code):'',esc(p.taille||'')].filter(Boolean).join(' · ');
+ const sub=[p.code?esc(p.code):'',esc(p.taille||''),p.bac?'<span class="ex-bac">'+esc(p.bac)+'</span>':''].filter(Boolean).join(' · ');
  return`<div class="tl"><span class="hl"></span><button type="button" class="im" data-id="${esc(p.id)}" style="background:${bg};color:${fg}" aria-label="Ouvrir la fiche">${p.photo?phImg(p.photo):catSvg(p)}</button><span class="pr ${cls}">${price}</span><div class="bd"><button type="button" class="ti" data-id="${esc(p.id)}"><b>${esc(title(p))}${p.ex?'<span class="ex">exemple</span>':''}</b><span class="cdm">${sub}</span></button>${isA?`<div class="ft">${dot}<button type="button" class="vb" data-qv="${esc(p.id)}">Vendu</button></div>`:`<div class="st">${sold(p)?'Vendu '+eur(p.pv)+' · '+esc(p.canal||'Vinted'):'Marquée indisponible'}</div>`}</div></div>`}
 $('flt').onclick=e=>{const m=e.target.closest('[data-lm]');if(m){lmode=m.dataset.lm;LSs('lmode',lmode);qSel=null;renderList();return}const b=e.target.closest('[data-flt]');if(b){filt=b.dataset.flt;lim=60;renderList()}};
 $('q').oninput=()=>{lim=60;renderList()};
@@ -798,7 +850,7 @@ function openSheet(id,m){
  const back=`<button class="btn sec" id="g_no" type="button">Retour</button>`;
  if(m==='view'){
   const dims=[...DH,...DB].filter(([k])=>p[k]).map(([k,l])=>l+' '+String(p[k]).replace('.',',')+' cm').join(' · ');
-  const rows=[['Code',p.code],['Catégorie',p.cat],['Type',p.sub],['Marque',p.marque],['Modèle',p.modele],['Taille',p.taille],['Genre',p.genre],['Grade',p.grade],['État',p.etat],['Matières',(p.mat||[]).join(', ')],['Couleurs',(p.coul||[]).join(', ')],['Made in',p.madein],['Collab',p.collab&&!/^Aucun/.test(p.collab)?p.collab:''],['Ballot',p.ballot],['Provenance',p.prov],['Acheté',isnum(p.achat)?eur(p.achat):''],['Entrée',fd(p.entree)+(ok(p.entree)?' ('+age(p)+' j)':'')],['Publiée',fd(p.pub)],['Dimensions',dims],
+  const rows=[['Bac',p.bac],['Code',p.code],['Catégorie',p.cat],['Type',p.sub],['Marque',p.marque],['Modèle',p.modele],['Taille',p.taille],['Genre',p.genre],['Grade',p.grade],['État',p.etat],['Matières',(p.mat||[]).join(', ')],['Couleurs',(p.coul||[]).join(', ')],['Made in',p.madein],['Collab',p.collab&&!/^Aucun/.test(p.collab)?p.collab:''],['Ballot',p.ballot],['Provenance',p.prov],['Acheté',isnum(p.achat)?eur(p.achat):''],['Entrée',fd(p.entree)+(ok(p.entree)?' ('+age(p)+' j)':'')],['Publiée',fd(p.pub)],['Dimensions',dims],
    ...(sold(p)?[['Vendu',eur(p.pv)+' · '+(p.canal||'Vinted')+' · '+fd(p.dv)],['Frais',p.frais?eur(p.frais):'']]:[]),
    ...(p.retours||[]).map(r=>['Retour',fd(r.d)+(isnum(r.p)?' · '+eur(r.p):'')]),['Note',p.note]].filter(r=>r[1]);
   c.innerHTML=head(esc(title(p)))+(p.photo?phImg(p.photo,'big-ph'):'')+`<div class="card"><dl class="kv">${rows.map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>${sold(p)?`<div class="pv" style="color:${profit(p)>=0?'var(--mint)':'var(--red)'}">Bénéfice net : ${eur(profit(p))}</div>`:''}</div>
@@ -841,7 +893,7 @@ function openSheet(id,m){
   document.querySelectorAll('[data-t="s_plat"]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{auto();pv()},0)));
   $('g_no').onclick=()=>openSheet(id);
   $('s_ok').onclick=()=>{const x=num($('s_prix').value);$('s_w').classList.toggle('err',isNaN(x)||x<0);if(isNaN(x)||x<0)return toast('Indique le prix de vente');
-   const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:$('s_plat').value.trim()||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0});save(q);closeSheet();toast('Vendu · bénéfice '+eur(profit(q)),()=>save(p))}}
+   const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:$('s_plat').value.trim()||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0,vt:Date.now()});save(q);closeSheet();toast('Vendu · bénéfice '+eur(profit(q))+(p.bac?' · bac '+p.bac:''),()=>save(p))}}
  if(m==='esale'){c.innerHTML=head('Modifier la vente')+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · acheté ${eur(p.achat)}</p>
   <div class="fld" id="e_w"><label class="l" for="e_prix">Prix de vente</label><div class="price"><input type="text" inputmode="decimal" id="e_prix" value="${fN(p.pv||0)}"><span>€</span></div></div>
   <div class="row2 fld"><div><label class="l" for="e_date">Date de vente</label><input type="date" id="e_date" value="${esc(ok(p.dv)?p.dv:today())}"></div><div><label class="l" for="e_frais">Frais</label><div class="price"><input type="text" inputmode="decimal" id="e_frais" value="${fN(p.frais||0)}"><span>€</span></div></div></div>
@@ -884,7 +936,7 @@ function renderDash(){
  const months=[];for(let i=5;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);months.push(d.getFullYear()+'-'+pad(d.getMonth()+1,2))}
  const ms=months.map(m=>({m,...stats(P.filter(x=>sold(x)&&(x.dv||'').startsWith(m)))})),mxm=Math.max(...ms.map(x=>x.ca),1);
  const mn=m=>new Date(m+'-15T12:00:00').toLocaleDateString('fr-FR',{month:'short'}).replace('.','');
- $('dsh').innerHTML=goalHTML()+`
+ $('dsh').innerHTML=goalHTML()+`<button type="button" class="card coachc" data-tool="coach"><b>Coach du lundi</b><span>Ton plan de la semaine en 30 secondes</span></button>
  <div class="hero"><div class="t">Bénéfice net ${lbl}</div><div class="big">${eur(S.ben)}</div><div class="s">${S.n} vente${S.n>1?'s':''} · ${eur(S.ca)} encaissés · marge ${(S.marge*100).toFixed(0)} %</div></div>
  <div class="kpis"><div class="kpi"><b>${eurR(S.panier)}</b><span>panier moyen</span></div><div class="kpi"><b>${S.n?S.delai.toFixed(0)+' j':'—'}</b><span>délai avant la vente</span></div><div class="kpi"><b>${(ecoul*100).toFixed(0)} %</b><span>pièces vendues</span></div></div>
  ${rets.length?`<div class="kpis two"><div class="kpi"><b>${rets.length}</b><span>retour${rets.length>1?'s':''} ${lbl}</span></div><div class="kpi"><b>${eurR(retSum)}</b><span>remboursés${S.ca?' ('+(retSum/S.ca*100).toFixed(0)+' % du CA)':''}</span></div></div>`:''}
@@ -1034,7 +1086,7 @@ document.addEventListener('click',e=>{if(e.target.closest('[data-goalset]')){go(
 let qSel=null,qF={};
 const CANAUX_V=['Vinted','TikTok Live','Autre'];
 function cand(qraw){const q=nrm(qraw);let L=P.filter(avail);
- if(q){const sc=p=>{const c=nrm(p.code);if(c===q)return 0;if(c.startsWith(q))return 1;if(c.includes(q))return 2;if(nrm(p.marque).startsWith(q))return 3;return[p.marque,p.cat,p.sub,p.taille,p.id,p.modele,p.ballot].some(x=>x&&nrm(x).includes(q))?4:9};
+ if(q){const sc=p=>{const c=nrm(p.code);if(c===q)return 0;if(c.startsWith(q))return 1;if(c.includes(q))return 2;if(nrm(p.marque).startsWith(q))return 3;return[p.marque,p.cat,p.sub,p.taille,p.id,p.modele,p.ballot,p.bac].some(x=>x&&nrm(x).includes(q))?4:9};
   L=L.map(p=>[sc(p),p]).filter(x=>x[0]<9).sort((a,b)=>a[0]-b[0]||(b[1].entree||'').localeCompare(a[1].entree||'')).map(x=>x[1])}
  else L=[...L].sort((a,b)=>(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0));
  return L}
@@ -1066,7 +1118,7 @@ function sellConfirm(rerender){const p=P.find(x=>x.id===qSel);if(!p)return;sellR
  if(isNaN(x)||x<0){$('qp').closest('.price').style.outline='2px solid var(--red)';toast('Indique le prix final');return}
  const fr=num(qF.frais)||0,canal=qF.canal||'Vinted';LSs('lastCanal',canal);
  const q=Object.assign({},p,{statut:'Vendu',pv:x,canal,dv:today(),frais:fr,vt:Date.now()}),ps=(qF.pseudo||'').trim().replace(/^@+/,'');if(ps)q.acheteur=ps;
- save(q);qSel=null;rerender();toast('Vendu · bénéfice '+eur(profit(q)),()=>{save(p);rerender()})}
+ save(q);qSel=null;rerender();toast('Vendu · bénéfice '+eur(profit(q))+(p.bac?' · bac '+p.bac:''),()=>{save(p);rerender()})}
 $('lst').addEventListener('input',sellInput);
 $('lst').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='qp'||e.target.id==='qf'||e.target.id==='qb')){e.preventDefault();sellConfirm(renderList)}});
 
@@ -1075,7 +1127,7 @@ function renderVendre(){$('gq').innerHTML=goalMini();renderLive()}
 
 /* mode Live TikTok */
 let liveSel=null,lf={prix:'',pseudo:''};
-const colisList=()=>P.filter(p=>sold(p)&&p.canal==='TikTok Live'&&!p.exp);
+const colisList=()=>P.filter(p=>sold(p)&&!p.exp&&p.vt);
 function liveStats(){const ls=LSg('liveStart',0),L=ls?P.filter(p=>sold(p)&&p.canal==='TikTok Live'&&(p.vt||0)>=ls):[];return{ls,n:L.length,ca:L.reduce((a,x)=>a+(x.pv||0),0),ben:L.reduce((a,x)=>a+profit(x),0)}}
 function renderLive(){renderLH();renderLCand();renderLCur();renderLCol()}
 function renderLH(){const s=liveStats();$('lh').innerHTML=s.ls?`<div class="live-h on"><span class="live-dot"></span><b>EN DIRECT</b><span class="live-s">${s.n} vente${s.n>1?'s':''} · ${eur(s.ca)} · bénéfice ${eur(s.ben)}</span><button type="button" class="btn sm sec" id="l_end">Terminer</button></div>`:`<div class="live-h"><b>Mode Live TikTok</b><span class="live-s">Démarre le live pour compter tes ventes.</span><button type="button" class="btn sm mint" id="l_start">Démarrer</button></div>`}
@@ -1089,9 +1141,14 @@ function renderLCur(){const box=$('lcur');const p=liveSel&&P.find(x=>x.id===live
  <div id="lr">${liveCalc(p)}</div>
  <label class="l" for="lb" style="margin-top:12px">@pseudo de l'acheteur</label><input type="text" id="lb" value="${esc(lf.pseudo)}" placeholder="@pseudo" autocapitalize="none" autocomplete="off" spellcheck="false">
  <button type="button" class="btn mint lv-go" id="l_sell">Vendu à @${esc(lf.pseudo.replace(/^@+/,'')||'…')}</button><button type="button" class="btn sec" id="l_chg" style="margin-top:8px">Changer de pièce</button></div>`;hydrate()}
-function renderLCol(){const C=colisList(),box=$('lcol');if(!C.length){box.innerHTML='<h3 style="margin:18px 0 6px">Colis à préparer</h3><div class="empty" style="padding:14px 8px">Aucun colis en attente. Les ventes du live apparaissent ici.</div>';return}
+let colisMode=LSg('colisMode','bac');
+function renderLCol(){const C=colisList(),box=$('lcol');
+ const head=`<h3 style="margin:18px 0 8px">À préparer (${C.length})</h3>`+(C.length?`<div class="chips" style="margin-bottom:10px"><button type="button" class="chip sm${colisMode==='bac'?' on':''}" data-cm="bac">Par bac</button><button type="button" class="chip sm${colisMode==='buyer'?' on':''}" data-cm="buyer">Par acheteur</button></div>`:'');
+ if(!C.length){box.innerHTML=head+'<div class="empty" style="padding:14px 8px">Rien à préparer. Les ventes faites dans l\'appli apparaissent ici.</div>';return}
+ if(colisMode==='bac'){const S2=[...C].sort((a,b)=>(a.bac||'￿').localeCompare(b.bac||'￿','fr',{numeric:true})||(a.code||'').localeCompare(b.code||''));
+  box.innerHTML=head+'<div class="prepl">'+S2.map(x=>`<div class="pre"><span class="bacb">${esc(x.bac||'—')}</span><div class="pm"><b>${esc(title(x))}${x.taille?' · '+esc(x.taille):''}</b><small>${esc(x.code||'')} · ${x.acheteur?'@'+esc(x.acheteur)+' · ':''}${esc(x.canal||'')}</small></div><button type="button" class="btn sm mint" data-prep="${esc(x.id)}">Prêt</button></div>`).join('')+'</div>';return}
  const g=new Map();[...C].sort((a,b)=>(b.vt||0)-(a.vt||0)).forEach(p=>{const k=p.acheteur||'';if(!g.has(k))g.set(k,[]);g.get(k).push(p)});
- box.innerHTML=`<h3 style="margin:18px 0 8px">Colis à préparer (${C.length} pièce${C.length>1?'s':''})</h3>`+[...g.entries()].map(([k,L])=>`<div class="parcel"><div class="ph"><b>${k?'@'+esc(k):'Sans pseudo'}</b><span>${L.length} pièce${L.length>1?'s':''} · ${eur(L.reduce((a,x)=>a+(x.pv||0),0))}</span></div><ul>${L.map(x=>`<li><b>${esc(x.code||x.id)}</b> ${esc(title(x))}${x.taille?' · '+esc(x.taille):''}</li>`).join('')}</ul><button type="button" class="btn mint" data-col="${esc(k)}">Colis prêt</button></div>`).join('')}
+ box.innerHTML=head+[...g.entries()].map(([k,L])=>`<div class="parcel"><div class="ph"><b>${k?'@'+esc(k):'Sans pseudo'}</b><span>${L.length} pièce${L.length>1?'s':''} · ${eur(L.reduce((a,x)=>a+(x.pv||0),0))}</span></div><ul>${L.map(x=>`<li><b>${esc(x.code||x.id)}</b> ${esc(title(x))}${x.taille?' · '+esc(x.taille):''}</li>`).join('')}</ul><button type="button" class="btn mint" data-col="${esc(k)}">Colis prêt</button></div>`).join('')}
 function liveSelect(id){const p=P.find(x=>x.id===id);if(!p)return;liveSel=id;const pr=priceFor(p);lf={prix:pr?fN(pr):'',pseudo:''};$('ls').value='';renderLCand();renderLCur();const i=$('lb');if(i)i.focus()}
 $('ls').addEventListener('input',renderLCand);
 $('ls').addEventListener('keydown',e=>{if(e.key==='Enter'){const L=cand($('ls').value);if($('ls').value.trim()&&L.length){e.preventDefault();liveSelect(L[0].id)}}});
@@ -1102,6 +1159,8 @@ $('vl').addEventListener('click',e=>{
  const lp=e.target.closest('[data-lp]');if(lp){const x=num(lf.prix)||0;lf.prix=fN(Math.max(0,x+Number(lp.dataset.lp)));$('lp').value=lf.prix;const p=P.find(y=>y.id===liveSel);if(p)$('lr').innerHTML=liveCalc(p);return}
  if(e.target.closest('#l_chg')){liveSel=null;lf={prix:'',pseudo:''};renderLCand();renderLCur();$('ls').focus();return}
  if(e.target.closest('#l_sell')){liveSell();return}
+ const cm=e.target.closest('[data-cm]');if(cm){colisMode=cm.dataset.cm;LSs('colisMode',colisMode);renderLCol();return}
+ const pr=e.target.closest('[data-prep]');if(pr){const x=P.find(y=>y.id===pr.dataset.prep);if(x){const old=Object.assign({},x);save(Object.assign({},x,{exp:today()}));renderLCol();toast('Colis prêt'+(x.bac?' · bac '+x.bac:''),()=>{save(old);renderLCol()})}return}
  const col=e.target.closest('[data-col]');
  if(col){const k=col.dataset.col,L=colisList().filter(p=>(p.acheteur||'')===k),old=L.map(p=>Object.assign({},p));L.forEach(p=>save(Object.assign({},p,{exp:today()})));renderLCol();toast('Colis prêt'+(k?' pour @'+k:''),()=>{old.forEach(p=>save(p));renderLCol()})}});
 $('vl').addEventListener('input',e=>{
@@ -1326,6 +1385,242 @@ window.addEventListener('offline',()=>{online=false;refreshStatus()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user)syncNow()});
 setInterval(()=>{if(user&&!document.hidden)syncNow()},60000);
 
+/* ---------- outils : coach du lundi, simulateur de ballot, négociation, QR et bacs, commande vocale ---------- */
+const sheetHead=t=>`<div class="sh"><h2>${t}</h2><button type="button" class="x" data-x="1" aria-label="Fermer">×</button></div>`;
+function showSheet(html){$('sheet').hidden=false;$('shc').innerHTML=html;$('sheet').firstElementChild.scrollTop=0}
+const TI=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
+const TOOLS=[
+ {k:'coach',t:'Coach du lundi',d:'Ton plan de la semaine en 30 secondes',i:TI('<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m4 6 5-3 5 4 6-4"/>')},
+ {k:'ballot',t:'Simulateur de ballot',d:'Chiffre d\'affaires probable, délai pour couvrir ton achat, risque de perte',i:TI('<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/>')},
+ {k:'nego',t:'Négociation',d:'Colle le message d\'un acheteur, obtiens une réponse selon ton prix plancher',i:TI('<path d="M4 5h16v11H9l-5 4z"/>')},
+ {k:'qr',t:'Étiquettes QR et bacs',d:'Imprime des étiquettes, range dans un bac, retrouve vite',i:TI('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM19 17v3h-3"/>')},
+ {k:'scan',t:'Scanner un QR',d:'Ouvre la fiche et dit dans quel bac se trouve la pièce',i:TI('<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/>')}];
+function openTools(){showSheet(sheetHead('Outils')+`<div class="tools">${TOOLS.map(t=>`<button type="button" class="tool" data-tool="${t.k}"><span class="tic">${t.i}</span><span class="tx"><b>${t.t}</b><small>${t.d}</small></span></button>`).join('')}</div>`)}
+function openTool(k){({coach:openCoach,ballot:openBallot,nego:openNego,qr:openQrTool,scan:openScanner})[k]()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(b){e.preventDefault();openTool(b.dataset.tool)}});
+$('tl').onclick=openTools;
+
+/* ===== 9. Coach du lundi ===== */
+function coachData(){
+ const now=today(),d7=addDays(now,-7),d14=addDays(now,-14),d30=addDays(now,-30),S=P.filter(sold),inR=(a,b)=>S.filter(x=>(x.dv||'')>a&&(x.dv||'')<=b);
+ const w1=stats(inR(d7,now)),w0=stats(inR(d14,d7)),m30=stats(inR(d30,now)),all=stats(S);
+ const st=P.filter(avail),dorm=st.filter(x=>ok(x.entree)&&age(x)>=60),tracks=st.length&&st.filter(x=>ok(x.pub)).length/st.length>=0.2,unpub=tracks?st.filter(x=>!ok(x.pub)):[];
+ const byB=l=>{const o={};l.forEach(p=>{const k=p.marque||'Sans marque';(o[k]=o[k]||[]).push(p)});return o};
+ const histB=byB(S),s30B=byB(inR(d30,now)),uB=byB(unpub),dB=byB(dorm),lines=[];
+ const pc=(a,b)=>b?Math.round((a-b)/Math.abs(b)*100):null,dv=pc(w1.ben,w0.ben);
+ lines.push({tone:w1.ben>=w0.ben?'g':'o',lead:`Semaine écoulée : ${w1.n} vente${w1.n>1?'s':''}, ${eur(w1.ben)} de bénéfice`,txt:dv===null?(w0.n?'':'Pas de vente la semaine précédente.'):`${dv>=0?'+':''}${dv} % par rapport à la semaine précédente (${eur(w0.ben)}).`});
+ const kind=goalKinds().find(k=>goalCalc(k,'m'))||goalKinds().find(k=>goalCalc(k,'y')),g=kind&&(goalCalc(kind,'m')||goalCalc(kind,'y'));
+ if(g){const per=g.per==='m'?'du mois':'de l\'année';
+  if(g.cur>=g.g)lines.push({tone:'g',lead:`Objectif ${per} atteint`,txt:`${eur(g.cur)} sur ${eur(g.g)} : continue sur ta lancée.`});
+  else{const avg=m30.n?(kind==='net'?m30.ben:m30.ca)/m30.n:(all.n?(kind==='net'?all.ben:all.ca)/all.n:0),pubs30=P.filter(x=>ok(x.pub)&&x.pub>d30&&x.pub<=now).length,rate=pubs30>=8?Math.min(.9,Math.max(.2,m30.n/pubs30)):.5,days=g.per==='m'?Math.max(1,g.left):Math.max(1,g.left),needS=avg>0?Math.ceil(g.reste/avg):null;
+   if(needS){const needP=Math.ceil(needS/rate),perDay=Math.max(1,Math.ceil(needP/days)),typ=P.filter(x=>ok(x.pub)&&x.pub>d14&&x.pub<=now).length/14,easy=typ>0?perDay<=typ*1.3:perDay<=10;
+    lines.push({tone:easy?'o':'r',lead:`Objectif ${per} de ${eurR(g.g)} : ${easy?'atteignable':'difficile'}`,txt:`Il reste ${eur(g.reste)}, soit environ ${needS} ventes (${eur(avg)} en moyenne). Avec ${Math.round(rate*100)} % de pièces vendues, publie ${perDay} pièce${perDay>1?'s':''} par jour${typ>0?` (tu en publies ${Math.round(typ*10)/10} en ce moment)`:''}.`})}}}
+ const cands=Object.entries(uB).filter(([k,l])=>l.length>=5).map(([k,l])=>{const h=(histB[k]||[]).filter(x=>x.pv>0),dl=h.map(delai).filter(v=>v!==null);return{k,n:l.length,h:h.length,pm:h.length?med(h.map(x=>x.pv)):0,dm:dl.length?med(dl):null,score:h.length>=3?(h.reduce((a,x)=>a+profit(x),0)/h.length)*l.length:0}}).sort((a,b)=>b.score-a.score||b.n-a.n);
+ cands.slice(0,2).forEach(c=>lines.push({tone:c.h>=3?'g':'n',lead:`Publie les ${c.n} ${c.k} restants`,txt:c.h>=3?`Tu en as vendu ${c.h} : environ ${eur(c.pm)} la pièce${c.dm!==null?', vendue en '+Math.round(c.dm)+' j':''}.`:'Pas assez de ventes pour juger : teste-en quelques-uns d\'abord.'}));
+ Object.entries(dB).filter(([k,l])=>l.length>=5).sort((a,b)=>b[1].length-a[1].length).slice(0,1).forEach(([k,l])=>lines.push({tone:'o',lead:`Solde les ${k} en lots`,txt:`${l.length} en stock depuis 60 jours et plus${(s30B[k]||[]).length?'':', aucune vente sur 30 jours'}. Propose des lots de 3 ou baisse de 15 %.`}));
+ if(dorm.length)lines.push({tone:dorm.length/Math.max(1,st.length)>.3?'r':'o',lead:`${dorm.length} pièces dorment depuis 60 jours et plus`,txt:`${eurR(dorm.reduce((a,x)=>a+(x.achat||0),0))} d'achat immobilisés. Baisse de 10 à 15 % sur les plus anciennes.`});
+ const nc=colisList().length;if(nc)lines.push({tone:'o',lead:`${nc} colis à préparer`,txt:'Ils sont rangés par bac dans l\'onglet Live.'});
+ const lb=LSg('lastBackup','');if(!lb||days(lb,now)>=7)lines.push({tone:'o',lead:'Fais une sauvegarde',txt:lb?'Dernière sauvegarde il y a '+days(lb,now)+' jours.':'Aucune sauvegarde JSON faite pour l\'instant.'});
+ const d=new Date();return{title:'Coach du lundi',sub:'semaine du '+fd(addDays(now,-6))+' au '+fd(now),lines:lines.slice(0,8),text:'Coach du lundi, '+fd(now)+'\n'+lines.map(l=>'• '+l.lead+(l.txt?' : '+l.txt:'')).join('\n')}}
+function openCoach(){const c=coachData();LSs('coachDay',today());$('cb').hidden=true;
+ showSheet(sheetHead(c.title)+`<p class="sub">${esc(c.sub)}</p>${c.lines.map(l=>`<div class="cl cl-${l.tone}"><i></i><div><b>${esc(l.lead)}</b>${l.txt?`<span>${esc(l.txt)}</span>`:''}</div></div>`).join('')}<div class="acts"><button type="button" class="btn sec" id="co_cp">Copier le rapport</button></div>`);
+ $('co_cp').onclick=()=>copyText(c.text,'Rapport')}
+function checkCoachBanner(){if(new Date().getDay()===1&&LSg('coachDay','')!==today()&&P.length)$('cb').hidden=false}
+$('cb_go').onclick=openCoach;$('cb_x').onclick=()=>{$('cb').hidden=true;LSs('coachDay',today())};
+
+/* ===== 5. Simulateur de ballot ===== */
+function poolStats(list,H){const cut=addDays(today(),-H),mat=list.filter(x=>ok(x.entree)&&x.entree<=cut),soldIn=mat.filter(x=>sold(x)&&delai(x)!==null&&delai(x)<=H),sp=list.filter(x=>sold(x)&&isnum(x.pv)&&x.pv>0);
+ return{nm:mat.length,rate:mat.length?soldIn.length/mat.length:null,prices:sp.map(x=>x.pv),delais:soldIn.map(delai),ns:sp.length}}
+function poolFor(marque,cat,H){const mq=nrm(marque),opts=[];
+ if(mq)opts.push([marque+(cat?' · '+cat:''),P.filter(x=>nrm(x.marque)===mq&&(!cat||x.cat===cat))]);
+ if(cat)opts.push(['catégorie '+cat+' (toutes marques)',P.filter(x=>x.cat===cat)]);
+ opts.push(['tout ton stock',P]);
+ for(let i=0;i<opts.length;i++){const ps=poolStats(opts[i][1],H);if(ps.nm>=8&&ps.ns>=3&&ps.delais.length>=2&&ps.rate>0)return{label:opts[i][0],ps,fallback:i>0}}
+ const ps=poolStats(P,H);return{label:'tout ton stock',ps,fallback:true}}
+function simBallot(prix,rows,H,runs){
+ const pools=rows.map(r=>Object.assign({n:r.n},poolFor(r.marque,r.cat,H)));
+ const pieces=[];pools.forEach(p=>{for(let i=0;i<p.n;i++)pieces.push(p.ps)});
+ const rnd=a=>a[Math.floor(Math.random()*a.length)],nets=[],cas=[],be=[];let reached=0;
+ for(let r=0;r<runs;r++){let ca=0,sum=0;const sales=[];
+  for(const ps of pieces){if(Math.random()<(ps.rate||0)&&ps.prices.length){const pr=rnd(ps.prices),d=ps.delais.length?rnd(ps.delais):H/2,n=pr-defFrais(pr,'Vinted');ca+=pr;sum+=n;sales.push([d,n])}}
+  nets.push(sum-prix);cas.push(ca);sales.sort((a,b)=>a[0]-b[0]);let c=0;for(const s of sales){c+=s[1];if(c>=prix){be.push(s[0]);reached++;break}}}
+ nets.sort((a,b)=>a-b);cas.sort((a,b)=>a-b);be.sort((a,b)=>a-b);
+ const q=(a,p)=>a.length?a[Math.min(a.length-1,Math.floor(p*(a.length-1)+.5))]:0,gain=nets.map(x=>x+prix).sort((a,b)=>a-b);
+ return{pools,n:pieces.length,ca:{p10:q(cas,.1),p50:q(cas,.5),p90:q(cas,.9)},net:{p10:q(nets,.1),p50:q(nets,.5),p90:q(nets,.9)},loss:nets.filter(x=>x<0).length/runs,reach:reached/runs,be:q(be,.5),maxPrix:q(gain,.2),nets,runs}}
+function parseBallot(t){const n=nrm(t),o={prix:null,n:null,marques:[]};
+ let m=/(\d[\d\s.,]*)\s*(?:€|euros?|eur\b)/.exec(n);if(m){const v=num(m[1].replace(/\s/g,''));if(!isNaN(v))o.prix=v}
+ m=/(\d+)\s*(?:pieces?|pcs|articles?|vetements?|pull|sweats?)/.exec(n);if(m)o.n=+m[1];
+ const seen=new Set();allBrands().forEach(b=>{const k=nrm(b);if(k.length>=3&&!seen.has(k)&&new RegExp('(^|[^a-z0-9])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^a-z0-9]|$)').test(n)){seen.add(k);o.marques.push(b)}});
+ return o}
+function openBallot(){
+ const H0=LSg('ballotH',45);
+ showSheet(sheetHead('Simulateur de ballot')+`<div class="card"><p class="sub" style="margin-bottom:10px">Décris le ballot : l'appli simule 2 000 scénarios à partir de tes ventes passées.</p>
+  <label class="l" for="bl_t">Description (facultatif)</label><input type="text" id="bl_t" placeholder="40 pièces, mix Woolrich et Tommy, 768 €" autocomplete="off"><button type="button" class="btn sec sm" id="bl_fill" style="margin-top:8px">Remplir le formulaire</button>
+  <div class="row2 fld"><div><label class="l" for="bl_p">Prix du ballot (€)</label><input type="text" inputmode="decimal" id="bl_p"></div><div><label class="l" for="bl_n">Nombre de pièces</label><input type="text" inputmode="numeric" id="bl_n"></div></div>
+  <span class="l">Composition annoncée</span><div id="bl_rows"></div><button type="button" class="chip sm add" id="bl_add">+ ajouter une marque</button><div class="hint">Les pièces non détaillées sont simulées comme la moyenne de ton stock.</div>
+  <span class="l" style="margin-top:14px">Horizon de vente</span><div class="chips" id="bl_h">${[30,45,60].map(h=>`<button type="button" class="chip sm${h===H0?' on':''}" data-h="${h}">${h} jours</button>`).join('')}</div>
+  <div class="acts"><button type="button" class="btn" id="bl_go">Simuler</button></div></div><div id="bl_out"></div>`);
+ const cats=mrg(CATS0,freq('cat'));
+ const row=(m,c,q)=>`<div class="blr"><input type="text" class="bm" list="bl_dl" placeholder="Marque" value="${esc(m||'')}"><select class="bc"><option value="">Toutes</option>${cats.map(x=>`<option${x===c?' selected':''}>${esc(x)}</option>`).join('')}</select><input type="text" inputmode="numeric" class="bq" placeholder="Qté" value="${q||''}"><button type="button" class="bx" aria-label="Retirer">×</button></div>`;
+ $('bl_rows').innerHTML=row()+row()+`<datalist id="bl_dl">${allBrands().map(b=>`<option value="${esc(b)}">`).join('')}</datalist>`;
+ let H=H0;
+ $('bl_add').onclick=()=>$('bl_rows').querySelector('datalist').insertAdjacentHTML('beforebegin',row());
+ $('bl_rows').onclick=e=>{if(e.target.classList.contains('bx'))e.target.closest('.blr').remove()};
+ $('bl_h').onclick=e=>{const b=e.target.closest('[data-h]');if(!b)return;H=+b.dataset.h;LSs('ballotH',H);$('bl_h').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b))};
+ $('bl_fill').onclick=()=>{const o=parseBallot($('bl_t').value);if(o.prix!=null)$('bl_p').value=fN(o.prix);if(o.n)$('bl_n').value=o.n;
+  if(o.marques.length){const per=Math.floor((o.n||0)/o.marques.length),rest=(o.n||0)-per*o.marques.length;$('bl_rows').querySelectorAll('.blr').forEach(r=>r.remove());const dl=$('bl_rows').querySelector('datalist');o.marques.forEach((m,i)=>dl.insertAdjacentHTML('beforebegin',row(m,'',o.n?per+(i===0?rest:0):'')))}
+  toast(o.prix!=null||o.n||o.marques.length?'Formulaire rempli : vérifie les valeurs':'Je n\'ai rien reconnu dans cette description')};
+ $('bl_go').onclick=()=>{const prix=num($('bl_p').value),N=Math.round(num($('bl_n').value));
+  if(isNaN(prix)||prix<=0)return toast('Indique le prix du ballot');if(isNaN(N)||N<1)return toast('Indique le nombre de pièces');
+  let rows=[...$('bl_rows').querySelectorAll('.blr')].map(r=>({marque:r.querySelector('.bm').value.trim(),cat:r.querySelector('.bc').value,n:Math.round(num(r.querySelector('.bq').value))})).filter(r=>(r.marque||r.cat)&&r.n>0);
+  let used=rows.reduce((a,r)=>a+r.n,0);if(used>N){const f=N/used;rows.forEach(r=>r.n=Math.max(1,Math.floor(r.n*f)));used=rows.reduce((a,r)=>a+r.n,0)}
+  if(N>used)rows.push({marque:'',cat:'',n:N-used});
+  if(!P.some(sold))return toast('Il faut des ventes passées pour simuler');
+  const s=simBallot(prix,rows,H,2000);renderBallot(s,prix,N,H)}}
+function renderBallot(s,prix,N,H){
+ const cp=prix/N,loss=Math.round(s.loss*100),col=loss<=15?'g':loss<=40?'o':'r',bins=12,mn=s.nets[0],mx=s.nets[s.nets.length-1],w=(mx-mn)/bins||1,h=Array(bins).fill(0);s.nets.forEach(x=>{h[Math.min(bins-1,Math.floor((x-mn)/w))]++});const hm=Math.max(...h),zero=(0-mn)/w;
+ $('bl_out').innerHTML=`<div class="card"><div class="pot pot-${col}" style="margin:0 0 12px"><div class="pt"><span class="mono">risque de perte</span><b>${loss} %</b></div><div class="ps">${loss<=15?'Faible':loss<=40?'À surveiller':'Élevé'} : ${loss} scénario${loss>1?'s':''} sur 100 finissent sous ton prix d'achat.</div></div>
+  <div class="kpis two" style="margin-bottom:10px"><div class="kpi"><b>${eurR(s.ca.p50)}</b><span>chiffre d'affaires probable (${eurR(s.ca.p10)} à ${eurR(s.ca.p90)})</span></div><div class="kpi ${s.net.p50>=0?'':'neg'}"><b>${s.net.p50>=0?'+':'−'}${eurR(Math.abs(s.net.p50))}</b><span>bénéfice net probable (${eurR(s.net.p10)} à ${eurR(s.net.p90)})</span></div></div>
+  <div class="kv" style="grid-template-columns:auto 1fr;margin-bottom:12px"><dt>Coût par pièce</dt><dd>${eur(cp)}</dd><dt>Prix couvert en</dt><dd>${s.reach>=.5?'environ '+Math.round(s.be)+' jours (dans '+Math.round(s.reach*100)+' % des scénarios)':'pas atteint en '+H+' jours dans '+Math.round((1-s.reach)*100)+' % des scénarios'}</dd><dt>Prix maximum raisonnable</dt><dd>${eurR(s.maxPrix)} (80 % de chances d'être rentable)</dd></div>
+  <svg viewBox="0 0 240 70" class="hist" role="img" aria-label="Répartition du bénéfice net sur les scénarios">${h.map((c,i)=>`<rect x="${i*20+1}" y="${64-Math.round(c/hm*58)}" width="18" height="${Math.max(1,Math.round(c/hm*58))}" rx="2" fill="${(mn+(i+.5)*w)<0?'var(--red)':'var(--mint)'}"/>`).join('')}${zero>0&&zero<bins?`<line x1="${zero*20}" y1="2" x2="${zero*20}" y2="66" stroke="var(--ink)" stroke-dasharray="3 3"/>`:''}</svg><div class="hint" style="text-align:center">Bénéfice net : de ${eurR(mn)} à ${eurR(mx)} · trait pointillé = zéro</div>
+  <span class="l" style="margin-top:12px">Sur quoi repose la simulation</span>${s.pools.map(p=>`<div class="pr2b"><span>${p.n} pièce${p.n>1?'s':''} · ${esc(p.label)}</span><b>${p.ps.rate!==null?Math.round(p.ps.rate*100)+' % vendues en '+H+' j':'peu de données'}${p.fallback?' · estimation large':''}</b></div>`).join('')}
+  <div class="hint">Simulation sur ton historique (${s.runs} tirages) : les pièces sont vendues avec la probabilité observée, aux prix et délais de tes ventes passées, frais de vente déduits. Ce n'est pas une garantie.</div></div>`;
+ $('bl_out').scrollIntoView({behavior:'smooth',block:'start'})}
+
+/* ===== 8. Négociation ===== */
+function parseOffer(t){const n=nrm(t).replace(/(\d)\s*[.,]\s*(\d{1,2})(?!\d)/g,'$1.$2');let m=/(\d+(?:\.\d+)?)\s*(?:€|euros?|eur\b|e\b)/.exec(n);if(m)return +m[1];
+ m=/(?:propose|offre|donne|laisse|fais|ferai|prend|prends|pour|a)\s+(\d+(?:\.\d+)?)(?!\d)/.exec(n);if(m)return +m[1];const all=n.match(/\b\d+(?:\.\d+)?\b/g);return all&&all.length===1&&+all[0]<1000?+all[0]:null}
+function openNego(){
+ let sel=null;const pct=LSg('floorPct',80);
+ showSheet(sheetHead('Négociation')+`<div class="card"><label class="l" for="ng_m">Message de l'acheteur</label><textarea id="ng_m" rows="4" placeholder="Bonjour, je vous propose 15 € pour le pull, c'est possible ?"></textarea>
+  <label class="l" for="ng_q" style="margin-top:12px">Pièce (facultatif)</label><input type="search" id="ng_q" placeholder="Code ou marque" autocomplete="off" autocapitalize="none"><div id="ng_c"></div>
+  <div class="row2 fld"><div><label class="l" for="ng_p">Prix affiché (€)</label><input type="text" inputmode="decimal" id="ng_p"></div><div><label class="l" for="ng_f">Prix plancher (€)</label><input type="text" inputmode="decimal" id="ng_f"></div></div>
+  <span class="l">Plancher par défaut</span><div class="chips" id="ng_pc">${[70,80,90].map(v=>`<button type="button" class="chip sm${v===pct?' on':''}" data-pc="${v}">${v} % du prix</button>`).join('')}</div>
+  <div class="acts"><button type="button" class="btn" id="ng_go">Proposer une réponse</button></div></div><div id="ng_out"></div>`);
+ const setFloor=()=>{const p=num($('ng_p').value);if(!isNaN(p)&&p>0)$('ng_f').value=fN(Math.round(p*LSg('floorPct',80)/100*2)/2)};
+ $('ng_p').oninput=setFloor;
+ $('ng_pc').onclick=e=>{const b=e.target.closest('[data-pc]');if(!b)return;LSs('floorPct',+b.dataset.pc);$('ng_pc').querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));setFloor()};
+ $('ng_q').oninput=()=>{const q=$('ng_q').value.trim(),L=q?cand(q).slice(0,5):[];$('ng_c').innerHTML=L.map(p=>`<button type="button" class="lcand" data-ngp="${esc(p.id)}"><b>${esc(p.code||p.id)}</b><span>${esc(title(p))}${p.taille?' · '+esc(p.taille):''}</span></button>`).join('')};
+ $('ng_c').onclick=e=>{const b=e.target.closest('[data-ngp]');if(!b)return;sel=P.find(x=>x.id===b.dataset.ngp);$('ng_q').value='';$('ng_c').innerHTML=`<div class="hint">Pièce choisie : <b>${esc(title(sel))}</b> · acheté ${eur(sel.achat)}</div>`;const v=priceFor(sel);if(v){$('ng_p').value=fN(v);setFloor()}};
+ $('ng_go').onclick=()=>{const msg=$('ng_m').value,price=num($('ng_p').value);let floor=num($('ng_f').value);
+  if(isNaN(price)||price<=0)return toast('Indique le prix affiché');if(isNaN(floor)||floor<=0){floor=Math.round(price*.8*2)/2}
+  $('ng_out').innerHTML=negoHTML(msg,price,floor,sel);$('ng_out').scrollIntoView({behavior:'smooth',block:'start'})}}
+function negoReply(msg,price,floor){
+ const n=nrm(msg),offer=parseOffer(msg),lot=/\blot\b|plusieurs|pack|ensemble|deux articles|2 articles|les deux/.test(n),last=/dernier prix|meilleur prix|baisse|geste|reduc|remise|moins cher/.test(n),r2=v=>Math.round(v*2)/2,fmt=v=>String(r2(v)).replace('.',',')+' €';
+ const mid=Math.max(floor,Math.min(price,r2((Math.max(offer||0,floor)+price)/2)));
+ if(offer!==null){
+  if(offer>=price)return{tag:'g',analysis:`Offre de ${fmt(offer)} : au prix affiché ou au-dessus.`,main:`Bonjour, avec plaisir ! C'est d'accord pour ${fmt(price)}. Je prépare le colis dès que tu valides l'achat sur Vinted. Merci !`,alt:null,price:price};
+  if(offer>=floor){const strong=offer>=floor+(price-floor)*.5;const accept=`Bonjour, c'est d'accord pour ${fmt(offer)}. Je prépare le colis dès ton achat, merci !`;const counter=`Bonjour, merci pour ton offre ! Je peux faire ${fmt(mid)} avec envoi soigné. Dis-moi si ça te convient.`;
+   return{tag:strong?'g':'o',analysis:`Offre de ${fmt(offer)} : au-dessus de ton plancher (${fmt(floor)}).`,main:strong?accept:counter,alt:strong?counter:accept,mainLabel:strong?`Accepte ${fmt(offer)}`:`Contre-propose ${fmt(mid)}`,altLabel:strong?`Ou contre-propose ${fmt(mid)}`:`Ou accepte ${fmt(offer)}`,price:strong?offer:mid}}
+  const c=Math.max(floor,r2(price*.92));return{tag:'r',analysis:`Offre de ${fmt(offer)} : sous ton plancher (${fmt(floor)}).`,main:`Bonjour, merci pour ton intérêt ! ${fmt(offer)} est un peu juste pour cette pièce. Mon dernier prix est ${fmt(c)}, avec envoi soigné.`,alt:`Bonjour, merci ! Je ne peux pas descendre à ${fmt(offer)}. Je reste à ${fmt(price)}, mais n'hésite pas à regarder mes autres articles : je fais un lot avec remise.`,mainLabel:`Refuse et propose ${fmt(c)}`,altLabel:'Ou reste ferme et propose un lot',price:c}}
+ if(lot)return{tag:'g',analysis:'L\'acheteur demande un lot ou plusieurs articles.',main:`Bonjour ! Oui, je fais un prix sur les lots : -10 % dès 2 articles et -15 % dès 3, avec un seul envoi. Dis-moi lesquels t'intéressent et je te fais le prix.`,alt:null,price:null};
+ const dispo=/disponible|dispo\b|toujours a vendre|encore a vendre|toujours la/.test(n);
+ if(!last&&dispo)return{tag:'g',analysis:'L\'acheteur demande si la pièce est disponible.',main:`Bonjour ! Oui, elle est toujours disponible. Tu veux que je te donne des mesures ou des photos en plus ? Je prépare le colis dès ton achat.`,alt:null,price:null};
+ if(!last)return{tag:'n',analysis:'Pas de prix ni de demande de remise dans le message.',main:`Bonjour, merci pour ton message ! N'hésite pas si tu veux des mesures ou des photos en plus. Je suis à ton écoute.`,alt:null,price:null};
+ {const c=Math.max(floor,r2(price*.93));return{tag:'o',analysis:'Pas de prix précis dans le message.',main:`Bonjour, merci pour ton message ! Je peux faire ${fmt(c)} au lieu de ${fmt(price)}, avec envoi soigné sous 48 h. Ça te convient ?`,alt:`Bonjour, merci ! Le prix est déjà ajusté, mais je peux faire un geste sur un lot si tu prends plusieurs articles.`,mainLabel:`Propose ${fmt(c)}`,altLabel:'Ou reste ferme',price:c}}}
+function negoHTML(msg,price,floor,sel){const r=negoReply(msg,price,floor),cost=sel?((sel.achat||0)):null;
+ const margin=p=>p==null||cost===null?'':`<div class="hint">Bénéfice net à ${eur(p)} : ${eur(p-cost-defFrais(p,'Vinted'))}</div>`;
+ const box=(label,txt,p,main)=>`<div class="nbx${main?' main':''}"><div class="nh"><b>${esc(label)}</b></div><div class="nt">${esc(txt)}</div>${margin(p)}<div class="acts" style="margin-top:8px"><button type="button" class="btn${main?'':' sec'} sm" data-cp="${esc(txt)}">Copier la réponse</button></div></div>`;
+ setTimeout(()=>{document.querySelectorAll('#ng_out [data-cp]').forEach(b=>b.onclick=()=>copyText(b.dataset.cp,'Réponse'))},0);
+ return`<div class="card"><div class="feu f-${r.tag}"><i></i><b>${esc(r.analysis)}</b></div>${box(r.mainLabel||'Réponse conseillée',r.main,r.price,true)}${r.alt?box(r.altLabel||'Autre option',r.alt,null,false):''}<div class="hint">Relis avant d'envoyer : tu gardes le dernier clic.</div></div>`}
+
+/* ===== 7. QR et emplacement (bacs) ===== */
+const qrSvg=(t,cell)=>{const q=qrcode(0,'M');q.addData(t);q.make();return q.createSvgTag(cell||3,0)};
+const naturalBacs=()=>abc(freq('bac'));
+function openQrTool(){
+ let mode=LSg('qrMode','new'),sel=new Set();
+ const list=()=>{const st=P.filter(avail);return mode==='new'?st.filter(p=>p.entree===today()):mode==='nobac'?st.filter(p=>!p.bac):mode==='all'?st:st.filter(p=>p.bac===mode)};
+ const draw=()=>{const L=list();sel=new Set([...sel].filter(id=>L.some(p=>p.id===id)));
+  $('qr_list').innerHTML=L.slice(0,80).map(p=>`<label class="qrr"><input type="checkbox" data-sel="${esc(p.id)}"${sel.has(p.id)?' checked':''}><span><b>${esc(p.code||p.id)}</b> ${esc(title(p))}${p.taille?' · '+esc(p.taille):''}</span><em>${esc(p.bac||'—')}</em></label>`).join('')||'<div class="hint">Aucune pièce dans ce filtre.</div>';
+  $('qr_n').textContent=L.length+' pièce'+(L.length>1?'s':'')+(L.length>80?' (80 affichées)':'')+' · '+sel.size+' sélectionnée'+(sel.size>1?'s':'');
+  $('qr_flt').querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.m===mode))};
+ const bacs=naturalBacs();
+ showSheet(sheetHead('Étiquettes QR et bacs')+`<div class="card"><p class="sub" style="margin-bottom:10px">Choisis des pièces, range-les dans un bac, imprime leurs étiquettes. Scanner le QR ouvre la fiche et indique le bac.</p>
+  <div class="chips" id="qr_flt"><button type="button" class="chip sm" data-m="new">Ajoutées aujourd'hui</button><button type="button" class="chip sm" data-m="nobac">Sans bac</button><button type="button" class="chip sm" data-m="all">Tout le stock</button>${bacs.map(b=>`<button type="button" class="chip sm" data-m="${esc(b)}">${esc(b)}</button>`).join('')}</div>
+  <div class="hint" id="qr_n" style="margin:8px 0"></div><div class="qrl" id="qr_list"></div>
+  <div class="acts two" style="margin-top:8px"><button type="button" class="btn sec sm" id="qr_all">Tout sélectionner</button><button type="button" class="btn sec sm" id="qr_none">Rien</button></div>
+  <label class="l" for="qr_b" style="margin-top:14px">Ranger la sélection dans le bac</label><div class="pwrow"><input type="text" id="qr_b" list="qr_bl" placeholder="B3" autocapitalize="characters" autocomplete="off"><button type="button" class="btn sm" id="qr_set">Ranger</button></div><datalist id="qr_bl">${bacs.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+  <div class="acts"><button type="button" class="btn" id="qr_print">Imprimer les étiquettes</button></div></div>`);
+ $('qr_flt').onclick=e=>{const c=e.target.closest('[data-m]');if(c){mode=c.dataset.m;LSs('qrMode',mode);draw()}};
+ $('qr_list').onchange=e=>{const i=e.target.dataset.sel;if(!i)return;e.target.checked?sel.add(i):sel.delete(i);$('qr_n').textContent=$('qr_n').textContent.replace(/· \d+ sélectionnée.*/,'· '+sel.size+' sélectionnée'+(sel.size>1?'s':''))};
+ $('qr_all').onclick=()=>{list().slice(0,80).forEach(p=>sel.add(p.id));draw()};$('qr_none').onclick=()=>{sel.clear();draw()};
+ $('qr_set').onclick=()=>{const b=$('qr_b').value.trim().toUpperCase();if(!b)return toast('Indique le bac');if(!sel.size)return toast('Sélectionne des pièces');
+  const olds=[...sel].map(id=>P.find(p=>p.id===id)).filter(Boolean);olds.forEach(p=>save(Object.assign({},p,{bac:b})));toast(olds.length+' pièce'+(olds.length>1?'s':'')+' rangée'+(olds.length>1?'s':'')+' dans '+b,()=>olds.forEach(p=>save(p)));draw()};
+ $('qr_print').onclick=()=>{const L=[...sel].map(id=>P.find(p=>p.id===id)).filter(Boolean);if(!L.length)return toast('Sélectionne des pièces');printLabels(L)};
+ draw()}
+function printLabels(L){let box=$('plabels');if(!box){box=document.createElement('div');box.id='plabels';document.body.appendChild(box)}
+ box.innerHTML=L.map(p=>`<div class="plb"><div class="pq">${qrSvg('stock:'+p.id,3)}</div><div class="pt2"><b>${esc(p.bac||'')}</b><span class="pc2">${esc(p.code||p.id)}</span><span>${esc(title(p))}</span><span>${esc([p.taille,p.grade&&'grade '+p.grade].filter(Boolean).join(' · '))}</span></div></div>`).join('');
+ document.body.classList.add('printing');const done=()=>{document.body.classList.remove('printing');window.removeEventListener('afterprint',done)};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),150)}
+let scanStream=null,scanRaf=0;
+function stopScan(){cancelAnimationFrame(scanRaf);if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null}$('scan').hidden=true}
+async function openScanner(){
+ closeSheet();
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return toast('La caméra n\'est pas disponible ici (il faut une adresse https)');
+ try{scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})}catch(e){return toast('Accès à la caméra refusé')}
+ const v=$('scan_v');v.srcObject=scanStream;await v.play().catch(()=>{});$('scan').hidden=false;$('scan_s').textContent='Place le QR dans le cadre';
+ const det=window.BarcodeDetector?new BarcodeDetector({formats:['qr_code']}):null,cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+ const tick=async()=>{if(!scanStream)return;if(v.readyState>=2){let txt=null;
+   try{if(det){const r=await det.detect(v);if(r.length)txt=r[0].rawValue}else if(window.jsQR){cv.width=v.videoWidth;cv.height=v.videoHeight;cx.drawImage(v,0,0);const im=cx.getImageData(0,0,cv.width,cv.height),r=jsQR(im.data,cv.width,cv.height);if(r)txt=r.data}}catch(e){}
+   if(txt){const found=findByQr(txt);if(found){stopScan();openSheet(found.id);return}$('scan_s').textContent='QR lu, mais aucune pièce correspondante : '+txt.slice(0,30)}}
+  scanRaf=requestAnimationFrame(tick)};tick()}
+const findByQr=t=>{const m=/^stock:(.+)$/.exec(String(t).trim());return P.find(p=>p.id===(m?m[1]:t))||P.find(p=>p.code===String(t).trim())};
+$('scan_x').onclick=stopScan;
+
+/* ===== 6. Commande vocale ===== */
+const WNUM={zero:0,un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,onze:11,douze:12,treize:13,quatorze:14,quinze:15,seize:16,vingt:20,vingts:20,trente:30,quarante:40,cinquante:50,soixante:60};
+function frNumWords(tokens){let tot=0,cur=0,got=false;for(let i=0;i<tokens.length;i++){const w=tokens[i];if(w==='et'||w==='')continue;if(w==='quatre'&&/^vingts?$/.test(tokens[i+1]||'')){cur+=80;i++;got=true;continue}
+  if(w==='cent'||w==='cents'){cur=(cur||1)*100;got=true;continue}if(w in WNUM){cur+=WNUM[w];got=true;continue}break}return got?tot+cur:null}
+function voicePrice(n){let m=/(\d+(?:[.,]\d+)?)\s*(?:euros?|€|eur\b|e\b)/.exec(n);if(m)return num(m[1]);
+ const t=n.split(/[\s-]+/),i=t.findIndex(w=>/^euros?$/.test(w));if(i>0){let j=i-1;while(j>=0&&(t[j] in WNUM||/^(et|cent|cents|vingts?)$/.test(t[j])))j--;const v=frNumWords(t.slice(j+1,i));if(v!==null)return v}
+ m=/(?:a|pour|prix)\s+(\d+(?:[.,]\d+)?)\b/.exec(n);return m?num(m[1]):null}
+const CATW={tshirt:'Tshirt','t-shirt':'Tshirt',tee:'Tshirt',sweat:'Sweat',pull:'Sweat',hoodie:'Sweat',chemise:'Chemise',pantalon:'Pantalon',jean:'Pantalon',jeans:'Pantalon',veste:'Veste',manteau:'Veste',doudoune:'Veste',blouson:'Veste',short:'Short',polo:'Polo',maillot:'Maillot',robe:'RobeJupe',jupe:'RobeJupe'};
+function parseVoice(text){const n=nrm(text).replace(/[,.!?]/g,' ').replace(/\s+/g,' ').trim(),o={raw:text,n};
+ if(/\b(annule|annuler|annulation)\b/.test(n))return Object.assign(o,{intent:'undo'});
+ if(/\b(ou est|ou se trouve|ou sont|trouve|cherche|recherche|montre)\b/.test(n)&&!/\bvendu/.test(n))o.intent=/\bou\b/.test(n)?'where':'search';
+ else if(/\bvendu|vendue|vendus|j ai vendu|vends\b/.test(n))o.intent='sell';else o.intent=/\d/.test(n)&&/vinted|tiktok|live|euro/.test(n)?'sell':'unknown';
+ o.price=voicePrice(n);o.canal=/tik ?tok|\blive\b/.test(n)?'TikTok Live':/vinted/.test(n)?'Vinted':null;const ps=/@\s?(\w+)/.exec(text);if(ps)o.pseudo=ps[1];
+ const toks=n.split(' ');o.brand=null;const bs=allBrands().map(b=>[b,nrm(b)]).filter(x=>x[1].length>=3).sort((a,b)=>b[1].length-a[1].length);
+ for(const [b,k] of bs){if((' '+n+' ').includes(' '+k+' ')){o.brand=b;break}}
+ if(!o.brand){for(const t of toks){if(t.length<4)continue;const hit=bs.find(([b,k])=>!k.includes(' ')&&lev(t,k)<=1&&Math.abs(t.length-k.length)<=1);if(hit){o.brand=hit[0];break}}}
+ o.color=Object.keys(COLORS).find(c=>toks.includes(nrm(c)))||null;o.cat=null;for(const t of toks){if(CATW[t]){o.cat=CATW[t];break}}
+ let sz=/(?:taille|en)\s+(xxl|3xl|xl|xs|[sml]|\d{2})\b/.exec(n);if(!sz)sz=/\b(xxl|3xl|xl|xs)\b/.exec(n);if(!sz)sz=/\b([sml])\b/.exec(n.replace(/\b(a|en)\s+[sml]\b/,'$&'));
+ o.size=sz?sz[1].toUpperCase():null;o.code=(/\b([a-z]{2}[a-z0-9]{4,}-\d{3})\b/i.exec(text)||[])[1]||null;return o}
+function voiceMatch(o,pool){const sc=p=>{let s=0,k=0;if(o.brand){k++;if(nrm(p.marque)===nrm(o.brand))s+=3;else return -1}if(o.color){k++;if((p.coul||[]).includes(o.color))s+=2;else return -1}if(o.size){k++;if(nrm(p.taille)===nrm(o.size))s+=2;else return -1}if(o.cat){k++;if(p.cat===o.cat)s+=2;else return -1}if(o.code){return nrm(p.code)===nrm(o.code)?10:-1}return k?s:-1};
+ const sc2=pool.map(p=>[sc(p),p]).filter(x=>x[0]>0);if(!sc2.length)return[];const top=Math.max(...sc2.map(x=>x[0]));return sc2.filter(x=>x[0]===top).map(x=>x[1]).sort((a,b)=>(a.entree||'').localeCompare(b.entree||''))}
+let lastUndo=null;
+function speak(t){try{if('speechSynthesis' in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';speechSynthesis.speak(u)}}catch(e){}}
+function voiceSell(p,o){const canal=o.canal||LSg('lastCanal','Vinted'),pr=isnum(o.price)?o.price:priceFor(p),fr=defFrais(pr,canal),old=p;
+ const q=Object.assign({},p,{statut:'Vendu',pv:pr,canal,dv:today(),frais:fr,vt:Date.now()});if(o.pseudo)q.acheteur=o.pseudo;LSs('lastCanal',canal);save(q);lastUndo=()=>save(old);
+ const msg='Vendu : '+title(p)+(p.taille?' '+p.taille:'')+', '+fN(pr)+' euros, '+canal+(p.bac?'. Bac '+p.bac:'');speak(msg);toast('Vendu · '+eur(pr)+(p.bac?' · bac '+p.bac:''),()=>{old&&save(old)});return msg}
+function runVoice(text){const o=parseVoice(text),out=$('vc_out');if(!out)return;
+ const say=(h,cls)=>{out.innerHTML=`<div class="vres ${cls||''}">${h}</div>`};
+ if(o.intent==='undo'){if(lastUndo){lastUndo();lastUndo=null;speak('Annulé');return say('<b>Annulé</b> : la dernière action est défaite.','g')}return say('Rien à annuler.','o')}
+ if(o.intent==='unknown'||(!o.brand&&!o.cat&&!o.color&&!o.size&&!o.code))return say(`<b>Je n'ai pas compris.</b><br>Essaie : « Vendu, Tommy bleu L, 18 euros, Vinted ».`,'o');
+ const pool=o.intent==='sell'?P.filter(avail):P,m=voiceMatch(o,pool);
+ if(o.intent==='where'){if(!m.length)return say('<b>Aucune pièce trouvée.</b>','o');const p=m[0];speak(p.bac?'Bac '+p.bac:'Pas de bac renseigné');return say(`<b>${esc(title(p))}${p.taille?' · '+esc(p.taille):''}</b><br>${p.bac?'Bac <b>'+esc(p.bac)+'</b>':'Pas de bac renseigné'} · ${esc(p.code||'')}${m.length>1?`<br><small>${m.length-1} autre${m.length>2?'s':''} pièce${m.length>2?'s':''} correspondante${m.length>2?'s':''}</small>`:''}`,'g')}
+ if(o.intent==='search'){const q=[o.brand,o.cat,o.color,o.size].filter(Boolean).join(' ');closeSheet();go('list');$('q').value=q;filt='Disponible';renderList();return}
+ if(!m.length)return say(`<b>Aucune pièce en stock ne correspond</b> à « ${esc([o.brand,o.cat,o.color,o.size].filter(Boolean).join(' '))} ».`,'o');
+ const same=m.every(p=>nrm(p.marque)===nrm(m[0].marque)&&p.cat===m[0].cat&&p.taille===m[0].taille&&(p.coul||[]).join()===(m[0].coul||[]).join());
+ if(m.length===1||same){const p=m[0];if(!isnum(o.price)&&!priceFor(p))return say(`<b>${esc(title(p))}</b> : je n'ai pas entendu le prix. Redis-le, par exemple « Vendu, Tommy bleu L, 18 euros ».`,'o');const msg=voiceSell(p,o);return say(`<b>${esc(msg)}</b>${m.length>1?`<br><small>${m.length} pièces identiques : j'ai pris la plus ancienne.</small>`:''}`,'g')}
+ voiceChoices=m.slice(0,6);voiceSpec=o;out.innerHTML=`<div class="vres o"><b>${m.length} pièces correspondent.</b> Laquelle ?</div>`+voiceChoices.map((p,i)=>`<button type="button" class="lcand" data-vc="${i}"><b>${i+1}</b><span>${esc(title(p))}${p.taille?' · '+esc(p.taille):''}${p.code?' · '+esc(p.code):''}${p.bac?' · bac '+esc(p.bac):''}</span></button>`).join('');speak(m.length+' pièces correspondent. Laquelle ?')}
+let voiceChoices=[],voiceSpec=null;
+function openVoice(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ showSheet(sheetHead('Commande vocale')+`<div class="card" style="text-align:center"><button type="button" class="micbig" id="vc_mic" aria-label="Parler">${TI('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>')}</button><div id="vc_st" class="hint" style="margin:8px 0">${SR?'Touche le micro et parle.':'Le micro n\'est pas disponible dans ce navigateur : écris la commande ci-dessous.'}</div>
+  <div class="hint">« Vendu, Tommy bleu L, 18 euros, Vinted » · « Où est le Nike gris M ? » · « Annule »</div>
+  <div class="pwrow" style="margin-top:12px"><input type="text" id="vc_t" placeholder="Ou écris ta commande" autocomplete="off"><button type="button" class="btn sm" id="vc_go">OK</button></div></div><div id="vc_out"></div>`);
+ let rec=null;const st=m=>{$('vc_st').textContent=m};
+ const start=()=>{if(!SR)return $('vc_t').focus();try{rec=new SR();rec.lang='fr-FR';rec.interimResults=true;rec.maxAlternatives=1;let fin='';
+  rec.onstart=()=>{$('vc_mic').classList.add('on');st('J\'écoute…')};rec.onerror=e=>{$('vc_mic').classList.remove('on');st(e.error==='not-allowed'?'Accès au micro refusé.':'Je n\'ai rien entendu, réessaie.')};
+  rec.onresult=e=>{let t='';for(const r of e.results){t+=r[0].transcript;if(r.isFinal)fin=t}$('vc_t').value=t;st('« '+t+' »')};
+  rec.onend=()=>{$('vc_mic').classList.remove('on');const t=fin.trim();if(t){$('vc_t').value=t;runVoice(t)}};rec.start()}catch(e){st('Micro indisponible')}};
+ $('vc_mic').onclick=()=>{if(rec&&$('vc_mic').classList.contains('on')){rec.stop();return}start()};
+ $('vc_go').onclick=()=>{const t=$('vc_t').value.trim();if(t)runVoice(t)};$('vc_t').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const t=$('vc_t').value.trim();if(t)runVoice(t)}};
+ $('vc_out').onclick=e=>{const b=e.target.closest('[data-vc]');if(!b)return;const p=voiceChoices[+b.dataset.vc];if(!p)return;const msg=voiceSell(p,voiceSpec);$('vc_out').innerHTML=`<div class="vres g"><b>${esc(msg)}</b></div>`};
+ if(SR)setTimeout(start,250)}
+$('mic').onclick=openVoice;
+
+
 /* ---------- apparence : clair par défaut, sombre en option ---------- */
 const THEMES=[['light','Clair'],['dark','Sombre'],['auto','Automatique']];
 function applyTheme(t){document.documentElement.dataset.theme=t;const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=(t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme:dark)').matches))?'#0E0F11':'#F1F2F4'}
@@ -1339,7 +1634,7 @@ initAdd();renderAll();
 (async()=>{
  try{IDB=await idbOpen();P=await tx('pieces','readonly',s=>s.getAll())||[];if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});await countPending()}
  catch(e){IDB=null;$('ro').hidden=false}
- loaded=true;setSync('ok');renderAll();addForm.draw();if(!cloud)autoBackupCheck();
+ loaded=true;setSync('ok');renderAll();addForm.draw();if(!cloud)autoBackupCheck();checkCoachBanner();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkCoachBanner()});
  if(cloud){
   sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{if(ev==='PASSWORD_RECOVERY')showReset();if(session&&session.user)startSync(session.user);else if(ev==='SIGNED_OUT')stopSync()},0)});
   try{const r=await sb.auth.getSession();if(r.data&&r.data.session)startSync(r.data.session.user);else showAuth()}catch(e){showAuth()}
