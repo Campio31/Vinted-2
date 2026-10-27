@@ -1,6 +1,6 @@
 {
-  "name": "Stock Friperie",
-  "short_name": "Stock",
+  "name": "Max",
+  "short_name": "Max",
   "description": "Suivi du stock et des ventes de vêtements de seconde main.",
   "lang": "fr",
   "start_url": "./index.html",
