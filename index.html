@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Stock Friperie</title>
+<title>Max</title>
 <meta name="description" content="Suivi du stock et des ventes de vêtements de seconde main (Vinted, TikTok Live).">
 <meta name="theme-color" content="#F1F2F4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Stock">
+<meta name="apple-mobile-web-app-title" content="Max">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -153,7 +153,7 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px
 nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11.5px;font-weight:600;color:var(--mute);cursor:pointer;min-height:52px;border-radius:10px}
 nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav button.on{color:var(--denim)}
-.brand{display:none}
+.brand{display:none}.lg{display:block;width:34px;height:34px;border-radius:9px;flex:none}.authlogo{display:flex;align-items:center;gap:14px;margin:0 0 10px}.authlogo .lg{width:56px;height:56px;border-radius:14px}.authlogo b{font-family:var(--fd);font-stretch:68%;font-weight:800;font-size:44px;line-height:1;letter-spacing:-1px}
 #sheet{position:fixed;inset:0;z-index:40;background:rgba(10,16,30,.55);display:flex;align-items:flex-end;justify-content:center}
 #sheet>div{background:var(--bg);width:100%;max-width:720px;max-height:92dvh;overflow:auto;border-radius:18px 18px 0 0;padding:16px max(16px,env(safe-area-inset-left,0px)) calc(24px + env(safe-area-inset-bottom,0px))}
 .sh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
@@ -240,7 +240,7 @@ nav button.addb{overflow:visible}
  nav button{flex-direction:row;justify-content:flex-start;gap:12px;font-size:15px;padding:10px 14px;min-height:46px}
  nav button:hover{background:var(--soft)}
  nav button.on{background:var(--soft)}
- .brand{display:block;font-family:var(--fd);font-weight:800;font-size:20px;padding:6px 14px 18px;color:var(--ink)}
+ .brand{display:flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:800;font-size:20px;padding:6px 14px 18px;color:var(--ink)}
  #v-add{max-width:720px}
  #v-set{max-width:720px}
  #lst{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
@@ -395,7 +395,7 @@ input.big-in{border-radius:18px}
 /* barre du bas : dock flottant, icônes seules, 5 colonnes égales donc symétrique */
 @media(max-width:899px){
  nav{left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));height:60px;padding:0 6px;border:0;border-radius:30px;background:var(--hero);box-shadow:0 10px 26px rgba(0,0,0,.28);grid-template-columns:repeat(5,minmax(0,1fr));align-items:center}
- .brand{display:none}
+ .brand{display:none}.lg{display:block;width:34px;height:34px;border-radius:9px;flex:none}.authlogo{display:flex;align-items:center;gap:14px;margin:0 0 10px}.authlogo .lg{width:56px;height:56px;border-radius:14px}.authlogo b{font-family:var(--fd);font-stretch:68%;font-weight:800;font-size:44px;line-height:1;letter-spacing:-1px}
  nav button{color:#8d9199;min-height:60px;border-radius:30px;justify-content:center;gap:0}
  nav button.on{color:#fff}
  nav button.on:not(.addb):after{content:"";position:absolute;bottom:8px;width:4px;height:4px;border-radius:50%;background:var(--acc)}
@@ -571,7 +571,7 @@ kbd{font-family:var(--fm);font-size:12px;min-width:30px;text-align:center;backgr
   </section>
  </main>
  <nav id="nav">
-  <div class="brand">Stock Friperie</div>
+  <div class="brand"><svg class="lg" viewBox="0 0 104 104" aria-hidden="true"><rect width="104" height="104" fill="#111111"/><rect x="12" y="68" width="80" height="18" rx="3" fill="#F1F2F4"/><rect x="18" y="46" width="68" height="18" rx="3" fill="#C9CBD0"/><rect x="32" y="14" width="58" height="18" rx="3" fill="#FF4A1C" transform="rotate(-12 62 24)"/><path d="M20 28H32M16 20H26" stroke="#FF4A1C" stroke-width="3" stroke-linecap="round" fill="none"/></svg><span>max</span></div>
   <button data-v="list" type="button" aria-label="Stock"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span class="nl">Stock</span></button>
   <button data-v="quick" type="button" aria-label="Live"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span class="nl">Live</span><span class="nbg" id="nbg" hidden></span></button>
   <button data-v="add" class="on addb" type="button" aria-label="Ajouter une pièce"><span class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="nl">Ajouter</span></button>
@@ -580,7 +580,7 @@ kbd{font-family:var(--fm);font-size:12px;min-width:30px;text-align:center;backgr
  </nav>
 </div>
 <div id="auth" hidden><div class="card">
- <h2 style="margin:0 0 4px;font-size:22px">Stock Friperie</h2>
+ <div class="authlogo"><svg class="lg" viewBox="0 0 104 104" aria-hidden="true"><rect width="104" height="104" fill="#111111"/><rect x="12" y="68" width="80" height="18" rx="3" fill="#F1F2F4"/><rect x="18" y="46" width="68" height="18" rx="3" fill="#C9CBD0"/><rect x="32" y="14" width="58" height="18" rx="3" fill="#FF4A1C" transform="rotate(-12 62 24)"/><path d="M20 28H32M16 20H26" stroke="#FF4A1C" stroke-width="3" stroke-linecap="round" fill="none"/></svg><b>max</b></div>
  <p class="sub">Connecte-toi pour retrouver ton stock sur tous tes appareils.</p>
  <div class="fld"><label class="l" for="au_mail">E-mail</label><input type="text" id="au_mail" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
  <div class="fld"><label class="l" for="au_pw">Mot de passe</label><div class="pwrow"><input type="password" id="au_pw" autocomplete="current-password"><button type="button" class="btn sec sm" id="au_eye" aria-label="Afficher le mot de passe">Afficher</button></div></div>
