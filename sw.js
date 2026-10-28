@@ -1,10 +1,22 @@
 /* Fonctionnement hors-ligne : les fichiers de l'appli sont gardés en cache. Change VERSION à chaque mise à jour. */
-const VERSION = 'stock-v19';
+const VERSION = 'stock-v20';
 const FILES = ['./', './index.html', './manifest.webmanifest', './vendor/xlsx.full.min.js', './vendor/supabase.js', './vendor/qrcode.js', './vendor/jsQR.js', './config.js', './fonts/Archivo-latin.woff2', './fonts/Archivo-latin-ext.woff2', './fonts/JetBrainsMono-latin.woff2', './fonts/JetBrainsMono-latin-ext.woff2', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 /* Une nouvelle version attend que l'utilisateur touche « Mettre à jour » dans l'appli (message SKIP_WAITING). */
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' })))));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window' }).then(l => (l[0] ? l[0].focus() : self.clients.openWindow('./'))));
+});
+
+/* Prêt pour un futur serveur d'envoi : affiche la notification reçue. */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data.json(); } catch (er) {}
+  e.waitUntil(self.registration.showNotification(d.title || 'Max', { body: d.body || '', icon: 'icons/icon-192.png', tag: d.tag }));
 });
 
 self.addEventListener('message', e => {
