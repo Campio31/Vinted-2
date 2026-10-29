@@ -18,7 +18,8 @@ src/
   styles.css
   modules/            un fichier par fonction de l'appli (ex. group-sale.js, supplies-planning.js…)
 tests/                tests automatiques (démarrage, tous les écrans, ventes, Sentry)
-docs/                 guides (synchronisation, notifications, Sentry, publication)
+admin.html            page d'administration (voir docs/ADMIN.md), avec src/admin.js
+docs/                 guides (synchronisation, notifications, Sentry, publication, administration)
 supabase/             fonction serveur des rappels
 ```
 

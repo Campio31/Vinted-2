@@ -37,7 +37,7 @@ export default defineConfig(async () => {
     base: './',
     plugins,
     define: { __RELEASE__: JSON.stringify(RELEASE) },
-    build: { outDir: 'dist', sourcemap: withMaps ? 'hidden' : false, target: 'es2020', rollupOptions: { output: { manualChunks: id => (id.includes('@sentry') ? 'sentry' : undefined) } } },
+    build: { outDir: 'dist', sourcemap: withMaps ? 'hidden' : false, target: 'es2020', rollupOptions: { input: { main: 'index.html', admin: 'admin.html' }, output: { manualChunks: id => (id.includes('@sentry') ? 'sentry' : undefined) } } },
     test: { environment: 'jsdom', include: ['tests/**/*.test.js'], setupFiles: ['tests/setup.js'] },
   };
 });
