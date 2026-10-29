@@ -20,6 +20,7 @@
 <script src="vendor/jsQR.js"></script>
 <script src="config.js"></script>
 <script src="i18n.js"></script>
+<script src="vintage.js"></script>
 <style>
 /* Mobile: barre d'onglets en bas. PC (≥ 900 px): menu à gauche, contenu plus large, bilan en deux colonnes. */
 @font-face{font-family:'Archivo';font-style:normal;font-weight:400 900;font-stretch:62% 125%;font-display:swap;src:url(fonts/Archivo-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
@@ -568,6 +569,44 @@ kbd{font-family:var(--fm);font-size:12px;min-width:30px;text-align:center;backgr
 .iom{display:flex;align-items:center;gap:10px;margin-bottom:6px}.iom>span{flex:1;min-width:0;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.iom small{display:block;color:var(--mute);font-weight:400;font-size:11px;overflow:hidden;text-overflow:ellipsis}.iom select{flex:none;width:150px;min-height:40px;padding:6px 8px;font-size:14px}
 .nws{margin:8px 0 0;padding-left:18px;font-size:14px}.nws li{margin:4px 0}
 .lnkb{background:none;border:0;color:var(--acc);font-weight:700;font-size:12px;cursor:pointer;padding:0 0 0 6px}
+
+/* ===== v24 ===== */
+.bw{display:inline-block;font-size:12px;color:var(--mute);margin:6px 10px 0 0}.bw.bad{color:var(--red);font-weight:700}
+.sim{display:block}.sim b{display:block}.sim span{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.fx .acts.two .btn{min-height:44px;font-size:14px;padding:10px 12px}
+.gsr{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}.gsr:first-child{border-top:0}
+.gsr small{display:block;color:var(--mute);font-size:11px}.gsr b{font-variant-numeric:tabular-nums}.gsr i{font-style:normal;font-size:12px;font-weight:700;min-width:64px;text-align:right}.gsr i.g{color:var(--mint)}.gsr i.b{color:var(--red)}.gsr.tot{border-top:2px solid var(--ink);font-weight:800}
+#selbar{position:fixed;left:14px;right:14px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;gap:8px;align-items:center;background:var(--hero);color:var(--hero-on);border-radius:999px;padding:8px 8px 8px 18px;box-shadow:0 10px 26px rgba(0,0,0,.28);max-width:560px;margin-inline:auto}
+#selbar[hidden]{display:none}
+#selbar span{flex:1;font-weight:700;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#selbar button{border:0;border-radius:999px;min-height:40px;padding:0 14px;font-weight:700;background:rgba(255,255,255,.16);color:inherit;cursor:pointer;font-size:14px}
+#selbar button.pri{background:var(--acc);color:#fff}
+.selc{outline:3px solid var(--acc);outline-offset:-3px;position:relative}
+.selc::after{content:'✓';position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-weight:800;display:grid;place-items:center;font-size:15px;z-index:3;pointer-events:none}
+body.selmode .tl,body.selmode .qrow,body.selmode .li{-webkit-user-select:none;user-select:none}
+body.selmode #toast,body.onehand #toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+.hrb{display:flex;gap:6px;align-items:flex-end;height:120px;margin-top:8px}.hrb>div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px;min-width:0}.hrb i{display:block;width:100%;max-width:34px;background:var(--acc);border-radius:6px 6px 2px 2px;min-height:6px}.hrb b{font-size:12px}.hrb small{font-size:10px;color:var(--mute)}
+.coh{width:100%;border-collapse:collapse;font-size:13px}.coh th{text-align:left;font-weight:700;padding:7px 8px;white-space:nowrap}.coh thead th{font-size:11px;color:var(--mute);font-weight:600}.coh td{padding:7px 8px;position:relative;font-variant-numeric:tabular-nums}.coh td.mu{color:var(--mute)}.coh td .cb{position:absolute;left:0;top:4px;bottom:4px;width:var(--w);background:color-mix(in srgb,var(--mint) 26%,transparent);border-radius:6px}.coh td b{position:relative}
+.crv{width:100%;height:auto;display:block;margin-bottom:10px}.crv .tg{stroke:var(--mute);stroke-width:1.5;stroke-dasharray:5 4}.crv .ac{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.crv path.ac.up{stroke:var(--mint)}.crv path.ac.dn{stroke:var(--acc)}.crv circle.ac{fill:var(--card)}.crv circle.ac.up{stroke:var(--mint)}.crv circle.ac.dn{stroke:var(--acc)}.crv .tg2{fill:var(--mute)}.crv .lb{fill:var(--mute);font-size:10px;font-family:var(--fm)}
+.fxr{display:flex;align-items:center;gap:10px;margin-bottom:8px}.fxr>span{flex:1;font-weight:600}.fxr small{display:block;color:var(--mute);font-weight:400;font-size:12px}
+.plt{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}.plt:first-child{border-top:0}.plt.dn span{text-decoration:line-through;color:var(--mute)}.plt input{width:22px;height:22px;flex:none}
+.pwd{display:grid;grid-template-columns:92px 1fr;gap:8px;padding:9px 0;border-top:1px solid var(--line);align-items:start}.pwd b{text-transform:capitalize;font-size:13px}.pwd.now b{color:var(--acc)}.pwd>div{display:flex;flex-wrap:wrap;gap:6px}
+.pws{border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}.pws i{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.pws i.k-photo{background:#7a5cff}.pws i.k-sourcing{background:#2b9e6b}.pws i.k-live{background:var(--acc)}.pws i.k-depot{background:#e0a526}
+.pwa{width:32px;height:32px;border-radius:50%;border:1.5px dashed var(--line);background:none;color:var(--mute);font-size:18px;cursor:pointer;line-height:1}
+.dcr{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.dcr>span{flex:1;min-width:0;font-weight:600;font-size:14px}.dcr.off>span{color:var(--mute)}.dcr .chip{min-height:36px;padding:0 12px}.dcr .chip[disabled]{opacity:.35}
+.vl{display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:14px}.vl input{margin-top:3px;width:20px;height:20px;flex:none}
+.brp{display:flex;gap:14px;align-items:center;margin-bottom:14px}.brl{width:72px;height:72px;border-radius:16px;background:var(--soft);display:grid;place-items:center;overflow:hidden;color:var(--mute);font-size:12px;flex:none}.brl img{width:100%;height:100%;object-fit:contain;background:#fff}
+.cfr{display:flex;gap:12px;align-items:flex-start;padding:10px 0}.cfr+.cfr{border-top:1px solid var(--line)}.cfr input{width:24px;height:24px;flex:none;margin-top:2px}.cfr small{display:block;color:var(--mute);font-weight:400;font-size:13px}
+#ohb{display:none}
+body.onehand #ohb{display:flex;position:fixed;left:14px;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:19;gap:6px;justify-content:center;pointer-events:none}
+body.onehand #ohb button{pointer-events:auto;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;min-height:44px;padding:0 14px;background:var(--card);color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.22);font-weight:700;font-size:13px;cursor:pointer}
+#ohb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+body.selmode #ohb{display:none!important}
+body.onehand main{padding-bottom:150px}
+body.onehand .sh .x{width:48px;height:48px}
+.dsa{flex-wrap:wrap}
+.ohx{position:sticky;bottom:0;margin-top:14px;min-height:54px;box-shadow:0 -14px 14px var(--bg)}
 </style>
 </head>
 <body>
@@ -972,7 +1011,7 @@ function openSheet(id,m){
   on('a_indis',()=>{save(Object.assign({},p,{statut:'Pas Disponible'}));closeSheet();toast(t('Marquée indisponible'),()=>save(p))});
   on('a_dis',()=>{save(Object.assign({},p,{statut:'Disponible'}));closeSheet();toast(t('Remise en stock'),()=>save(p))});
   on('a_ann',()=>openSheet(id,'ann'));on('a_esale',()=>openSheet(id,'esale'));on('a_proof',()=>openProofs(id));
-  on('a_unsell',()=>{const q=Object.assign({},p,{statut:'Disponible'});['pv','dv','canal','frais','vt','acheteur','exp'].forEach(k=>delete q[k]);save(q);closeSheet();toast(t('Vente annulée : pièce remise en stock'),()=>save(p))});
+  on('a_unsell',()=>{const q=Object.assign({},p,{statut:'Disponible'});['pv','dv','canal','frais','vt','acheteur','exp','lot','lotn','fo'].forEach(k=>delete q[k]);save(q);closeSheet();toast(t('Vente annulée : pièce remise en stock'),()=>save(p))});
   hydrate();if(avail(p))renderAdvice(p);
  }
  if(m==='ann'){const a=advice(p);
@@ -995,7 +1034,7 @@ function openSheet(id,m){
   <div class="fld" id="s_w"><label class="l" for="s_prix">${t('Prix de vente')}</label><div class="price"><input type="text" inputmode="decimal" id="s_prix" placeholder="0${DS}00" value="${pr0?fN(pr0):''}"><span>€</span></div>${adv.ok?`<div class="hint">${t('Prix conseillé : {p} ({n} ventes comparables). Modifie-le si besoin.',{p:eur(adv.reco),n:adv.n})}</div>`:''}</div>
   <div class="fld"><label class="l" for="s_plat">${t('Vendu sur')}</label><input type="text" id="s_plat" value="Vinted"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${x==='Vinted'?' on':''}" data-t="s_plat" data-v="${x}">${tv(x)}</button>`).join('')}</div></div>
   <div class="row2 fld"><div><label class="l" for="s_date">${t('Date de vente')}</label><input type="date" id="s_date" value="${today()}"></div><div><label class="l" for="s_frais">${t('Frais')}</label><div class="price"><input type="text" inputmode="decimal" id="s_frais" value="${fN(defFrais(pr0||0,'Vinted'))}"><span>€</span></div></div></div>
-  <div class="hint">${t('Frais : commission, envoi à ta charge… Sur Vinted, les frais de protection sont payés par l\'acheteur.')}</div><div class="pv" id="s_pv"></div></div>
+  <div class="hint">${t('Frais : commission, envoi à ta charge… Sur Vinted, les frais de protection sont payés par l\'acheteur.')}</div><div class="fld" style="margin-top:12px"><label class="l" for="s_ps">${t('@pseudo de l\'acheteur (facultatif)')}</label><input type="text" id="s_ps" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"></div><div class="pv" id="s_pv"></div></div>
   <div class="acts"><button class="btn mint" id="s_ok" type="button">${t('Valider la vente')}</button>${back}</div>`;
   let ft=false;
   const pv=()=>{const x=num($('s_prix').value),f=num($('s_frais').value)||0;$('s_pv').innerHTML=isNaN(x)?t('Bénéfice net : —'):rentaHTML(renta(p.achat||0,x,f,ageDelai(p),true))};
@@ -1004,7 +1043,7 @@ function openSheet(id,m){
   document.querySelectorAll('[data-t="s_plat"]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{auto();pv()},0)));
   $('g_no').onclick=()=>openSheet(id);
   $('s_ok').onclick=()=>{const x=num($('s_prix').value);$('s_w').classList.toggle('err',isNaN(x)||x<0);if(isNaN(x)||x<0)return toast(t('Indique le prix de vente'));
-   if(!guardSale(p,x,num($('s_frais').value)||0,$('s_date').value||today()))return;const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:$('s_plat').value.trim()||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0,vt:Date.now()});save(q);closeSheet();toast(t('Vendu · bénéfice {b}',{b:eur(profit(q))})+(p.bac?t(' · bac {b}',{b:p.bac}):''),()=>save(p))}}
+   if(!guardSale(p,x,num($('s_frais').value)||0,$('s_date').value||today()))return;const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:$('s_plat').value.trim()||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0,vt:Date.now()});{const ps0=$('s_ps')?$('s_ps').value.trim().replace(/^@+/,''):'';if(ps0)q.acheteur=ps0}save(q);closeSheet();toast(t('Vendu · bénéfice {b}',{b:eur(profit(q))})+(p.bac?t(' · bac {b}',{b:p.bac}):''),()=>save(p))}}
  if(m==='esale'){c.innerHTML=head(t('Modifier la vente'))+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · ${t('acheté {p}',{p:eur(p.achat)})}</p>
   <div class="fld" id="e_w"><label class="l" for="e_prix">${t('Prix de vente')}</label><div class="price"><input type="text" inputmode="decimal" id="e_prix" value="${fN(p.pv||0)}"><span>€</span></div></div>
   <div class="row2 fld"><div><label class="l" for="e_date">${t('Date de vente')}</label><input type="date" id="e_date" value="${esc(ok(p.dv)?p.dv:today())}"></div><div><label class="l" for="e_frais">${t('Frais')}</label><div class="price"><input type="text" inputmode="decimal" id="e_frais" value="${fN(p.frais||0)}"><span>€</span></div></div></div>
@@ -1025,7 +1064,7 @@ function openSheet(id,m){
   <div class="row2"><div><label class="l" for="r_date">${t('Date du retour')}</label><input type="date" id="r_date" value="${today()}"></div><div><label class="l" for="r_p">${t('Montant remboursé')}</label><div class="price"><input type="text" inputmode="decimal" id="r_p" value="${String(p.pv||'').replace('.',DS)}"><span>€</span></div></div></div></div>
   <div class="fld" style="margin-top:14px"><span class="l">${t('Motif du retour')}</span><div class="chips" id="r_m">${MOTIFS.map(x=>`<button type="button" class="chip sm" data-v="${esc(x)}">${esc(tv(x))}</button>`).join('')}</div></div><div class="acts"><button class="btn" id="r_ok" type="button">${t('Valider le retour')}</button>${back}</div>`;
   $('g_no').onclick=()=>openSheet(id);
-  $('r_m').onclick=e=>{const c=e.target.closest('[data-v]');if(!c)return;const was=c.classList.contains('on');$('r_m').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));if(!was)c.classList.add('on')};$('r_ok').onclick=()=>{const x=num($('r_p').value),mc=document.querySelector('#r_m .on'),rr={d:$('r_date').value||today(),p:isNaN(x)?0:x};if(mc)rr.m=mc.dataset.v;const q=Object.assign({},p,{statut:'Disponible',retours:[...(p.retours||[]),rr]});delete q.pv;delete q.dv;delete q.canal;delete q.frais;save(q);closeSheet();toast(t('Retour enregistré'),()=>save(p))}}
+  $('r_m').onclick=e=>{const c=e.target.closest('[data-v]');if(!c)return;const was=c.classList.contains('on');$('r_m').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));if(!was)c.classList.add('on')};$('r_ok').onclick=()=>{const x=num($('r_p').value),mc=document.querySelector('#r_m .on'),rr={d:$('r_date').value||today(),p:isNaN(x)?0:x};if(mc)rr.m=mc.dataset.v;const q=Object.assign({},p,{statut:'Disponible',retours:[...(p.retours||[]),rr]});delete q.pv;delete q.dv;delete q.canal;delete q.frais;delete q.lot;delete q.lotn;save(q);closeSheet();toast(t('Retour enregistré'),()=>save(p))}}
 }
 
 /* ---------- bilan ---------- */
@@ -1209,7 +1248,7 @@ function sellCalc(p){const x=num(qF.prix),f=num(qF.frais)||0;if(isNaN(x))return'
 function sellForm(p){return`<div class="qform"><div class="row2"><div><label class="l" for="qp">${t('Prix final')}</label><div class="price"><input type="text" inputmode="decimal" id="qp" value="${esc(qF.prix)}" placeholder="0${DS}00"><span>€</span></div></div><div><label class="l" for="qf">${t('Frais')}</label><div class="price"><input type="text" inputmode="decimal" id="qf" value="${esc(qF.frais)}"><span>€</span></div></div></div>
  <div class="hint">${t('Frais préremplis d\'après tes réglages (emballage, envoi, commission).')}</div>
  <div class="chips" style="margin-top:12px">${CANAUX_V.map(x=>`<button type="button" class="chip sm${qF.canal===x?' on':''}" data-qcn="${x}">${tv(x)}</button>`).join('')}</div>
- ${qF.canal==='TikTok Live'?`<div style="margin-top:12px"><label class="l" for="qb">${t('@pseudo de l\'acheteur (facultatif)')}</label><input type="text" id="qb" value="${esc(qF.pseudo)}" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"></div>`:''}
+ ${1?`<div style="margin-top:12px"><label class="l" for="qb">${t('@pseudo de l\'acheteur (facultatif)')}</label><input type="text" id="qb" value="${esc(qF.pseudo)}" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"></div>`:''}
  <div id="qpv">${sellCalc(p)}</div><div class="acts"><button type="button" class="btn mint" id="qok">${t('Confirmer la vente')}</button></div></div>`}
 function pieceRow(p,open){const adv=open?null:advice(p);
  const th=p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`;
@@ -2161,7 +2200,7 @@ function openReport(){let m=LSg('rpM','')||(()=>{const d=new Date();d.setDate(1)
   $('shc').onclick=e=>{const b=e.target.closest('[data-rm]');if(b){m=b.dataset.rm;LSs('rpM',m);draw();return}if(e.target.closest('#rp_pdf'))printReport(m)}};draw()}
 function printReport(m){let el=$('rpt');if(!el){el=document.createElement('div');el.id='rpt';document.body.appendChild(el)}el.innerHTML=reportHTML(m);document.body.classList.add('printing-r');const done=()=>{document.body.classList.remove('printing-r');window.removeEventListener('afterprint',done)};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),80)}
 /* ===== v20 : preuves, visuels réseaux, calendrier, rappels, wrapped, défis, import, aide, performances ===== */
-const VER='v23';
+const VER='v24';
 const ldate=d=>d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2);
 const fmtDT=t=>{const d=new Date(t);return fd(ldate(d))+' '+pad(d.getHours(),2)+':'+pad(d.getMinutes(),2)};
 const fmtSize=b=>b>=1048576?(b/1048576).toFixed(1).replace('.',DS)+' '+t('Mo'):Math.max(1,Math.round(b/1024))+' '+t('Ko');
@@ -2495,6 +2534,380 @@ async function openPhotos(){showSheet(sheetHead(t('Photos et espace'))+'<div cla
    done++;if(done%5===0)$('ph_s').textContent=t('{a} / {b} photos traitées…',{a:done,b:ids.length})}
   if(changed.length)await queueMany([],changed);$('ph_s').textContent=t('Terminé : {p}, {m} gagnés',{p:tn(changed.length,'photo allégée','photos allégées'),m:fmtSize(saved)})+(fail?' ('+tn(fail,'non lisible','non lisibles')+')':'')+'.';toast(t('{m} gagnés',{m:fmtSize(saved)}));setTimeout(()=>openPhotos(),1800)}}
 async function checkSpace(){if(!cloud||LSg('spaceDay','')===today())return;LSs('spaceDay',today());try{const recs=(await tx('photos','readonly',s=>s.getAll()))||[];const b=recs.reduce((a,r)=>a+(r.blob&&!(r.blob.type||'').startsWith('video')?r.blob.size:0),0);if(b/(1024*1048576)>=.7)toast(t('Espace photos à {p} % du Go gratuit : ouvre Outils, Photos et espace',{p:Math.round(b/(1024*1048576)*100)}),null,6000)}catch(e){}}
+/* ===== v24 : lots, sélection, variantes, similaires, acheteurs ===== */
+Object.assign(CFG0,{dash:null,shop:null,fourn:[],plan:[],fixes:[],noirs:{},vibr:true,onehand:false});
+DEVICE_KEYS.push('onehand','vibr');
+const r2=v=>Math.round(v*100)/100;
+const buzz=ms=>{try{if(cfg.vibr!==false&&navigator.vibrate)navigator.vibrate(ms)}catch(e){}};
+const toast24=toast;toast=function(m,u,d){if(u)buzz(16);return toast24(m,u,d)};
+
+/* écriture groupée : une seule sauvegarde et un seul affichage pour N pièces */
+function bulkMod(ids,fn){const out=[];ids.forEach(id=>{const i=P.findIndex(x=>x.id===id);if(i<0)return;const old=P[i];let q=fn(Object.assign({},old));if(!q)return;q=clean(q);const ev=diffEv(old,q);if(ev.length)q=Object.assign({},q,{h:[...(q.h||[]),...ev.map(e=>({t:Date.now(),e}))].slice(-40)});P[i]=q;out.push({o:old,q})});
+ if(!out.length)return out;renderAll();persist(async()=>{await tx('pieces','readwrite',s=>{out.forEach(x=>s.put(x.q))});await queueMany(out.map(x=>x.q.id),[])});return out}
+function bulkUndo(out){out.forEach(x=>{const i=P.findIndex(y=>y.id===x.o.id);if(i>=0)P[i]=x.o});renderAll();persist(async()=>{await tx('pieces','readwrite',s=>{out.forEach(x=>s.put(x.o))});await queueMany(out.map(x=>x.o.id),[])})}
+
+/* ---------- acheteurs : fiche, fidèles, liste noire ---------- */
+const pseudoKey=s=>nrm(String(s||'').replace(/^@+/,''));
+const noirs=()=>cfg.noirs||{};
+const isBlack=ps=>{const k=pseudoKey(ps);return k?noirs()[k]||null:null};
+function buyersData(){const o={};P.filter(p=>sold(p)&&p.acheteur).forEach(p=>{const k=pseudoKey(p.acheteur);if(!k)return;const b=o[k]=o[k]||{k,nom:p.acheteur,cmd:new Set(),pieces:[],ca:0,ben:0,last:'',ret:0};b.cmd.add(p.lot||p.id);b.pieces.push(p);b.ca+=p.pv||0;b.ben+=profit(p);if((p.dv||'')>b.last){b.last=p.dv||'';b.nom=p.acheteur}});
+ P.forEach(p=>{if(!p.acheteur||sold(p))return;const b=o[pseudoKey(p.acheteur)];if(b)b.ret+=(p.retours||[]).length});return o}
+function buyerLine(ps){const b=buyersData()[pseudoKey(ps)],bl=isBlack(ps);let h='';
+ if(bl)h+=`<span class="bw bad">⚠ ${t('Acheteur en liste noire')}${bl.m?' : '+esc(bl.m):''}</span>`;
+ if(b)h+=`<span class="bw">${t('{n} commandes, {c} déjà achetés',{n:b.cmd.size,c:eur(b.ca)})}${b.cmd.size>=2?' · '+t('acheteur fidèle'):''}${b.ret?' · '+tn(b.ret,'retour','retours'):''}</span>`;return h}
+document.addEventListener('input',e=>{const el=e.target;if(!el||!/^(qb|lb|e_ps|s_ps|gs_ps)$/.test(el.id))return;let w=$(el.id+'_w');if(!w){w=document.createElement('div');w.id=el.id+'_w';w.className='bwr';el.insertAdjacentElement('afterend',w)}w.innerHTML=buyerLine(el.value)});
+let bTab='fid',bQ='';
+function openBuyers(){const D=buyersData(),all=Object.values(D).sort((a,b)=>b.last.localeCompare(a.last)),nk=Object.keys(noirs());
+ const q=pseudoKey(bQ),L=(bTab==='fid'?all.filter(b=>b.cmd.size>=2).sort((a,b)=>b.ca-a.ca):bTab==='tous'?all:nk.map(k=>D[k]||{k,nom:noirs()[k].nom,cmd:new Set(),pieces:[],ca:0,last:'',ret:0})).filter(b=>!q||b.k.includes(q));
+ showSheet(sheetHead(t('Acheteurs'))+`<div class="chips" style="margin-bottom:10px">${[['fid',t('Fidèles')+' · '+all.filter(b=>b.cmd.size>=2).length],['tous',t('Tous')+' · '+all.length],['noir',t('Liste noire')+' · '+nk.length]].map(([k,l])=>`<button type="button" class="chip sm${bTab===k?' on':''}" data-bt="${k}">${l}</button>`).join('')}</div>
+ <input type="search" id="by_q" placeholder="${t('Chercher un pseudo')}" value="${esc(bQ)}" autocomplete="off" autocapitalize="none">
+ <div style="margin-top:12px">${L.length?L.slice(0,80).map(b=>`<button type="button" class="li" data-by="${esc(b.k)}"><div class="m"><b>@${esc(b.nom)}${noirs()[b.k]?' <span class="off">⚠</span>':''}</b><small>${b.cmd.size?t('{n} commandes, {c} déjà achetés',{n:b.cmd.size,c:eur(b.ca)})+(b.last?' · '+fd(b.last):''):esc(noirs()[b.k]&&noirs()[b.k].m||'')}</small></div></button>`).join(''):`<div class="empty" style="padding:14px 8px">${bTab==='noir'?t('Personne dans ta liste noire. Ajoute un pseudo ci-dessous.'):bTab==='fid'?t('Aucun acheteur n\'a encore commandé deux fois. Pense à noter le @pseudo à chaque vente.'):t('Aucune vente avec un pseudo. Le champ @pseudo est dans le formulaire de vente.')}</div>`}</div>
+ <div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px">${t('Ajouter à la liste noire')}</h3><div class="row2"><input type="text" id="by_n" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"><input type="text" id="by_m" placeholder="${t('Motif (facultatif)')}"></div><div class="acts"><button type="button" class="btn sec" id="by_add">${t('Ajouter')}</button></div></div>`);
+ $('by_q').oninput=()=>{bQ=$('by_q').value;const p=$('by_q').selectionStart;openBuyers();const i=$('by_q');i.focus();try{i.setSelectionRange(p,p)}catch(e){}};
+ $('shc').onclick=e=>{const b=e.target.closest('[data-bt]');if(b){bTab=b.dataset.bt;return openBuyers()}const y=e.target.closest('[data-by]');if(y)return openBuyer(y.dataset.by);
+  if(e.target.closest('#by_add')){const n=$('by_n').value.trim().replace(/^@+/,'');if(!n)return toast(t('Écris un pseudo'));blkSet(n,$('by_m').value.trim());bTab='noir';openBuyers();toast(t('Ajouté à la liste noire'))}}}
+function blkSet(nom,m){const k=pseudoKey(nom);if(!k)return;const o=Object.assign({},noirs());o[k]={nom,m:m||'',t:Date.now()};setCfg({noirs:o})}
+function blkDel(k){const o=Object.assign({},noirs());delete o[k];setCfg({noirs:o})}
+function openBuyer(k,back){const b=buyersData()[k],bl=noirs()[k];if(!b&&!bl)return openBuyers();const nom=b?b.nom:bl.nom,MOTIFS_B=['Retour abusif','Litige','Ne paie pas','Autre'];
+ showSheet(sheetHead('@'+esc(nom))+`<div class="card">${b?`<dl class="kv"><dt>${t('Commandes')}</dt><dd>${b.cmd.size}</dd><dt>${t('Pièces achetées')}</dt><dd>${b.pieces.length}</dd><dt>${t('Total dépensé')}</dt><dd>${eur(b.ca)}</dd><dt>${t('Ton bénéfice')}</dt><dd>${eur(b.ben)}</dd><dt>${t('Dernier achat')}</dt><dd>${fd(b.last)}</dd>${b.ret?`<dt>${t('Retours')}</dt><dd>${b.ret}</dd>`:''}</dl>`:`<p class="sub" style="margin:0">${t('Pas encore d\'achat chez toi.')}</p>`}
+  ${bl?`<div class="cl cl-r" style="margin-top:10px"><i></i><div><b>${t('En liste noire')}</b><span>${esc(bl.m||'')}</span></div></div>`:''}</div>
+  ${b?`<div class="card"><h3 style="margin:0 0 8px">${t('Historique')}</h3>${b.pieces.sort((x,y)=>(y.dv||'').localeCompare(x.dv||'')).map(p=>`<button type="button" class="li" data-id="${esc(p.id)}" style="margin-bottom:6px"><div class="m"><b>${esc(title(p))}</b><small>${fd(p.dv)}${p.lot?' · '+t('lot'):''}</small></div><div class="p">${eur(p.pv)}</div></button>`).join('')}</div>`:''}
+  ${bl?`<div class="acts"><button type="button" class="btn sec" id="bu_del">${t('Retirer de la liste noire')}</button></div>`:`<div class="card"><span class="l">${t('Liste noire')}</span><div class="chips" id="bu_m" style="margin:8px 0">${MOTIFS_B.map(m=>`<button type="button" class="chip sm" data-v="${esc(m)}">${t(m)}</button>`).join('')}</div><div class="acts"><button type="button" class="btn red" id="bu_add">${t('Ajouter à la liste noire')}</button></div></div>`}
+  <div class="acts"><button type="button" class="btn sec" id="bu_back">${t('Retour')}</button></div>`);
+ $('bu_back').onclick=()=>back?back():openBuyers();
+ if($('bu_del'))$('bu_del').onclick=()=>{blkDel(k);openBuyer(k,back)};
+ if($('bu_add')){$('bu_m').onclick=e=>{const c=e.target.closest('[data-v]');if(!c)return;const was=c.classList.contains('on');$('bu_m').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));if(!was)c.classList.add('on')};$('bu_add').onclick=()=>{const m=document.querySelector('#bu_m .on');blkSet(nom,m?m.dataset.v:'');openBuyer(k,back);toast(t('Ajouté à la liste noire'))}}}
+
+/* ---------- pièces similaires déjà vendues ---------- */
+function similarSold(p){const S=P.filter(x=>sold(x)&&x.id!==p.id&&ok(x.dv)),sub=x=>x.sub||x.cat,m=nrm(p.marque);if(!sub(p))return null;
+ const lv=[];if(m&&p.taille)lv.push([x=>nrm(x.marque)===m&&sub(x)===sub(p)&&x.taille===p.taille,[p.marque,tv(sub(p)),p.taille]]);if(m)lv.push([x=>nrm(x.marque)===m&&sub(x)===sub(p),[p.marque,tv(sub(p))]]);lv.push([x=>sub(x)===sub(p),[tv(sub(p))]]);
+ for(let i=0;i<lv.length;i++){const r=S.filter(lv[i][0]);if(r.length>=3||(i===lv.length-1&&r.length)||(r.length&&lv.length===1)){const pr=r.map(x=>x.pv||0),d=r.map(delai).filter(v=>v!=null);return{r,lab:lv[i][1].join(' '),min:Math.min(...pr),max:Math.max(...pr),med:med(pr),d:d.length?d.reduce((a,b)=>a+b,0)/d.length:null}}}
+ return null}
+function similarHTML(p){const s=similarSold(p);if(!s)return`<p class="sub" style="margin:0 0 6px">${t('Pas encore de vente comparable pour cette pièce.')}</p>`;
+ return`<div class="sim"><b>${tn(s.r.length,'vendu','vendus')} : ${esc(s.lab)}</b><span>${s.min===s.max?eur(s.min):t('entre {a} et {b}',{a:eur(s.min),b:eur(s.max)})} · ${t('prix médian {p}',{p:eur(s.med)})}${s.d!=null?' · '+t('{n} jours en moyenne',{n:Math.round(s.d)}):''}</span></div>`}
+
+/* ---------- variantes : même modèle, un champ qui change ---------- */
+function openVariant(id,done){const p=P.find(x=>x.id===id);if(!p)return;let fld='taille',made=[];
+ const cols=Object.keys(PASTEL),grades=[...new Set(P.map(x=>x.grade).filter(Boolean))].sort();
+ const draw=()=>{showSheet(sheetHead(t('Créer des variantes'))+`<div class="card"><p class="sub" style="margin:0 0 10px">${esc(title(p))}${p.taille?' · '+esc(p.taille):''}${(p.coul||[]).length?' · '+esc(p.coul.map(tv).join(', ')):''}. ${t('La fiche est recopiée, un seul champ change.')}</p>
+  <span class="l">${t('Ce qui change')}</span><div class="chips" id="va_f" style="margin:8px 0 12px">${[['taille','Taille'],['coul','Couleur'],['grade','Grade'],['achat','Prix d\'achat']].map(([k,l])=>`<button type="button" class="chip sm${fld===k?' on':''}" data-vf="${k}">${t(l)}</button>`).join('')}</div>
+  ${fld==='coul'?`<div class="chips" id="va_c">${cols.map(c=>`<button type="button" class="chip sm" data-vc="${esc(c)}">${esc(tv(c))}</button>`).join('')}</div>`:fld==='grade'?`<div class="chips" id="va_c">${grades.map(c=>`<button type="button" class="chip sm" data-vc="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:`<div class="fld"><label class="l" for="va_v">${fld==='taille'?t('Nouvelles tailles (sépare par des virgules)'):t('Nouveau prix d\'achat')}</label><input type="text" id="va_v" ${fld==='achat'?'inputmode="decimal"':''} placeholder="${fld==='taille'?'S, M, L':'0'+DS+'00'}" autocomplete="off"></div>`}
+  <div class="hint">${fld==='coul'?t('Choisis une ou plusieurs couleurs : une fiche par couleur, sans la photo.'):t('La photo, le prix visé et les notes sont recopiés ; le code est recalculé.')}</div></div>
+  <div class="acts"><button type="button" class="btn mint" id="va_go">${t('Créer')}</button><button type="button" class="btn sec" id="va_no">${made.length?t('Terminé'):t('Retour')}</button></div>${made.length?`<div class="card"><span class="l">${t('Créées')}</span>${made.map(m=>`<button type="button" class="li" data-id="${esc(m.id)}" style="margin-top:6px"><div class="m"><b>${esc(title(m))}</b><small>${esc([m.taille,(m.coul||[]).map(tv).join(', '),m.grade].filter(Boolean).join(' · '))}${m.code?' · '+esc(m.code):''}</small></div></button>`).join('')}</div>`:''}`);
+  $('va_no').onclick=()=>done?done():openSheet(id);
+  $('shc').onclick=e=>{const f=e.target.closest('[data-vf]');if(f){fld=f.dataset.vf;return draw()}const c=e.target.closest('[data-vc]');if(c){c.classList.toggle('on');return}const li=e.target.closest('.li[data-id]');if(li)return openSheet(li.dataset.id)};
+  $('va_go').onclick=()=>{let vals=[];if(fld==='coul'||fld==='grade')vals=[...document.querySelectorAll('#va_c .on')].map(x=>x.dataset.vc);else if(fld==='achat'){const v=num($('va_v').value);if(!isNaN(v)&&v>=0)vals=[v]}else vals=$('va_v').value.split(',').map(s=>s.trim()).filter(Boolean);
+   if(!vals.length)return toast(t('Indique la nouvelle valeur'));
+   vals.forEach(v=>{const q=Object.assign({},p,{id:nextId(),statut:'Disponible',entree:today(),cree:Date.now()});['pub','pvise','pv','dv','canal','frais','vt','acheteur','exp','lot','lotn','fo','h','pr','retours','code','ex','dispo'].forEach(k=>delete q[k]);
+    if(fld==='coul'){q.coul=[v];delete q.photo}else q[fld]=v;const cd=genCode(q);if(cd)q.code=cd;q.h=[{t:Date.now(),e:'Variante de '+(p.code||title(p))}];save(q);made.push(q)});
+   toast(tn(vals.length,'fiche créée','fiches créées'));draw()}};draw()}
+
+/* ---------- vente groupée : un paiement, un colis, plusieurs pièces ---------- */
+let GS=null;
+function gsRows(){const L=GS.ids.map(id=>P.find(p=>p.id===id)).filter(Boolean),tot=num(GS.prix),fr=num(GS.frais)||0;
+ const wf={conseil:p=>priceFor(p)||p.achat||0,achat:p=>p.achat||0,egal:()=>1}[GS.mode];let w=L.map(wf),W=w.reduce((a,b)=>a+b,0);if(!W){w=L.map(()=>1);W=L.length}
+ let u=0,uf=0;return L.map((p,i)=>{const last=i===L.length-1,a=isNaN(tot)?0:last?r2(tot-u):r2(tot*w[i]/W),f=last?r2(fr-uf):r2(fr*w[i]/W);u+=a;uf+=f;return{p,pv:a,frais:f}})}
+function gsAlloc(){const R=gsRows(),tot=num(GS.prix),b=GS.pseudo.trim()?buyerLine(GS.pseudo):'';
+ return`${R.map(r=>{const g=r.pv-(r.p.achat||0)-r.frais;return`<div class="gsr"><span>${esc(title(r.p))}<small>${esc([r.p.taille,r.p.code].filter(Boolean).join(' · '))}</small></span><b>${eur(r.pv)}</b><i class="${g>=0?'g':'b'}">${g>=0?'+':''}${eur(g)}</i></div>`}).join('')}
+ <div class="gsr tot"><span>${t('Total')}</span><b>${isNaN(tot)?'—':eur(tot)}</b><i class="${R.reduce((a,r)=>a+r.pv-(r.p.achat||0)-r.frais,0)>=0?'g':'b'}">${eur(R.reduce((a,r)=>a+r.pv-(r.p.achat||0)-r.frais,0))}</i></div>`}
+function openGroupSale(ids){const L=ids.map(id=>P.find(p=>p.id===id)).filter(p=>p&&avail(p));if(L.length<2)return toast(t('Choisis au moins 2 pièces en stock'));
+ const canal=LSg('lastCanal','Vinted'),sum=r2(L.reduce((a,p)=>a+(priceFor(p)||0),0));
+ GS={ids:L.map(p=>p.id),prix:sum?fN(sum):'',canal,frais:fN(defFrais(sum,canal)),ft:false,pseudo:'',date:today(),mode:'conseil'};
+ const draw=()=>{showSheet(sheetHead(t('Vente groupée'))+`<div class="card"><p class="sub" style="margin:0 0 12px">${tn(L.length,'pièce','pièces')} · ${t('un seul paiement, un seul colis')}</p>
+  <div class="row2 fld"><div><label class="l" for="gs_p">${t('Prix total payé')}</label><div class="price"><input type="text" inputmode="decimal" id="gs_p" value="${esc(GS.prix)}"><span>€</span></div></div><div><label class="l" for="gs_f">${t('Frais du colis')}</label><div class="price"><input type="text" inputmode="decimal" id="gs_f" value="${esc(GS.frais)}"><span>€</span></div></div></div>
+  <div class="chips">${CANAUX_V.map(x=>`<button type="button" class="chip sm${GS.canal===x?' on':''}" data-gc="${x}">${tv(x)}</button>`).join('')}</div>
+  <div class="fld" style="margin-top:12px"><div><label class="l" for="gs_ps">${t('@pseudo de l\'acheteur (facultatif)')}</label><input type="text" id="gs_ps" value="${esc(GS.pseudo)}" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"></div></div><div id="gs_ps_w" class="bwr"></div><div class="fld" style="margin-top:12px"><label class="l" for="gs_d">${t('Date de vente')}</label><input type="date" id="gs_d" value="${GS.date}"></div></div>
+  <div class="card"><span class="l">${t('Répartition du prix et des frais')}</span><div class="chips" style="margin:8px 0 12px">${[['conseil','Selon le prix conseillé'],['achat','Selon le prix d\'achat'],['egal','Parts égales']].map(([k,l])=>`<button type="button" class="chip sm${GS.mode===k?' on':''}" data-gm="${k}">${t(l)}</button>`).join('')}</div><div id="gs_al">${gsAlloc()}</div>
+  <div class="hint">${t('Chaque pièce garde sa part du prix et des frais : les marges par pièce restent justes.')}</div></div>
+  <div class="acts"><button type="button" class="btn mint" id="gs_ok">${t('Confirmer la vente')}</button><button type="button" class="btn sec" id="gs_no">${t('Annuler')}</button></div>`);
+  const rd=()=>{GS.prix=$('gs_p').value;GS.frais=$('gs_f').value;GS.pseudo=$('gs_ps').value;GS.date=$('gs_d').value||today()},up=()=>{$('gs_al').innerHTML=gsAlloc()};
+  $('gs_ps_w').innerHTML=GS.pseudo?buyerLine(GS.pseudo):'';
+  $('gs_p').oninput=()=>{rd();if(!GS.ft){GS.frais=fN(defFrais(num(GS.prix)||0,GS.canal));$('gs_f').value=GS.frais}up()};$('gs_f').oninput=()=>{GS.ft=true;rd();up()};$('gs_ps').addEventListener('input',rd);$('gs_d').onchange=rd;
+  $('shc').onclick=e=>{const c=e.target.closest('[data-gc]');if(c){rd();GS.canal=c.dataset.gc;if(!GS.ft)GS.frais=fN(defFrais(num(GS.prix)||0,GS.canal));return draw()}const m=e.target.closest('[data-gm]');if(m){rd();GS.mode=m.dataset.gm;return draw()}};
+  $('gs_no').onclick=()=>closeSheet();
+  $('gs_ok').onclick=()=>{rd();const tot=num(GS.prix);if(isNaN(tot)||tot<0)return toast(t('Indique le prix total'));
+   const R=gsRows(),lot='L'+Date.now().toString(36),vt=Date.now(),ps=GS.pseudo.trim().replace(/^@+/,''),canal=GS.canal||'Vinted',first=R[0].p.id;LSs('lastCanal',canal);
+   const out=bulkMod(R.map(r=>r.p.id),q=>{const r=R.find(x=>x.p.id===q.id);const n=Object.assign(q,{statut:'Vendu',pv:r.pv,frais:r.frais,canal,dv:GS.date,vt,lot,lotn:R.length});if(ps)n.acheteur=ps;if(q.id===first)n.fo=1;return n});
+   suppliesUse(1);closeSheet();selSet(false);const ben=R.reduce((a,r)=>a+r.pv-(r.p.achat||0)-r.frais,0);
+   toast(t('Lot vendu · bénéfice {b}',{b:eur(ben)}),()=>{bulkUndo(out);suppliesUse(-1)},7000)}};draw()}
+
+/* ---------- sélection multiple et actions groupées ---------- */
+let selMode=false;const SEL=new Set();
+document.body.insertAdjacentHTML('beforeend',`<div id="selbar" hidden><span id="sel_n"></span><button type="button" data-sa="all">${t('Tout')}</button><button type="button" class="pri" data-sa="act">${t('Actions')}</button><button type="button" data-sa="x" aria-label="${t('Fermer')}">✕</button></div>`);
+function curList(){const q=$('q').value.trim().toLowerCase(),toks=searchToks(q);return P.filter(p=>{if(!matchFilt(p))return false;if(!toks.length)return true;return searchScore(p,toks)>=0})}
+function selCards(){document.querySelectorAll('#lst .tl,#lst .qrow,#lst .li').forEach(c=>{const d=c.matches('[data-id]')?c:c.querySelector('[data-id]');c.classList.toggle('selc',!!(d&&selMode&&SEL.has(d.dataset.id)))})}
+function selBar(){const b=$('selbar');b.hidden=!selMode;document.body.classList.toggle('selmode',selMode);if(selMode)$('sel_n').textContent=SEL.size?tn(SEL.size,'sélectionnée','sélectionnées'):t('Touche des pièces')}
+function selSet(on){selMode=on;if(!on)SEL.clear();if(view==='list')renderList();else selBar()}
+const renderList24=renderList;renderList=function(){renderList24();const f=$('flt'),vt=f&&f.querySelector('.vt'),h=`<button type="button" class="chip sm${selMode?' on':''}" data-selmode="1">${t('Sélection')}</button>`;if(vt)vt.insertAdjacentHTML('beforebegin',h);else if(f)f.insertAdjacentHTML('beforeend',h);$('lst').classList.toggle('selmode',selMode);selCards();selBar()};
+document.addEventListener('click',e=>{if(e.target.closest('[data-selmode]'))selSet(!selMode)});
+(function(){const box=$('lst');let tm=null,sx=0,sy=0;
+ box.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'||selMode||e.target.closest('input,select,textarea,.qform'))return;const c=e.target.closest('.tl,.qrow,.li');if(!c||c.classList.contains('open'))return;const d=c.matches('[data-id]')?c:c.querySelector('[data-id]');if(!d)return;sx=e.clientX;sy=e.clientY;tm=setTimeout(()=>{tm=null;window._lp=Date.now();selMode=true;SEL.add(d.dataset.id);buzz(25);renderList()},520)});
+ const stop=()=>{if(tm){clearTimeout(tm);tm=null}};box.addEventListener('pointerup',stop);box.addEventListener('pointercancel',stop);box.addEventListener('pointermove',e=>{if(tm&&(Math.abs(e.clientX-sx)>9||Math.abs(e.clientY-sy)>9))stop()});
+ box.addEventListener('contextmenu',e=>{if(e.target.closest('.tl,.qrow,.li')&&matchMedia('(pointer:coarse)').matches)e.preventDefault()});
+ box.addEventListener('click',e=>{if(window._lp&&Date.now()-window._lp<700){e.stopImmediatePropagation();e.preventDefault();window._lp=0}},true);
+ box.addEventListener('click',e=>{if(!selMode)return;const c=e.target.closest('.tl,.qrow,.li');if(!c)return;const d=c.matches('[data-id]')?c:c.querySelector('[data-id]');if(!d)return;e.preventDefault();e.stopImmediatePropagation();const id=d.dataset.id;if(SEL.has(id))SEL.delete(id);else SEL.add(id);buzz(8);c.classList.toggle('selc',SEL.has(id));selBar()},true)})();
+$('selbar').onclick=e=>{const b=e.target.closest('[data-sa]');if(!b)return;const a=b.dataset.sa;if(a==='x')return selSet(false);
+ if(a==='all'){const L=curList();if(SEL.size>=L.length)SEL.clear();else L.forEach(p=>SEL.add(p.id));selCards();selBar();if(SEL.size)toast(tn(SEL.size,'pièce sélectionnée','pièces sélectionnées'));return}
+ if(a==='act')openSelActions()};
+const selPieces=()=>[...SEL].map(id=>P.find(p=>p.id===id)).filter(Boolean);
+function openSelActions(){const L=selPieces();if(!L.length)return toast(t('Choisis d\'abord des pièces'));const av=L.filter(avail).length,np=L.filter(unpub).length;
+ const A=[['price',t('Baisser le prix'),t('{n} pièces en stock',{n:av}),'<path d="M12 4v14M7 13l5 5 5-5"/>'],['pub',t('Marquer publiées'),t('{n} pas encore en ligne',{n:np}),'<path d="M5 12l4.5 4.5L19 7"/>'],['ballot',t('Changer de ballot'),t('Rattache ou retire le ballot'),'<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/>'],['bac',t('Changer de bac'),t('Pour les ranger au même endroit'),'<path d="M4 8h16v12H4zM3 4h18v4H3z"/>'],['lab',t('Imprimer les étiquettes'),t('Étiquettes QR de la sélection'),'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM19 17v3h-3"/>'],['lot',t('Créer un lot'),t('Vendre ensemble ou rédiger l\'annonce'),'<path d="M3 8l9-5 9 5-9 5zM3 8v8l9 5 9-5V8"/>']];
+ showSheet(sheetHead(tn(L.length,'pièce sélectionnée','pièces sélectionnées'))+`<div class="tools">${A.map(a=>`<button type="button" class="tool" data-sx="${a[0]}"><span class="tic">${TI(a[3])}</span><span class="tx"><b>${a[1]}</b><small>${a[2]}</small></span></button>`).join('')}</div>`);
+ $('shc').onclick=e=>{const b=e.target.closest('[data-sx]');if(!b)return;({price:selPrice,pub:selPub,ballot:()=>selField('ballot'),bac:()=>selField('bac'),lab:selLabels,lot:selLot})[b.dataset.sx]()}}
+function selPub(){const L=selPieces().filter(unpub);if(!L.length){toast(t('Toutes les pièces choisies sont déjà en ligne'));return}
+ const out=bulkMod(L.map(p=>p.id),q=>Object.assign(q,{pub:today()}));openSelActions();toast(t('{n} pièces marquées publiées',{n:out.length}),()=>bulkUndo(out))}
+function selPrice(){const L=selPieces().filter(avail),skip=L.filter(p=>!priceFor(p)).length;let pct=10;
+ const draw=()=>{const ex=L.find(p=>priceFor(p));showSheet(sheetHead(t('Baisser le prix'))+`<div class="card"><p class="sub" style="margin:0 0 12px">${t('Le prix visé de chaque pièce en stock baisse du même pourcentage.')}</p><div class="chips">${[5,10,15,20,30].map(v=>`<button type="button" class="chip sm${pct===v?' on':''}" data-pc="${v}">− ${v} %</button>`).join('')}</div>
+  <div class="fld" style="margin-top:12px"><label class="l" for="sp_v">${t('Autre pourcentage')}</label><input type="text" inputmode="decimal" id="sp_v" value="${pct}"></div>
+  ${ex?`<div class="pv">${esc(title(ex))} : ${eur(priceFor(ex))} → <b>${eur(newPrice(ex,pct))}</b></div>`:''}${skip?`<div class="hint">${t('{n} pièces sans prix connu seront ignorées.',{n:skip})}</div>`:''}</div>
+  <div class="acts"><button type="button" class="btn mint" id="sp_ok"${L.length-skip?'':' disabled'}>${t('Baisser {n} pièces',{n:L.length-skip})}</button><button type="button" class="btn sec" id="sp_no">${t('Retour')}</button></div>`);
+  $('sp_no').onclick=openSelActions;$('sp_v').oninput=()=>{const v=num($('sp_v').value);if(!isNaN(v)&&v>0&&v<100){pct=v;const ex2=L.find(p=>priceFor(p));const pv=document.querySelector('#shc .pv');if(pv&&ex2)pv.innerHTML=esc(title(ex2))+' : '+eur(priceFor(ex2))+' → <b>'+eur(newPrice(ex2,pct))+'</b>'}};
+  $('shc').onclick=e=>{const c=e.target.closest('[data-pc]');if(c){pct=+c.dataset.pc;draw()}};
+  $('sp_ok').onclick=()=>{const v=num($('sp_v').value);if(!isNaN(v)&&v>0&&v<100)pct=v;const out=bulkMod(L.filter(p=>priceFor(p)).map(p=>p.id),q=>Object.assign(q,{pvise:newPrice(q,pct)}));selSet(false);closeSheet();toast(t('{n} prix baissés de {p} %',{n:out.length,p:pct}),()=>bulkUndo(out))}};draw()}
+const newPrice=(p,pct)=>Math.max(.5,nice(priceFor(p)*(1-pct/100)));
+function selField(k){const L=selPieces(),lab=k==='ballot'?t('Ballot'):t('Bac'),vals=[...new Set(P.map(p=>p[k]).filter(Boolean))].sort();
+ showSheet(sheetHead(t('Changer de {x}',{x:lc(lab)}))+`<div class="card"><div class="fld"><label class="l" for="sf_v">${lab}</label><input type="text" id="sf_v" list="sf_l" autocomplete="off" placeholder="${t('Vide pour retirer')}"><datalist id="sf_l">${vals.map(v=>`<option value="${esc(v)}">`).join('')}</datalist></div><div class="hint">${t('Appliqué aux {n} pièces sélectionnées.',{n:L.length})}</div></div><div class="acts"><button type="button" class="btn mint" id="sf_ok">${t('Appliquer')}</button><button type="button" class="btn sec" id="sf_no">${t('Retour')}</button></div>`);
+ $('sf_no').onclick=openSelActions;$('sf_ok').onclick=()=>{const v=$('sf_v').value.trim();const out=bulkMod(L.map(p=>p.id),q=>{if(v)q[k]=v;else delete q[k];return q});selSet(false);closeSheet();toast(t('{n} pièces modifiées',{n:out.length}),()=>bulkUndo(out))}}
+function selLabels(){const L=selPieces();closeSheet();printLabels(L)}
+function lotAd(L){const br=[...new Set(L.map(p=>p.marque).filter(Boolean))],ti=(t('Lot de {n}',{n:L.length})+' '+(br.slice(0,3).join(', ')||t('vêtements'))).slice(0,60),tot=L.reduce((a,p)=>a+(priceFor(p)||0),0),lotP=tot?nice(tot*.85):0;
+ const desc=t('Lot de {n} pièces vendu ensemble, un seul envoi.',{n:L.length})+'\n\n'+L.map(p=>'• '+title(p)+(p.taille?' '+p.taille:'')+(p.etat?' · '+tv(p.etat):'')).join('\n')+(lotP?'\n\n'+t('Prix du lot : {p} au lieu de {q} séparément.',{p:eur(lotP),q:eur(tot)}):'')+'\n\n'+t('Envoi soigné. N\'hésite pas à poser tes questions.');return{ti,desc,lotP}}
+function selLot(){const L=selPieces(),av=L.filter(avail);
+ showSheet(sheetHead(t('Créer un lot'))+`<div class="card"><p class="sub" style="margin:0">${tn(av.length,'pièce en stock','pièces en stock')} ${t('dans la sélection')}.</p></div><div class="tools"><button type="button" class="tool" data-lt="sell"><span class="tic">${TI('<path d="M5 12l4.5 4.5L19 7"/>')}</span><span class="tx"><b>${t('Vendre ensemble')}</b><small>${t('Un paiement, un colis, prix et frais répartis')}</small></span></button><button type="button" class="tool" data-lt="ad"><span class="tic">${TI('<path d="M4 5h16v11H9l-5 4z"/>')}</span><span class="tx"><b>${t('Rédiger l\'annonce du lot')}</b><small>${t('Titre et description à copier dans Vinted')}</small></span></button></div><div class="acts"><button type="button" class="btn sec" id="lt_no">${t('Retour')}</button></div>`);
+ $('lt_no').onclick=openSelActions;$('shc').onclick=e=>{const b=e.target.closest('[data-lt]');if(!b)return;if(b.dataset.lt==='sell')return openGroupSale(av.map(p=>p.id));
+  const a=lotAd(av.length?av:L);showSheet(sheetHead(t('Annonce du lot'))+`<div class="card"><div class="fld"><label class="l" for="la_t">${t('Titre')}</label><input type="text" id="la_t" maxlength="60" value="${esc(a.ti)}"></div><div class="fld"><label class="l" for="la_d">${t('Description')}</label><textarea id="la_d" rows="12" style="font-size:15px">${esc(a.desc)}</textarea></div></div><div class="acts two"><button type="button" class="btn" id="la_ct">${t('Copier le titre')}</button><button type="button" class="btn" id="la_cd">${t('Copier la description')}</button></div><div class="acts"><button type="button" class="btn sec" id="la_no">${t('Retour')}</button></div>`);
+  $('la_ct').onclick=()=>copyText($('la_t').value,t('Titre'));$('la_cd').onclick=()=>copyText($('la_d').value,t('Description'));$('la_no').onclick=selLot}}
+
+/* ---------- ajouts à la fiche d'une pièce ---------- */
+function ficheExtra(p){const vin=vintageFor(p.marque),pals=p.lot?P.filter(x=>x.lot===p.lot&&x.id!==p.id):[];
+ return`<div class="card fx"><h3 style="margin:0 0 8px">${t('Pièces similaires déjà vendues')}</h3>${similarHTML(p)}
+  ${pals.length?`<div class="sim" style="margin-top:10px"><b>${t('Vendue dans un lot de {n} pièces',{n:p.lotn||pals.length+1})}</b><span>${pals.map(x=>esc(title(x))).join(' · ')}</span></div>`:''}
+  ${p.acheteur?`<div class="sim" style="margin-top:10px"><b>@${esc(p.acheteur)}</b><span>${buyerLine(p.acheteur)||''}</span><button type="button" class="lnkb" data-fx="buy" style="padding:0">${t('Voir la fiche acheteur')}</button></div>`:''}
+  <div class="acts${avail(p)?' two':''}" style="margin-top:12px"><button type="button" class="btn sec sm" data-fx="var">${t('Variante : autre taille ou couleur')}</button>${avail(p)?`<button type="button" class="btn sec sm" data-fx="lot">${t('Vendre avec d\'autres pièces')}</button>`:''}</div>
+  ${vin?`<div class="acts" style="margin-top:8px"><button type="button" class="btn sec sm" data-fx="vin">${t('Repères vintage : {m}',{m:vin.n})}</button></div>`:''}</div>`}
+function fxClick(p,a){if(a==='var')return openVariant(p.id);if(a==='buy')return openBuyer(pseudoKey(p.acheteur),()=>openSheet(p.id));if(a==='vin')return openVintage(vintageFor(p.marque).n,p.id);
+ if(a==='lot'){SEL.clear();SEL.add(p.id);selMode=true;closeSheet();go('list');renderList();toast(t('Touche les autres pièces, puis Actions'),null,4500)}}
+const openSheet24=openSheet;openSheet=function(id,m){openSheet24(id,m);if((m||'view')!=='view')return;const p=P.find(x=>x.id===id),shc=$('shc');if(!p||$('sheet').hidden||!shc)return;const a=shc.querySelector('.acts');if(!a)return;a.insertAdjacentHTML('beforebegin',ficheExtra(p));shc.querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>fxClick(p,b.dataset.fx))};
+
+/* ===== v24 b : analyses (live, cohortes, tranches, courbe, seuil) ===== */
+const pctF=v=>Math.round(v*100)+' %';
+const soldIn=(from,to)=>P.filter(p=>sold(p)&&ok(p.dv)&&(!from||p.dv>=from)&&(!to||p.dv<=to));
+
+/* --- bilan de chaque live --- */
+function liveSessions(){const g={};P.filter(p=>sold(p)&&p.canal==='TikTok Live'&&ok(p.dv)).forEach(p=>{(g[p.dv]=g[p.dv]||[]).push(p)});return Object.keys(g).sort().reverse().map(d=>{const L=g[d],S=stats(L),ts=L.map(p=>p.vt).filter(Boolean).sort((a,b)=>a-b),hrs={};ts.forEach(v=>{const h=new Date(v).getHours();hrs[h]=(hrs[h]||0)+1});
+ const buy=new Set(L.map(p=>p.acheteur).filter(Boolean).map(pseudoKey));return{d,L,S,ts,hrs,buy:buy.size,dur:ts.length>1?(ts[ts.length-1]-ts[0])/6e4:0}})}
+let liveSelD='';
+function livesBody(){const LS=liveSessions();if(!LS.length)return`<div class="empty" style="padding:14px 8px">${t('Aucune vente en TikTok Live enregistrée. Vends depuis l\'onglet Live pour voir ton bilan.')}</div>`;
+ const cur=LS.find(s=>s.d===liveSelD)||LS[0],i=LS.indexOf(cur),prev=LS.slice(i+1),avg=prev.length?prev.reduce((a,s)=>a+s.S.ca,0)/prev.length:0,rank=[...LS].sort((a,b)=>b.S.ca-a.S.ca).indexOf(cur)+1;
+ const hrs=Object.keys(cur.hrs).map(Number).sort((a,b)=>a-b),mx=Math.max(1,...Object.values(cur.hrs)),top=[...cur.L].sort((a,b)=>profit(b)-profit(a)).slice(0,3);
+ const vs=avg?(cur.S.ca/avg-1):null;
+ return`<div class="chips" id="lv_d" style="margin-bottom:12px;flex-wrap:nowrap;overflow-x:auto">${LS.slice(0,14).map(s=>`<button type="button" class="chip sm${s.d===cur.d?' on':''}" data-ld="${s.d}">${fd(s.d)}</button>`).join('')}</div>
+ <div class="kpis"><div class="kpi"><b>${eurR(cur.S.ca)}</b><span>${t('chiffre d\'affaires')}</span></div><div class="kpi"><b>${cur.S.n}</b><span>${t('ventes')}</span></div><div class="kpi"><b>${eurR(cur.S.ben)}</b><span>${t('bénéfice net')}</span></div></div>
+ <dl class="kv" style="margin:10px 0 0"><dt>${t('Panier moyen')}</dt><dd>${eur(cur.S.panier)}</dd>${cur.dur?`<dt>${t('Durée des ventes')}</dt><dd>${Math.floor(cur.dur/60)} h ${Math.round(cur.dur%60)} min</dd><dt>${t('Ventes par heure')}</dt><dd>${(cur.S.n/Math.max(.5,cur.dur/60)).toFixed(1).replace('.',DS)}</dd>`:''}${cur.buy?`<dt>${t('Acheteurs')}</dt><dd>${cur.buy}</dd>`:''}<dt>${t('Rang')}</dt><dd>${rank} / ${LS.length}</dd></dl>
+ ${hrs.length?`<span class="l" style="display:block;margin-top:14px">${t('Ventes par heure')}</span><div class="hrb">${hrs.map(h=>`<div><i style="height:${Math.max(6,cur.hrs[h]/mx*100)}%"></i><b>${cur.hrs[h]}</b><small>${h} h</small></div>`).join('')}</div>`:''}
+ <span class="l" style="display:block;margin-top:14px">${t('Pièces qui ont le mieux marché')}</span>${top.map(p=>`<button type="button" class="li" data-id="${esc(p.id)}" style="margin-top:6px"><div class="m"><b>${esc(title(p))}</b><small>${esc([p.taille,p.acheteur&&'@'+p.acheteur].filter(Boolean).join(' · '))}</small></div><div class="p g">${eur(p.pv)}<small>+${eur(profit(p))}</small></div></button>`).join('')}
+ ${prev.length?`<div class="cl cl-${vs>=0?'g':'o'}" style="margin-top:14px"><i></i><div><b>${vs>=0?'+':'−'}${Math.abs(Math.round(vs*100))} % ${t('par rapport à tes lives précédents')}</b><span>${t('Moyenne des {n} lives d\'avant : {c}',{n:prev.length,c:eurR(avg)})}</span></div></div>`:`<div class="hint">${t('C\'est ton premier live enregistré : la comparaison apparaîtra au prochain.')}</div>`}`}
+function openLives(){showSheet(sheetHead(t('Bilan des lives'))+`<div class="card" id="lvb">${livesBody()}</div>`);$('shc').onclick=e=>{const d=e.target.closest('[data-ld]');if(d){liveSelD=d.dataset.ld;$('lvb').innerHTML=livesBody()}}}
+
+/* --- cohortes : pièces entrées le même mois --- */
+function cohorteData(){const g={},nowD=today();P.filter(p=>ok(p.entree)&&!p.ex).forEach(p=>{(g[p.entree.slice(0,7)]=g[p.entree.slice(0,7)]||[]).push(p)});
+ return Object.keys(g).sort().reverse().slice(0,12).map(m=>{const L=g[m],row={m,n:L.length,left:L.filter(avail).length};[30,60,90].forEach(N=>{const el=L.filter(p=>days(p.entree,nowD)>=N||(sold(p)&&ok(p.dv)&&days(p.entree,p.dv)<=N));const s=el.filter(p=>sold(p)&&ok(p.dv)&&days(p.entree,p.dv)<=N).length;row['r'+N]=el.length>=Math.max(3,L.length*.5)?s/el.length:null});return row}).filter(r=>r.n>=3)}
+function cohorteBody(){const R=cohorteData();if(!R.length)return`<div class="empty" style="padding:14px 8px">${t('Pas assez de pièces par mois d\'entrée (3 minimum).')}</div>`;
+ const mn=m=>new Date(m+'-15T12:00:00').toLocaleDateString(LOC,{month:'short',year:'2-digit'}).replace('.',''),cell=v=>v==null?'<td class="mu">—</td>':`<td><i class="cb" style="--w:${Math.round(v*100)}%"></i><b>${pctF(v)}</b></td>`;
+ const best=R.filter(r=>r.r60!=null).sort((a,b)=>b.r60-a.r60)[0];
+ return`<p class="sub" style="margin:0 0 10px">${t('Part des pièces entrées un mois donné qui sont vendues au bout de 30, 60 et 90 jours.')}</p><div class="rpv"><table class="coh"><thead><tr><th>${t('Entrées en')}</th><th>${t('Pièces')}</th><th>30 ${t('j')}</th><th>60 ${t('j')}</th><th>90 ${t('j')}</th></tr></thead><tbody>${R.map(r=>`<tr><th>${esc(mn(r.m))}</th><td>${r.n}</td>${cell(r.r30)}${cell(r.r60)}${cell(r.r90)}</tr>`).join('')}</tbody></table></div>
+ <div class="hint" style="margin-top:8px">${t('« — » : trop tôt pour mesurer cette période.')}</div>${best?`<div class="cl cl-g" style="margin-top:10px"><i></i><div><b>${t('Meilleurs achats à 60 jours : {m}',{m:mn(best.m)})}</b><span>${pctF(best.r60)} ${t('des pièces vendues')}</span></div></div>`:''}`}
+function openCohortes(){showSheet(sheetHead(t('Qualité de tes achats'))+`<div class="card">${cohorteBody()}</div>`)}
+
+/* --- rentabilité par tranche de prix d'achat --- */
+const TRANCHES=[[0,1,'Moins de 1 €'],[1,2,'1 à 2 €'],[2,3,'2 à 3 €'],[3,5,'3 à 5 €'],[5,8,'5 à 8 €'],[8,12,'8 à 12 €'],[12,1e9,'12 € et plus']];
+function tranchesData(){return TRANCHES.map(([a,b,l])=>{const all=P.filter(p=>!p.ex&&isnum(p.achat)&&p.achat>=a&&p.achat<b),S=all.filter(sold),st=stats(S),cost=st.cost;return{l,n:all.length,sold:S.length,rate:all.length?S.length/all.length:0,ben:st.ben,roi:cost?st.ben/cost:null,per:S.length?st.ben/S.length:0,delai:st.delai}}).filter(r=>r.n>0)}
+function tranchesBody(){const R=tranchesData();if(!R.length)return`<div class="empty" style="padding:14px 8px">${t('Renseigne les prix d\'achat pour comparer.')}</div>`;const mx=Math.max(1,...R.map(r=>Math.abs(r.roi||0))),best=R.filter(r=>r.sold>=3&&r.roi!=null).sort((a,b)=>b.roi-a.roi)[0];
+ return`<p class="sub" style="margin:0 0 10px">${t('Pour 1 € dépensé, combien rapporte chaque tranche de prix d\'achat ?')}</p>${R.map(r=>`<div class="hb"><span class="n">${t(r.l)}</span><div class="tr"><i class="${(r.roi||0)<0?'neg':''}" style="width:${Math.max(3,Math.abs(r.roi||0)/mx*100)}%"></i></div><span class="v">${r.roi==null?'—':'×'+(r.roi+1).toFixed(1).replace('.',DS)}</span><small>${tn(r.n,'pièce','pièces')} · ${t('{p} vendues',{p:pctF(r.rate)})} · ${eur(r.per)} ${t('par vente')}${r.sold?' · '+dj(r.delai):''}</small></div>`).join('')}
+ <div class="hint" style="margin-top:8px">${t('« ×3,0 » : chaque euro dépensé en revient avec 2 € de bénéfice net en plus. Les tranches à moins de 3 ventes sont peu fiables.')}</div>${best?`<div class="cl cl-g" style="margin-top:10px"><i></i><div><b>${t('Tranche la plus rentable : {l}',{l:t(best.l)})}</b><span>${t('Rendement ×{x}',{x:(best.roi+1).toFixed(1).replace('.',DS)})}</span></div></div>`:''}`}
+function openTranches(){showSheet(sheetHead(t('Rentabilité par prix d\'achat'))+`<div class="card">${tranchesBody()}</div>`)}
+
+/* --- courbe de bénéfice cumulé et objectif --- */
+function courbeBody(){const kind=(goalKinds()||[]).find(k=>goalCalc(k,'m'));if(!kind)return`<p class="sub" style="margin:0 0 10px">${t('Fixe un objectif mensuel pour voir si tu es en avance ou en retard chaque jour.')}</p><button type="button" class="btn sm" data-goalset>${t('Définir mon objectif')}</button>`;
+ const d=goalCalc(kind,'m'),now=new Date(),y=now.getFullYear(),mo=now.getMonth(),n=new Date(y,mo+1,0).getDate(),dn=now.getDate(),pre=today().slice(0,7),per=Array(n+1).fill(0);
+ P.filter(p=>sold(p)&&(p.dv||'').startsWith(pre)).forEach(p=>{const dd=+p.dv.slice(8,10);per[dd]+=kind==='net'?profit(p):(p.pv||0)});
+ const cum=[0];for(let i=1;i<=dn;i++)cum[i]=cum[i-1]+per[i];const g=d.g,mxv=Math.max(g,...cum,1)*1.08,W=320,H=150,X=i=>8+(i-1)/(n-1)*(W-16),Y=v=>H-8-v/mxv*(H-24);
+ const line=cum.slice(1).map((v,i)=>(i?'L':'M')+X(i+1).toFixed(1)+' '+Y(v).toFixed(1)).join(' '),exp=g*dn/n,diff=cum[dn]-exp,proj=cum[dn]/dn*n,ahead=diff>=0;
+ return`<svg viewBox="0 0 ${W} ${H}" class="crv" role="img" aria-label="${t('Courbe cumulée du mois')}"><line x1="${X(1)}" y1="${Y(0)}" x2="${X(n)}" y2="${Y(g)}" class="tg"/><path d="${line}" class="ac ${ahead?'up':'dn'}"/><circle cx="${X(dn)}" cy="${Y(cum[dn])}" r="4.5" class="ac ${ahead?'up':'dn'}"/><circle cx="${X(dn)}" cy="${Y(exp)}" r="3.5" class="tg2"/><text x="${W-8}" y="${Y(g)-6}" text-anchor="end" class="lb">${t('objectif')} ${eurR(g)}</text></svg>
+ <div class="cl cl-${ahead?'g':'o'}"><i></i><div><b>${ahead?t('En avance de {x}',{x:eur(Math.abs(diff))}):t('En retard de {x}',{x:eur(Math.abs(diff))})}</b><span>${t('Aujourd\'hui : {a} · objectif du jour : {b}',{a:eur(cum[dn]),b:eur(exp)})}</span></div></div>
+ <div class="hint" style="margin-top:8px">${t('Au rythme actuel, tu finis le mois à {p}.',{p:eurR(proj)})} ${proj>=g?t('L\'objectif est tenu.'):t('Il manque {x} pour y arriver.',{x:eurR(g-proj)})}</div>`}
+function openCourbe(){showSheet(sheetHead(t('Bénéfice cumulé et objectif'))+`<div class="card">${courbeBody()}</div>`)}
+
+/* --- seuil de rentabilité mensuel --- */
+const fixesList=()=>Array.isArray(cfg.fixes)?cfg.fixes:[];
+const fixesMois=()=>fixesList().reduce((a,f)=>a+(f.p==='A'?(+f.v||0)/12:(+f.v||0)),0);
+function seuilCalc(){const F=fixesMois(),S=stats(soldIn(addDays(today(),-90),'')),per=S.n?S.ben/S.n:0,need=per>0?Math.ceil(F/per):null,pre=today().slice(0,7),M=stats(soldIn(pre+'-01',pre+'-31'));
+ return{F,per,need,M,rate:S.n/90*30,reached:M.ben>=F,left:Math.max(0,F-M.ben)}}
+function seuilBody(){const c=seuilCalc();
+ return`<div class="fxl">${fixesList().map((f,i)=>`<div class="fxr"><span>${esc(f.n)}<small>${f.p==='A'?t('par an'):t('par mois')}</small></span><b>${eur(f.v)}</b><button type="button" class="chip sm" data-fxd="${i}" aria-label="${t('Supprimer')}">✕</button></div>`).join('')||`<p class="sub" style="margin:0 0 8px">${t('Ajoute tes frais fixes : abonnements, matériel (photo, cintres), forfait téléphone.')}</p>`}</div>
+ <div class="row2" style="margin-top:8px"><input type="text" id="fx_n" placeholder="${t('Nom (ex. abonnement)')}" autocomplete="off"><div class="price"><input type="text" inputmode="decimal" id="fx_v" placeholder="0"><span>€</span></div></div>
+ <div class="chips" id="fx_p" style="margin:8px 0"><button type="button" class="chip sm on" data-fp="M">${t('par mois')}</button><button type="button" class="chip sm" data-fp="A">${t('par an')}</button><button type="button" class="btn sm sec" id="fx_add" style="width:auto;margin-left:auto;min-height:40px">${t('Ajouter')}</button></div>
+ ${c.F?`<div class="kpis two"><div class="kpi"><b>${eurR(c.F)}</b><span>${t('frais fixes par mois')}</span></div><div class="kpi"><b>${c.need==null?'—':c.need}</b><span>${t('ventes pour couvrir')}</span></div></div>
+ <dl class="kv" style="margin:12px 0 0"><dt>${t('Bénéfice moyen par vente')}</dt><dd>${eur(c.per)}</dd><dt>${t('Ce mois-ci')}</dt><dd>${tn(c.M.n,'vente','ventes')} · ${eur(c.M.ben)}</dd><dt>${t('Ton rythme (90 jours)')}</dt><dd>${Math.round(c.rate)} ${t('ventes par mois')}</dd></dl>
+ ${c.need==null?`<div class="hint">${t('Pas encore assez de ventes pour calculer un bénéfice moyen.')}</div>`:`<div class="cl cl-${c.reached?'g':'o'}" style="margin-top:12px"><i></i><div><b>${c.reached?t('Frais fixes couverts, tu gagnes de l\'argent'):t('À partir de la {n}e vente du mois, tu gagnes de l\'argent',{n:c.need})}</b><span>${c.reached?t('Marge de sécurité : {x}',{x:eur(c.M.ben-c.F)}):t('Il reste {x} à couvrir ce mois-ci, soit environ {n} ventes.',{x:eur(c.left),n:Math.ceil(c.left/c.per)})}</span></div></div><div class="hint" style="margin-top:8px">${c.rate<c.need?t('À ton rythme actuel ({r} ventes par mois), le seuil n\'est pas atteint.',{r:Math.round(c.rate)}):t('Ton rythme actuel couvre le seuil.')}</div>`}`:''}`}
+function openSeuil(){const draw=()=>{showSheet(sheetHead(t('Seuil de rentabilité'))+`<div class="card" id="sl_b">${seuilBody()}</div>`);let per='M';
+ $('shc').onclick=e=>{const p=e.target.closest('[data-fp]');if(p){per=p.dataset.fp;$('fx_p').querySelectorAll('[data-fp]').forEach(x=>x.classList.toggle('on',x===p));return}const d=e.target.closest('[data-fxd]');if(d){setCfg({fixes:fixesList().filter((f,i)=>i!==+d.dataset.fxd)});return draw()}
+  if(e.target.closest('#fx_add')){const n=$('fx_n').value.trim(),v=num($('fx_v').value);if(!n||isNaN(v)||v<=0)return toast(t('Indique un nom et un montant'));setCfg({fixes:[...fixesList(),{n,v,p:per}]});draw()}}};draw()}
+const seuilCardTxt=()=>{const c=seuilCalc();return c.F?(c.need==null?'':c.reached?t('Frais fixes couverts'):t('Seuil : {n} ventes',{n:c.need})):''};
+
+/* ===== v24 b2 : fournitures et planning ===== */
+const fournList=()=>Array.isArray(cfg.fourn)?cfg.fourn:[];
+const fournLow=()=>fournList().filter(f=>(+f.seuil||0)>0&&(+f.q||0)<=(+f.seuil||0));
+const colisCost=()=>fournList().reduce((a,f)=>a+(+f.c||0)*(+f.u||0),0);
+function suppliesUse(sign){const L=fournList();if(!L.some(f=>+f.u>0))return;const before=fournLow().map(f=>f.id),nl=L.map(f=>+f.u>0?Object.assign({},f,{q:Math.max(0,r2((+f.q||0)-sign*f.u)),s:Math.max(0,r2((+f.s||0)+sign*f.u))}):f);setCfg({fourn:nl});
+ if(sign>0){const nw=fournLow().filter(f=>!before.includes(f.id));if(nw.length)setTimeout(()=>toast(t('Plus que {q} {n}',{q:nw[0].q,n:nw[0].n}),null,5500),1500)}}
+const save24=save;save=function(p){const o=P.find(x=>x.id===p.id),r=save24(p);try{if(o&&!sold(o)&&sold(p)&&!p.lot)suppliesUse(1);else if(o&&sold(o)&&!sold(p)&&!o.lot)suppliesUse(-1)}catch(e){}return r};
+function openFourn(sel){let rs=false;const draw=()=>{const L=fournList(),cost=colisCost(),e=sel?L.find(f=>f.id===sel):null;
+ showSheet(sheetHead(t('Fournitures'))+(rs&&e?`<div class="card"><p class="sub" style="margin:0 0 12px"><b>${esc(e.n)}</b> · ${t('{q} en stock',{q:e.q})}</p><div class="row2 fld"><div><label class="l" for="fo_rq">${t('Quantité ajoutée')}</label><input type="text" inputmode="decimal" id="fo_rq" value="100"></div><div><label class="l" for="fo_rp">${t('Prix total payé')}</label><div class="price"><input type="text" inputmode="decimal" id="fo_rp" placeholder="0"><span>€</span></div></div></div><div class="hint">${t('Le prix à l\'unité est recalculé en moyenne avec ton ancien stock.')}</div></div><div class="acts"><button type="button" class="btn mint" id="fo_rok">${t('Ajouter au stock')}</button><button type="button" class="btn sec" id="fo_no">${t('Retour')}</button></div>`:sel?`<div class="card"><div class="fld"><label class="l" for="fo_n">${t('Nom')}</label><input type="text" id="fo_n" value="${esc(e?e.n:'')}" placeholder="${t('Sachets, cartons, scotch, étiquettes')}"></div>
+ <div class="row2 fld"><div><label class="l" for="fo_q">${t('En stock')}</label><input type="text" inputmode="decimal" id="fo_q" value="${e?e.q:''}"></div><div><label class="l" for="fo_s">${t('Alerte à partir de')}</label><input type="text" inputmode="decimal" id="fo_s" value="${e&&e.seuil?e.seuil:''}" placeholder="10"></div></div>
+ <div class="row2 fld"><div><label class="l" for="fo_c">${t('Prix à l\'unité')}</label><div class="price"><input type="text" inputmode="decimal" id="fo_c" value="${e&&e.c?e.c:''}"><span>€</span></div></div><div><label class="l" for="fo_u">${t('Utilisé par colis')}</label><input type="text" inputmode="decimal" id="fo_u" value="${e&&e.u?e.u:''}" placeholder="1"></div></div>
+ <div class="hint">${t('Si « utilisé par colis » est rempli, le stock baisse tout seul à chaque vente et le coût réel du colis est calculé.')}</div></div>
+ <div class="acts"><button type="button" class="btn mint" id="fo_ok">${t('Enregistrer')}</button>${e?`<button type="button" class="btn red" id="fo_del">${t('Supprimer')}</button>`:''}<button type="button" class="btn sec" id="fo_no">${t('Retour')}</button></div>`:
+ `<div class="card"><div class="kpis two" style="margin:0"><div class="kpi"><b>${eur(cost)}</b><span>${t('coût réel d\'un colis')}</span></div><div class="kpi"><b>${eur(cfg.emb||0)}</b><span>${t('frais d\'emballage dans tes réglages')}</span></div></div>${cost>0&&Math.abs(cost-(cfg.emb||0))>.005?`<div class="acts"><button type="button" class="btn sm sec" id="fo_use">${t('Utiliser {c} comme frais d\'emballage',{c:eur(cost)})}</button></div>`:''}</div>
+ ${fournLow().length?`<div class="cl cl-o" style="margin-bottom:12px"><i></i><div><b>${t('À racheter')}</b><span>${fournLow().map(f=>esc(f.n)+' ('+f.q+')').join(' · ')}</span></div></div>`:''}
+ ${L.map(f=>`<div class="fxr"><button type="button" class="li" data-fe="${esc(f.id)}" style="margin:0;flex:1"><div class="m"><b>${esc(f.n)}</b><small>${f.c?eur(f.c)+' '+t('l\'unité'):''}${f.u?' · '+t('{u} par colis',{u:f.u}):''}${f.s?' · '+t('{x} utilisés',{x:f.s}):''}</small></div><div class="p ${fournLow().includes(f)?'b':''}">${f.q}<small>${t('en stock')}</small></div></button><button type="button" class="chip sm" data-fr="${esc(f.id)}">+ ${t('Racheté')}</button></div>`).join('')||`<div class="empty" style="padding:14px 8px">${t('Ajoute tes sachets, cartons, scotch et étiquettes.')}</div>`}
+ <div class="acts"><button type="button" class="btn" id="fo_new">${t('Ajouter une fourniture')}</button></div>`));
+ const go1=id=>{sel=id;draw()};
+ $('shc').onclick=e=>{const b=e.target.closest('[data-fe]');if(b)return go1(b.dataset.fe);const r=e.target.closest('[data-fr]');if(r){sel=r.dataset.fr;rs=true;return draw()}
+  if(e.target.closest('#fo_rok')){const f=fournList().find(x=>x.id===sel),n=num($('fo_rq').value),tot=num($('fo_rp').value);if(!f||isNaN(n)||n<=0)return toast(t('Indique la quantité'));const nf=Object.assign({},f,{q:r2((+f.q||0)+n)});if(!isNaN(tot)&&tot>0)nf.c=r2((((+f.q||0)*(+f.c||0))+tot)/((+f.q||0)+n));setCfg({fourn:fournList().map(x=>x.id===sel?nf:x)});sel=null;rs=false;toast(t('Stock mis à jour'));return draw()}
+  if(e.target.closest('#fo_new'))return go1('new');if(e.target.closest('#fo_no')){sel=null;rs=false;return draw()}
+  if(e.target.closest('#fo_use')){setCfg({emb:r2(colisCost())});toast(t('Frais d\'emballage mis à jour'));return draw()}
+  if(e.target.closest('#fo_del')){setCfg({fourn:fournList().filter(f=>f.id!==sel)});sel=null;return draw()}
+  if(e.target.closest('#fo_ok')){const n=$('fo_n').value.trim();if(!n)return toast(t('Donne un nom'));const g=id=>{const v=num($('fo_'+id).value);return isNaN(v)?0:v},o={id:sel==='new'?'f'+Date.now().toString(36):sel,n,q:g('q'),seuil:g('s'),c:g('c'),u:g('u')},old=fournList().find(f=>f.id===o.id);if(old&&old.s)o.s=old.s;
+   setCfg({fourn:old?fournList().map(f=>f.id===o.id?o:f):[...fournList(),o]});sel=null;draw()}};
+ };draw()}
+
+/* --- planning de la semaine --- */
+const PLK={photo:'Photos',sourcing:'Sourcing',live:'Live',depot:'Dépôt colis',autre:'Autre'},JOURS=[1,2,3,4,5,6,0];
+const jourNom=j=>new Date(2024,0,7+j).toLocaleDateString(LOC,{weekday:'long'});
+const planList=()=>Array.isArray(cfg.plan)?cfg.plan:[];
+function planDone(){const o=LSg('planDone',{}),d=today(),r={};r[d]=o[d]||{};return r}
+function taskDone(k){return !!planDone()[today()][k]}
+function setTaskDone(k,v){const o=planDone();if(v)o[today()][k]=1;else delete o[today()][k];LSs('planDone',o)}
+function planToday(){const dow=new Date().getDay(),T=[];
+ planList().filter(s=>+s.j===dow).sort((a,b)=>(a.h||'').localeCompare(b.h||'')).forEach(s=>T.push({k:'s:'+s.id,h:s.h,txt:t(PLK[s.k]||'Autre')+(s.n?' · '+s.n:''),kind:s.k}));
+ const nc=colisList().length;if(nc)T.push({k:'a:colis',txt:t('Déposer {n} colis avant {h}',{n:nc,h:hh(cfg.depotH)}),kind:'depot',auto:1});
+ const sp=P.filter(p=>avail(p)&&!p.photo&&!p.ex).length;if(sp)T.push({k:'a:photo',txt:t('Photographier {n} pièces sans photo',{n:Math.min(sp,15)}),kind:'photo',auto:1});
+ const u=P.filter(unpub).length,pt=P.filter(p=>p.pub===today()).length;if(u&&pt<5)T.push({k:'a:pub',txt:t('Publier {n} pièces',{n:5-pt}),kind:'autre',auto:1,tool:'pub'});
+ if(cfg.liveAt){const dt=new Date(cfg.liveAt);if(!isNaN(dt)&&ldate(dt)===today())T.push({k:'a:live',h:pad(dt.getHours(),2)+':'+pad(dt.getMinutes(),2),txt:t('Live TikTok'),kind:'live',auto:1})}
+ if(fournLow().length)T.push({k:'a:fourn',txt:t('Racheter : {x}',{x:fournLow().map(f=>f.n).join(', ')}),kind:'autre',auto:1,tool:'fourn'});
+ return T}
+function planCounts(){const T=planToday();return{n:T.length,d:T.filter(x=>taskDone(x.k)).length}}
+function planTodayHTML(){const T=planToday();return T.length?T.map(x=>`<label class="chk plt${taskDone(x.k)?' dn':''}"><input type="checkbox" data-pt="${esc(x.k)}"${taskDone(x.k)?' checked':''}><span>${x.h?'<b>'+hh(x.h)+'</b> ':''}${esc(x.txt)}</span></label>`).join(''):`<p class="sub" style="margin:0">${t('Rien de prévu aujourd\'hui. Ajoute des créneaux dans le planning de la semaine.')}</p>`}
+function openPlanning(){let ed=null;const draw=()=>{const dn=planCounts();
+ showSheet(sheetHead(t('Planning'))+`<div class="card"><h3 style="margin:0 0 4px">${t('Aujourd\'hui')}</h3><p class="sub" style="margin:0 0 10px">${dn.n?t('{d} sur {n} faites',{d:dn.d,n:dn.n}):''}</p><div id="pl_t">${planTodayHTML()}</div></div>
+ <div class="card"><h3 style="margin:0 0 10px">${t('La semaine')}</h3>${JOURS.map(j=>{const S=planList().filter(s=>+s.j===j).sort((a,b)=>(a.h||'').localeCompare(b.h||''));return`<div class="pwd${j===new Date().getDay()?' now':''}"><b>${esc(jourNom(j))}</b><div>${S.map(s=>`<button type="button" class="pws" data-pe="${esc(s.id)}"><i class="k-${s.k}"></i>${s.h?hh(s.h)+' · ':''}${t(PLK[s.k]||'Autre')}${s.n?' · '+esc(s.n):''}</button>`).join('')}<button type="button" class="pwa" data-pa="${j}" aria-label="${t('Ajouter')}">+</button></div></div>`}).join('')}</div>`+(ed?`<div class="card"><h3 style="margin:0 0 10px">${ed.id?t('Modifier le créneau'):t('Nouveau créneau')} · ${esc(jourNom(+ed.j))}</h3><div class="chips" id="pl_k" style="margin-bottom:12px">${Object.keys(PLK).map(k=>`<button type="button" class="chip sm${ed.k===k?' on':''}" data-pk="${k}">${t(PLK[k])}</button>`).join('')}</div><div class="row2"><div><label class="l" for="pl_h">${t('Heure')}</label><input type="time" id="pl_h" value="${esc(ed.h||'')}"></div><div><label class="l" for="pl_n">${t('Précision')}</label><input type="text" id="pl_n" value="${esc(ed.n||'')}" placeholder="${t('Vide-grenier, ballot…')}"></div></div><div class="acts"><button type="button" class="btn mint" id="pl_ok">${t('Enregistrer')}</button>${ed.id?`<button type="button" class="btn red" id="pl_del">${t('Supprimer')}</button>`:''}<button type="button" class="btn sec" id="pl_no">${t('Annuler')}</button></div></div>`:''));
+ $('shc').onchange=e=>{const c=e.target.closest('[data-pt]');if(c){setTaskDone(c.dataset.pt,c.checked);draw()}};
+ $('shc').onclick=e=>{const a=e.target.closest('[data-pa]');if(a){ed={j:+a.dataset.pa,k:'photo',h:'',n:''};return draw()}const s=e.target.closest('[data-pe]');if(s){ed=Object.assign({},planList().find(x=>x.id===s.dataset.pe));return draw()}
+  const k=e.target.closest('[data-pk]');if(k){ed.h=$('pl_h').value;ed.n=$('pl_n').value;ed.k=k.dataset.pk;return draw()}if(e.target.closest('#pl_no')){ed=null;return draw()}
+  if(e.target.closest('#pl_del')){setCfg({plan:planList().filter(x=>x.id!==ed.id)});ed=null;return draw()}
+  if(e.target.closest('#pl_ok')){const o=Object.assign({},ed,{h:$('pl_h').value,n:$('pl_n').value.trim()});if(!o.id)o.id='s'+Date.now().toString(36);setCfg({plan:ed.id?planList().map(x=>x.id===o.id?o:x):[...planList(),o]});ed=null;draw()}}};draw()}
+const rappelsList24=rappelsList;rappelsList=function(){const R=rappelsList24();try{const f=fournLow();if(f.length)R.push({k:'fourn',tone:'o',txt:t('Plus que {q} {n}',{q:f[0].q,n:f[0].n}),tool:'fourn'});const pc=planCounts();if(pc.n)R.push({k:'plan',tone:pc.d>=pc.n?'g':'o',txt:t('Planning du jour : {d} sur {n} faites',{d:pc.d,n:pc.n}),tool:'planning'})}catch(e){}return R};
+
+/* ===== v24 c : vintage, bilan personnalisable, confort, boutique ===== */
+const vintageFor=m=>{if(!m||!window.VINTAGE)return null;const k=nrm(m);return VINTAGE.marques.find(b=>nrm(b.n)===k||b.a.includes(k))||null};
+function openVintage(name,pid){const V=window.VINTAGE;if(!V)return toast(t('Repères indisponibles'));const piece=pid&&P.find(x=>x.id===pid);
+ if(!name){let q='';const draw=()=>{const k=nrm(q),L=V.marques.filter(b=>!k||nrm(b.n).includes(k)||b.a.some(a=>a.includes(k)));$('vv_l').innerHTML=L.map(b=>`<button type="button" class="li" data-vb="${esc(b.n)}"><div class="m"><b>${esc(b.n)}</b><small>${b.r.map(r=>esc(r.t)).join(' · ')}</small></div></button>`).join('')||`<div class="empty" style="padding:14px 8px">${t('Marque pas encore dans la liste. Les repères généraux ci-dessous valent pour toutes.')}</div>`};
+  showSheet(sheetHead(t('Datation vintage'))+`<p class="sub" style="margin:0 0 10px">${t('Étiquettes, logos et pays de fabrication par marque, pour dater une pièce et justifier ton prix.')}</p><input type="search" id="vv_q" placeholder="${t('Chercher une marque')}" autocomplete="off"><div id="vv_l" style="margin-top:12px"></div><div class="acts"><button type="button" class="btn sec" data-vb="*">${t('Repères généraux')}</button></div>`);draw();$('vv_q').oninput=()=>{q=$('vv_q').value;draw()};
+  $('shc').onclick=e=>{const b=e.target.closest('[data-vb]');if(b)openVintage(b.dataset.vb)};return}
+ const br=name==='*'?null:V.marques.find(b=>b.n===name),secs=(br?br.r:[]).map(r=>({t:r.t,l:r.l,id:'b'})),gen=V.general,picked=new Set();let dec='';
+ const text=()=>{const L=[...document.querySelectorAll('#shc [data-vl]:checked')].map(x=>x.value.replace(/[.\s]+$/,'')),m=br?br.n:(piece&&piece.marque)||'';return t('Pièce vintage')+(m?' '+m:'')+(dec?', '+dec:'')+'.'+(L.length?' '+t('Indices de datation')+' : '+L.join(' ; ')+'.':'')};
+ const block=(s,open)=>`<details class="card hist"${open?' open':''}><summary>${esc(s.t)}</summary>${s.l.map(l=>`<label class="chk vl"><input type="checkbox" data-vl value="${esc(l)}"><span>${esc(l)}</span></label>`).join('')}</details>`;
+ showSheet(sheetHead(br?esc(br.n):t('Repères généraux'))+`<div class="cl cl-o" style="margin-bottom:12px"><i></i><div><b>${t('Des indices, pas des preuves')}</b><span>${t('Recoupe plusieurs repères avant d\'écrire une date. Une étiquette peut être recousue et un modèle réédité.')}</span></div></div>
+  ${secs.map(s=>block(s,true)).join('')}${br?`<h3 style="margin:16px 0 8px">${t('Repères généraux')}</h3>`:''}${gen.map(s=>block(s,!br)).join('')}
+  <div class="card"><h3 style="margin:0 0 8px">${t('Phrase pour ton annonce')}</h3><div class="chips" id="vv_d" style="margin-bottom:10px">${['années 60','années 70','années 80','années 90','années 2000'].map(d=>`<button type="button" class="chip sm" data-vd="${d}">${t(d)}</button>`).join('')}</div><textarea id="vv_t" rows="4" style="font-size:15px"></textarea><div class="hint">${t('Coche les indices que tu as vérifiés sur ta pièce, choisis la période, puis copie.')}</div>
+  <div class="acts ${piece?'two':''}"><button type="button" class="btn" id="vv_c">${t('Copier')}</button>${piece?`<button type="button" class="btn sec" id="vv_n">${t('Ajouter à la note de la pièce')}</button>`:''}</div></div>
+  <div class="acts"><button type="button" class="btn sec" id="vv_b">${t('Retour')}</button></div>`);
+ const up=()=>{$('vv_t').value=text()};up();
+ $('shc').onchange=e=>{if(e.target.matches('[data-vl]'))up()};
+ $('shc').onclick=e=>{const d=e.target.closest('[data-vd]');if(d){const was=d.classList.contains('on');$('vv_d').querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));dec=was?'':d.dataset.vd;if(!was)d.classList.add('on');up()}};
+ $('vv_c').onclick=()=>copyText($('vv_t').value,t('Texte'));
+ if($('vv_n'))$('vv_n').onclick=()=>{const p=P.find(x=>x.id===pid);if(!p)return;save(Object.assign({},p,{note:((p.note?p.note+'\n':'')+$('vv_t').value).slice(0,600)}));toast(t('Ajouté à la note'));openSheet(pid)};
+ $('vv_b').onclick=()=>piece?openSheet(pid):openVintage()}
+
+/* ---------- bilan personnalisable ---------- */
+const DASH_NEW=['courbe','seuil','cohorte','tranches','live','fourn','planning'];
+function dashKeyed(){const box=$('dsh'),cnt={};return[...box.children].filter(el=>!el.classList.contains('dsa')).map(el=>{let k=el.dataset.ck;if(!k){const h=el.querySelector('h3[data-sec]');if(h)k='S:'+h.dataset.sec;else if(el.dataset.tool)k='T:'+el.dataset.tool;else{const c=el.classList.contains('hero')?'hero':el.classList.contains('kpis')?'kpis':el.classList.contains('coachc')?'coach':el.classList.contains('gcard')?'goal':el.dataset.nc?'nc':(el.className.split(' ')[0]||el.tagName.toLowerCase());cnt[c]=(cnt[c]||0)+1;k=c+cnt[c]}}return{el,k}})}
+function dashLabel(x){const el=x.el;if(el.dataset.lb)return el.dataset.lb;if(x.k.startsWith('T:')){const tl=TOOLS.find(z=>z.k===x.k.slice(2));if(tl)return t(tl.t)}if(x.k.startsWith('hero'))return t('Bénéfice net de la période');if(x.k.startsWith('kpis'))return x.k==='kpis1'?t('Chiffres clés'):t('Retours');if(x.k.startsWith('coach'))return t('Coach du lundi');if(x.k.startsWith('goal'))return t('Objectifs');const h=el.querySelector('h3');return(h?h.textContent:el.textContent).replace(/\s+/g,' ').trim().slice(0,36)||x.k}
+const dashHidden=()=>cfg.dash&&Array.isArray(cfg.dash.hide)?cfg.dash.hide:DASH_NEW;
+function newCards(){const hid=dashHidden(),c=(k,h,fn)=>hid.includes(k)?`<div class="card" data-nc="1" data-ck="${k}" data-lb="${esc(h)}" style="display:none"></div>`:`<div class="card" data-nc="1" data-ck="${k}" data-lb="${esc(h)}"><h3 style="margin:0 0 8px">${esc(h)}</h3><div class="cbody">${fn()}</div></div>`;
+ return c('courbe',t('Bénéfice cumulé et objectif'),courbeBody)+c('seuil',t('Seuil de rentabilité'),()=>{const x=seuilCardTxt();return`<p class="sub" style="margin:0 0 8px">${x||t('Ajoute tes frais fixes pour connaître ton seuil.')}</p><button type="button" class="btn sm sec" data-tool="seuil">${t('Ouvrir')}</button>`})+c('cohorte',t('Qualité de tes achats'),cohorteBody)+c('tranches',t('Rentabilité par prix d\'achat'),tranchesBody)+c('live',t('Dernier live'),livesBody)+c('fourn',t('Fournitures'),()=>{const L=fournLow();return`<p class="sub" style="margin:0 0 8px">${colisCost()?t('Coût réel d\'un colis : {c}',{c:eur(colisCost())}):t('Suis tes sachets, cartons et scotch.')}${L.length?' · '+L.map(f=>esc(f.n)+' ('+f.q+')').join(', '):''}</p><button type="button" class="btn sm sec" data-tool="fourn">${t('Ouvrir')}</button>`})+c('planning',t('Planning du jour'),()=>planTodayHTML()+`<button type="button" class="btn sm sec" data-tool="planning" style="margin-top:8px">${t('Planning de la semaine')}</button>`)}
+function dashApply(){const box=$('dsh'),hide=dashHidden(),order=(cfg.dash&&cfg.dash.order)||[],it=dashKeyed();it.forEach(x=>{x.el.style.display=hide.includes(x.k)?'none':''});
+ if(order.length){const pos=k=>{const i=order.indexOf(k);return i<0?1e6:i};it.map((x,i)=>({x,i})).sort((a,b)=>pos(a.x.k)-pos(b.x.k)||a.i-b.i).forEach(o=>box.appendChild(o.x.el))}
+ let dsa=box.querySelector('.dsa');if(!dsa){box.insertAdjacentHTML('afterbegin','<div class="dsa"></div>');dsa=box.querySelector('.dsa')}box.prepend(dsa);if(!dsa.querySelector('[data-dcust]'))dsa.insertAdjacentHTML('afterbegin',`<button type="button" class="chip sm" data-dcust="1">${t('Personnaliser')}</button>`)}
+const renderDash24=renderDash;renderDash=function(){renderDash24();if(!P.length||!$('dsh').children.length)return;$('dsh').insertAdjacentHTML('beforeend',newCards());dashApply();hydrate()};
+function openDashCustom(){const draw=()=>{const it=dashKeyed(),hide=dashHidden();
+ showSheet(sheetHead(t('Personnaliser le bilan'))+`<p class="sub" style="margin:0 0 10px">${t('Choisis les cartes à afficher et leur ordre. Ça reste sur ton compte, pour tous tes appareils.')}</p>${it.map((x,i)=>`<div class="dcr${hide.includes(x.k)?' off':''}"><button type="button" class="chip sm${hide.includes(x.k)?'':' on'}" data-dv="${esc(x.k)}" aria-label="${t('Afficher ou masquer')}">${hide.includes(x.k)?t('Masquée'):t('Visible')}</button><span>${esc(dashLabel(x))}</span><button type="button" class="chip sm" data-dm="${esc(x.k)}|-1"${i?'':' disabled'} aria-label="${t('Monter')}">↑</button><button type="button" class="chip sm" data-dm="${esc(x.k)}|1"${i<it.length-1?'':' disabled'} aria-label="${t('Descendre')}">↓</button></div>`).join('')}
+ <div class="acts two"><button type="button" class="btn sec" id="dc_rs">${t('Réinitialiser')}</button><button type="button" class="btn" id="dc_ok">${t('Terminé')}</button></div>`);
+ $('shc').onclick=e=>{const v=e.target.closest('[data-dv]'),m=e.target.closest('[data-dm]'),keys=it.map(x=>x.k);
+  if(v){const k=v.dataset.dv,h=hide.includes(k)?hide.filter(z=>z!==k):[...hide,k];setCfg({dash:{hide:h,order:(cfg.dash&&cfg.dash.order)||keys}});renderDash();return draw()}
+  if(m){const[k,d]=m.dataset.dm.split('|'),i=keys.indexOf(k),j=i+ +d;if(j<0||j>=keys.length)return;keys.splice(j,0,keys.splice(i,1)[0]);setCfg({dash:{hide,order:keys}});renderDash();return draw()}
+  if(e.target.closest('#dc_rs')){setCfg({dash:null});renderDash();return draw()}if(e.target.closest('#dc_ok'))closeSheet()}};draw()}
+$('dsh').addEventListener('click',e=>{if(e.target.closest('[data-dcust]'))return openDashCustom();const d=e.target.closest('[data-ld]');if(d){liveSelD=d.dataset.ld;const b=d.closest('[data-ck]'),body=b&&b.querySelector('.cbody');if(body)body.innerHTML=livesBody()}});
+$('dsh').addEventListener('change',e=>{const c=e.target.closest('[data-pt]');if(c){setTaskDone(c.dataset.pt,c.checked);renderDash()}});
+
+/* ---------- boutique : nom, couleur, logo sur les exports ---------- */
+const shop=()=>cfg.shop||{};
+const shopCol=()=>{const c=shop().col;return/^#[0-9a-f]{6}$/i.test(c||'')?c:''};
+let brandImg=null;function brandLoad(){const s=shop();if(s.logo){const i=new Image();i.src=s.logo;brandImg=i}else brandImg=null}brandLoad();
+const logoMark24=logoMark;logoMark=function(c,x,y,s){if(brandImg&&brandImg.complete&&brandImg.naturalWidth){c.save();c.beginPath();if(c.roundRect)c.roundRect(x,y,s,s,s*.21);else c.rect(x,y,s,s);c.fillStyle='#ffffff';c.fill();c.clip();const k=Math.min(s/brandImg.width,s/brandImg.height);c.drawImage(brandImg,x+(s-brandImg.width*k)/2,y+(s-brandImg.height*k)/2,brandImg.width*k,brandImg.height*k);c.restore()}else logoMark24(c,x,y,s)};
+(function(){const CP=CanvasRenderingContext2D.prototype;['fillStyle','strokeStyle'].forEach(k=>{const d=Object.getOwnPropertyDescriptor(CP,k);if(!d||!d.set)return;Object.defineProperty(CP,k,{get:d.get,set(v){if(typeof v==='string'&&v.toLowerCase()==='#ff4a1c'){const c=shopCol();if(c)v=c}d.set.call(this,v)},configurable:true})});
+ const ft=CP.fillText;CP.fillText=function(s,...a){const n=shop().nom;if(n&&typeof s==='string'){if(s==='max')s=n;else if(s.length<40&&/\bMax\b/.test(s))s=s.replace(/\bMax\b/,n)}return ft.call(this,s,...a)}})();
+function brandize(h){const s=shop(),col=shopCol();if(!s.nom&&!s.logo&&!col)return h;
+ if(s.logo)h=h.replace(/<svg viewBox="0 0 104 104" width="34" height="34">[\s\S]*?<\/svg>/,`<img src="${s.logo}" alt="" style="width:34px;height:34px;object-fit:contain;border-radius:7px">`);
+ if(s.nom)h=h.replace('<b>max</b>','<b>'+esc(s.nom)+'</b>');
+ if(col&&h.indexOf('data-brand')<0)h='<style data-brand>.rp h4{color:'+col+'}.rph{border-bottom-color:'+col+'}.rt tr.tt td,.rl2 tr.tt td{border-bottom-color:'+col+'}</style>'+h;return h}
+const printHTML24=printHTML;printHTML=function(h){return printHTML24(brandize(h))};
+const reportHTML24=reportHTML;reportHTML=function(m){return brandize(reportHTML24(m))};
+async function logoFromFile(f){const url=URL.createObjectURL(f);try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});let mx=256,out='';for(let n=0;n<3;n++){const k=Math.min(1,mx/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*k));c.height=Math.max(1,Math.round(img.height*k));c.getContext('2d').drawImage(img,0,0,c.width,c.height);out=c.toDataURL('image/png');if(out.length<110000)return out;out=c.toDataURL('image/jpeg',.85);if(out.length<110000)return out;mx=Math.round(mx*.7)}return out}finally{URL.revokeObjectURL(url)}}
+function openBoutique(){let s=Object.assign({nom:'',col:'',logo:''},shop());
+ const draw=()=>{const c=/^#[0-9a-f]{6}$/i.test(s.col)?s.col:'#FF4A1C';showSheet(sheetHead(t('Ma boutique'))+`<div class="card"><p class="sub" style="margin:0 0 12px">${t('Ton nom, ta couleur et ton logo remplacent ceux de Max sur les PDF, les visuels réseaux et le Wrapped.')}</p>
+  <div class="brp"><div class="brl">${s.logo?`<img src="${s.logo}" alt="">`:`<span>${t('Logo')}</span>`}</div><div><b style="font-size:20px">${esc(s.nom||'Max')}</b><i style="display:block;height:6px;width:70px;border-radius:3px;background:${c};margin-top:6px"></i></div></div>
+  <div class="fld"><label class="l" for="bt_n">${t('Nom de la boutique')}</label><input type="text" id="bt_n" maxlength="18" value="${esc(s.nom)}" placeholder="Max" autocomplete="off"></div>
+  <div class="row2 fld"><div><label class="l" for="bt_c">${t('Couleur')}</label><input type="color" id="bt_c" value="${c}" style="height:50px;padding:4px"></div><div><label class="l" for="bt_f">${t('Logo')}</label><input type="file" id="bt_f" accept="image/*"></div></div>
+  <div class="hint">${t('Un logo carré sur fond clair ou transparent donne le meilleur résultat. 18 caractères maximum pour le nom.')}</div></div>
+  <div class="acts"><button type="button" class="btn mint" id="bt_ok">${t('Enregistrer')}</button><div class="acts two" style="margin:0"><button type="button" class="btn sec" id="bt_rm">${t('Retirer le logo')}</button><button type="button" class="btn sec" id="bt_rs">${t('Revenir à Max')}</button></div></div>`);
+  $('bt_n').oninput=()=>{s.nom=$('bt_n').value;document.querySelector('.brp b').textContent=s.nom||'Max'};$('bt_c').oninput=()=>{s.col=$('bt_c').value;document.querySelector('.brp i').style.background=s.col};
+  $('bt_f').onchange=async()=>{const f=$('bt_f').files[0];if(!f)return;try{s.logo=await logoFromFile(f);s.nom=$('bt_n').value;draw()}catch(e){toast(t('Image illisible'))}};
+  $('bt_rm').onclick=()=>{s.logo='';s.nom=$('bt_n').value;draw()};$('bt_rs').onclick=()=>{setCfg({shop:null});brandLoad();toast(t('Retour à Max'));openBoutique()};
+  $('bt_ok').onclick=()=>{s.nom=$('bt_n').value.trim();const o={};if(s.nom)o.nom=s.nom;if(s.col)o.col=s.col;if(s.logo)o.logo=s.logo;setCfg({shop:Object.keys(o).length?o:null});brandLoad();toast(t('Boutique enregistrée'));closeSheet()}};draw()}
+
+/* ---------- confort : vibrations et mode une main ---------- */
+function applyComfort(){document.body.classList.toggle('onehand',!!cfg.onehand)}
+const setCfg24=setCfg;setCfg=function(p,l){setCfg24(p,l);if(p&&'onehand' in p)applyComfort()};
+const renderAll24=renderAll;renderAll=function(){renderAll24();applyComfort()};
+document.body.insertAdjacentHTML('beforeend',`<div id="ohb"><button type="button" data-oh="find">${TI('<circle cx="11" cy="11" r="6"/><path d="m20 20-4-4"/>')}<span>${t('Chercher')}</span></button><button type="button" data-oh="sel">${TI('<path d="M5 12l4.5 4.5L19 7"/>')}<span>${t('Sélection')}</span></button><button type="button" data-oh="plan">${TI('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>')}<span>${t('Planning')}</span></button><button type="button" data-oh="tools">${TI('<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>')}<span>${t('Outils')}</span></button></div>`);
+$('ohb').onclick=e=>{const b=e.target.closest('[data-oh]');if(!b)return;const a=b.dataset.oh;if(a==='find'){go('list');setTimeout(()=>$('q').focus(),40)}else if(a==='sel'){go('list');selSet(!selMode)}else if(a==='plan')openPlanning();else openTools()};
+new MutationObserver(()=>{const c=$('shc');if(!c||$('sheet').hidden||!document.body.classList.contains('onehand')||c.querySelector('.ohx'))return;c.insertAdjacentHTML('beforeend',`<button type="button" class="btn sec ohx" data-x="1">${t('Fermer')}</button>`)}).observe($('shc'),{childList:true});
+function openConfort(){const draw=()=>{showSheet(sheetHead(t('Confort'))+`<div class="card"><label class="chk cfr"><input type="checkbox" id="cf_o"${cfg.onehand?' checked':''}><span><b>${t('Mode une main')}</b><small>${t('Barre d\'actions en bas de l\'écran (chercher, sélection, planning, outils) et bouton Fermer en bas des fenêtres.')}</small></span></label>
+  <label class="chk cfr"><input type="checkbox" id="cf_v"${cfg.vibr!==false?' checked':''}><span><b>${t('Vibrations légères')}</b><small>${t('À la validation d\'une vente et à la sélection. Fonctionne sur Android ; l\'iPhone ne les permet pas.')}</small></span></label></div>`);
+  $('cf_o').onchange=()=>{setCfg({onehand:$('cf_o').checked},true)};$('cf_v').onchange=()=>{setCfg({vibr:$('cf_v').checked},true);if($('cf_v').checked)buzz(30)}};draw()}
+
+/* ---------- outils, nouveautés, aide ---------- */
+TOOLS.push(
+ {k:'planning',t:'Planning',d:'Photos, sourcing, lives, dépôts de colis, et ta liste du jour',i:TI('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3"/>')},
+ {k:'vintage',t:'Datation vintage',d:'Étiquettes, logos et made in par marque, pour justifier un prix plus élevé',i:TI('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')},
+ {k:'buyers',t:'Acheteurs',d:'Historique par pseudo, acheteurs fidèles, liste noire',i:TI('<circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 11a3 3 0 1 0-1-5.800M18 20a5 5 0 0 0-3-4.500"/>')},
+ {k:'lives',t:'Bilan des lives',d:'CA, ventes par heure, meilleures pièces, comparaison avec les lives précédents',i:TI('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>')},
+ {k:'cohortes',t:'Qualité de tes achats',d:'Sur les pièces entrées un mois donné, combien sont vendues à 30, 60 et 90 jours',i:TI('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>')},
+ {k:'tranches',t:'Rentabilité par prix d\'achat',d:'Les pièces à 2 € rapportent-elles plus que celles à 8 € ?',i:TI('<path d="M4 18V6M4 18h16M7 15l4-4 3 3 5-6"/>')},
+ {k:'courbe',t:'Bénéfice cumulé et objectif',d:'Chaque jour, en avance ou en retard sur ton objectif du mois',i:TI('<path d="M3 17l5-5 4 3 8-9"/><path d="M3 20h18"/>')},
+ {k:'seuil',t:'Seuil de rentabilité',d:'À partir de combien de ventes tu couvres tes frais fixes',i:TI('<path d="M4 20h16M6 20V10M12 20V4M18 20v-7"/>')},
+ {k:'fourn',t:'Fournitures',d:'Sachets, cartons, scotch : stock, alerte et coût réel du colis',i:TI('<path d="M3 8l9-5 9 5-9 5zM3 8v8l9 5 9-5V8"/>')},
+ {k:'boutique',t:'Ma boutique',d:'Ton logo, ton nom et ta couleur sur les PDF et les visuels',i:TI('<path d="M4 9l1-5h14l1 5M4 9v11h16V9M4 9h16M9 20v-6h6v6"/>')},
+ {k:'confort',t:'Confort',d:'Vibrations légères et mode une main',i:TI('<path d="M8 13V5a2 2 0 0 1 4 0v6M12 11V4a2 2 0 0 1 4 0v8M16 12V7a2 2 0 0 1 4 0v8a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.500L3 14a2 2 0 0 1 3-2l2 2"/>')});
+const openTool24=openTool;openTool=function(k){const m={planning:openPlanning,vintage:()=>openVintage(),buyers:openBuyers,lives:openLives,cohortes:openCohortes,tranches:openTranches,courbe:openCourbe,seuil:openSeuil,fourn:()=>openFourn(),boutique:openBoutique,confort:openConfort};if(m[k])return m[k]();return openTool24(k)};
+CHANGELOG.unshift({v:'v24',d:'2026-10-30',t:['Sélection multiple : baisse de prix, publication, ballot, bac, étiquettes et lots en un geste (appui long sur une pièce)','Vente groupée : un paiement, un colis, prix et frais répartis entre les pièces','Variantes : même modèle, autre taille ou couleur','Pièces similaires déjà vendues dans chaque fiche','Acheteurs fidèles et liste noire','Bilan des lives, qualité des achats par mois, rentabilité par prix d\'achat','Bénéfice cumulé comparé à l\'objectif, seuil de rentabilité','Fournitures avec alerte, planning de la semaine et liste du jour','Datation vintage par marque','Bilan personnalisable, mode une main, vibrations, logo et couleur de ta boutique']});
+FAQ.push(['Vendre plusieurs pièces dans un seul colis','Touche longuement une pièce (ou le bouton Sélection), choisis les autres pièces, puis Actions, Créer un lot, Vendre ensemble. Entre le prix total payé et les frais du colis : Max les répartit entre les pièces pour que chaque marge reste juste.'],
+ ['Modifier plusieurs pièces d\'un coup','Bouton Sélection dans le Stock (ou appui long sur une pièce). Touche les pièces ou Tout pour le filtre en cours, puis Actions : baisser le prix, marquer publiées, changer de ballot ou de bac, imprimer les étiquettes.'],
+ ['Personnaliser le bilan','Dans le Bilan, bouton Personnaliser : masque les cartes inutiles et change leur ordre. Les nouvelles cartes (courbe de l\'objectif, seuil de rentabilité, qualité des achats, dernier live) y sont masquées au départ.'],
+ ['Dater une pièce vintage','Outils, Datation vintage, ou le bouton Repères vintage dans la fiche d\'une pièce de marque connue. Coche les indices vérifiés pour obtenir une phrase à coller dans l\'annonce.'],
+ ['Mettre mon logo sur les PDF','Outils, Ma boutique : nom, couleur et logo remplacent ceux de Max sur les PDF, les visuels et le Wrapped.']);
+
 function renderAll(){kickExtra();scheduleBadges();renderKpi();const nb=colisList().length,bg=$('nbg');bg.hidden=!nb;bg.textContent=nb;if(view==='quick')renderVendre();if(view==='list')renderList();if(view==='dash')renderDash();if(view==='set')renderSet()}
 initAdd();renderAll();
 (async()=>{
