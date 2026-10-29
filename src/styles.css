@@ -161,7 +161,7 @@ nav button.on{color:var(--denim)}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
 .lnk{background:none;border:0;color:var(--denim);font-weight:600;cursor:pointer;padding:6px 0;font-size:14px;min-height:36px}
 .chk{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:15px;cursor:pointer;min-height:44px}
-.chk input{width:22px;height:22px;accent-color:var(--denim);flex:none}
+.chk input,#auth .chk input{width:22px;height:22px;min-height:0;padding:0;accent-color:var(--denim);flex:none}
 .pwrow{display:flex;gap:8px}.pwrow input{flex:1;min-width:0}
 .feu{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px}
 .feu i{width:16px;height:16px;border-radius:50%;flex:none;background:var(--mute)}

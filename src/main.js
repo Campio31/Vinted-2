@@ -65,5 +65,8 @@ import './modules/dash-custom.js';
 import './modules/branding.js';
 import './modules/comfort.js';
 import './modules/tools-register.js';
+import './modules/usage.js';
+import './modules/simple-mode.js';
+import './modules/welcome.js';
 import './modules/boot.js';
 import './modules/updates.js';
