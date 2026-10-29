@@ -4,5 +4,5 @@
 window.STOCK_CONFIG = {
   supabaseUrl: 'https://akbwyxbllrfeibmtwdbh.supabase.co',
   supabaseKey: 'sb_publishable_3WGlhOZqehwV0Kds1ao1yQ_MhzmnoJE',   // clé publishable (publique)
-  vapidPublicKey: ''   // clé PUBLIQUE des notifications push (générée avec generer-cles-vapid.html, voir PUSH-ET-CLASSEMENT.md). Jamais la clé privée.
+  vapidPublicKey: 'BHeliuiV1EPO5RL-vr5nYUdDumr-RFk7iaoBk5C282V5n0NvyzKjDDzKzC4nFz1bMHeoNWEvGtt51h5yfN-RSS8'   // clé PUBLIQUE des notifications push (générée avec generer-cles-vapid.html, voir PUSH-ET-CLASSEMENT.md). Jamais la clé privée.
 };
