@@ -1,6 +1,6 @@
 /* Fonctionnement hors-ligne : les fichiers de l'appli sont gardés en cache. Change VERSION à chaque mise à jour. */
-const VERSION = 'stock-v20';
-const FILES = ['./', './index.html', './manifest.webmanifest', './vendor/xlsx.full.min.js', './vendor/supabase.js', './vendor/qrcode.js', './vendor/jsQR.js', './config.js', './fonts/Archivo-latin.woff2', './fonts/Archivo-latin-ext.woff2', './fonts/JetBrainsMono-latin.woff2', './fonts/JetBrainsMono-latin-ext.woff2', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
+const VERSION = 'stock-v23';
+const FILES = ['./', './index.html', './manifest.webmanifest', './vendor/xlsx.full.min.js', './vendor/supabase.js', './vendor/qrcode.js', './vendor/jsQR.js', './config.js', './i18n.js', './fonts/Archivo-latin.woff2', './fonts/Archivo-latin-ext.woff2', './fonts/JetBrainsMono-latin.woff2', './fonts/JetBrainsMono-latin-ext.woff2', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 /* Une nouvelle version attend que l'utilisateur touche « Mettre à jour » dans l'appli (message SKIP_WAITING). */
 self.addEventListener('install', e => {
@@ -12,11 +12,11 @@ self.addEventListener('notificationclick', e => {
   e.waitUntil(self.clients.matchAll({ type: 'window' }).then(l => (l[0] ? l[0].focus() : self.clients.openWindow('./'))));
 });
 
-/* Prêt pour un futur serveur d'envoi : affiche la notification reçue. */
+/* Notification envoyée par le serveur (fonction envoyer-rappels), même appli fermée. */
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data.json(); } catch (er) {}
-  e.waitUntil(self.registration.showNotification(d.title || 'Max', { body: d.body || '', icon: 'icons/icon-192.png', tag: d.tag }));
+  e.waitUntil(self.registration.showNotification(d.title || 'Max', { body: d.body || '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: d.tag }));
 });
 
 self.addEventListener('message', e => {

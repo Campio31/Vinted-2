@@ -3,5 +3,6 @@
    N'écris JAMAIS ici la clé « service_role ». */
 window.STOCK_CONFIG = {
   supabaseUrl: 'https://akbwyxbllrfeibmtwdbh.supabase.co',
-  supabaseKey: 'sb_publishable_3WGlhOZqehwV0Kds1ao1yQ_MhzmnoJE'    // clé publishable (publique)
+  supabaseKey: 'sb_publishable_3WGlhOZqehwV0Kds1ao1yQ_MhzmnoJE',   // clé publishable (publique)
+  vapidPublicKey: ''   // clé PUBLIQUE des notifications push (générée avec generer-cles-vapid.html, voir PUSH-ET-CLASSEMENT.md). Jamais la clé privée.
 };
