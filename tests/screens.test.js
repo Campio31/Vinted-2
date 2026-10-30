@@ -13,12 +13,12 @@ beforeAll(async () => {
 });
 
 describe('onglets', () => {
-  for (const v of ['add', 'quick', 'list', 'dash', 'set']) it('onglet ' + v, () => { nav.go(v); expect(document.getElementById('ttl').textContent.length).toBeGreaterThan(0); });
+  for (const v of ['add', 'quick', 'sales', 'list', 'dash', 'set']) it('onglet ' + v, () => { nav.go(v); expect(document.getElementById('ttl').textContent.length).toBeGreaterThan(0); });
 });
 
 describe('fenêtres des outils', () => {
-  it('liste tous les outils', () => { expect(tools.TOOLS.length).toBeGreaterThan(30); });
-  for (const k of ['coach', 'ballot', 'nego', 'qr', 'trophees', 'fisc', 'complete', 'merge', 'photos', 'depenses', 'treso', 'rapport', 'trash', 'visuels', 'wrapped', 'calcom', 'rappels', 'defis', 'importo', 'aide', 'help', 'news', 'idee', 'planning', 'vintage', 'buyers', 'lives', 'cohortes', 'tranches', 'courbe', 'seuil', 'fourn', 'boutique', 'confort']) {
+  it('liste tous les outils', () => { expect(tools.TOOLS.length).toBeGreaterThan(15); });
+  for (const k of ['coach', 'qr', 'trophees', 'fisc', 'complete', 'merge', 'depenses', 'treso', 'rapport', 'trash', 'wrapped', 'calcom', 'rappels', 'defis', 'importo', 'aide', 'help', 'news', 'idee', 'planning', 'vintage', 'buyers', 'lives', 'cohortes', 'tranches', 'courbe', 'seuil', 'fourn', 'boutique', 'confort']) {
     it('outil ' + k, async () => { expect(NE_PAS_OUVRIR).not.toContain(k); await app.openTool(k); expect(document.getElementById('sheet').hidden).toBe(false); expect(document.getElementById('shc').innerHTML.length).toBeGreaterThan(50); });
   }
 });

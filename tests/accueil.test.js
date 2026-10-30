@@ -22,26 +22,27 @@ describe('mode simple et avancé', () => {
     expect(new Set(v.list.map(x => x.k)).size).toBe(8);
     expect(v.foot).toContain('data-moretools="1"');
     expect(v.foot).toContain(`(${TOOLS.length - 8})`);
-    expect(v.list.map(x => x.k)).toContain('nego');
+    expect(v.list.map(x => x.k)).not.toContain('live');
     expect(v.list.map(x => x.k)).not.toContain('fisc');
   });
 
-  it('le profil choisit les outils : micro-entrepreneur et lives', async () => {
+  it('le profil choisit les outils : micro-entrepreneur et TikTok', async () => {
     cfg({ mode: 'simple', onb: { statut: 'micro', canal: 'both', obj: 'vivre' } });
     const k = app.toolsView().list.map(x => x.k);
-    expect(k).toEqual(expect.arrayContaining(['fisc', 'lives', 'nego']));
+    expect(k).toEqual(expect.arrayContaining(['fisc', 'live']));
     expect(k).toHaveLength(8);
   });
 
-  it('la feuille Outils affiche 8 outils puis tout au clic sur « Plus d\'outils »', async () => {
+  it('l\'onglet Outils affiche 8 outils puis tout au clic sur « Plus d\'outils »', async () => {
     const { TOOLS, openTools } = await import('../src/modules/tools-index.js');
     openTools();
-    expect(document.querySelectorAll('#shc .tool')).toHaveLength(8);
-    document.querySelector('#shc [data-moretools="1"]').click();
-    expect(document.querySelectorAll('#shc .tool')).toHaveLength(TOOLS.length);
-    document.querySelector('#shc [data-mode="avance"]').click();
+    expect(app.view).toBe('tools');
+    expect(document.querySelectorAll('#tv .tool')).toHaveLength(8);
+    document.querySelector('#tv [data-moretools="1"]').click();
+    expect(document.querySelectorAll('#tv .tool')).toHaveLength(TOOLS.length);
+    document.querySelector('#tv [data-mode="avance"]').click();
     expect(app.cfg.mode).toBe('avance');
-    expect(document.querySelectorAll('#shc .tool')).toHaveLength(TOOLS.length);
+    expect(document.querySelectorAll('#tv .tool')).toHaveLength(TOOLS.length);
   });
 });
 

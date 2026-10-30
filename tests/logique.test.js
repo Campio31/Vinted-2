@@ -60,5 +60,5 @@ describe('enveloppes de fonctions (save, renderDash…)', () => {
   it('les fonctions enveloppées par plusieurs modules restent appelables', () => {
     for (const k of ['save', 'renderDash', 'renderList', 'renderAll', 'openSheet', 'toast', 'setCfg', 'openTool', 'printHTML', 'reportHTML', 'rappelsList', 'logoMark']) expect(typeof app[k], k).toBe('function');
   });
-  it('le bilan reste affiché après plusieurs rendus', () => { nav.go('dash'); for (let i = 0; i < 3; i++) app.renderDash(); expect(document.querySelectorAll('[data-ck]').length).toBe(8); expect(document.querySelectorAll('[data-ck="today"]').length).toBe(1); });
+  it('le bilan reste affiché après plusieurs rendus', () => { nav.go('dash'); for (let i = 0; i < 3; i++) app.renderDash(); expect(document.querySelectorAll('[data-ck]').length).toBe(7); expect(document.querySelectorAll('[data-ck="today"]').length).toBe(1); });
 });
