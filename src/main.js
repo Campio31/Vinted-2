@@ -70,5 +70,7 @@ import './modules/simple-mode.js';
 import './modules/welcome.js';
 import './modules/progress.js';
 import './modules/wrapped-ready.js';
+import './modules/history.js';
+import './modules/account.js';
 import './modules/boot.js';
 import './modules/updates.js';
