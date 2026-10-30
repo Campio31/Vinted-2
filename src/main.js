@@ -16,6 +16,8 @@ import './modules/profitability.js';
 import './modules/potential.js';
 import './modules/goals.js';
 import './modules/sell-card.js';
+import './modules/finalisation.js';
+import './modules/colis.js';
 import './modules/live.js';
 import './modules/sales-view.js';
 import './modules/backup.js';
