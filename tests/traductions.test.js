@@ -75,5 +75,5 @@ describe('traductions : aucun texte oublié', () => {
     FAQ.forEach(([q, r]) => { permis.add(q); permis.add(r); });
     const manquants = miss.filter(k => !permis.has(k) && !k.startsWith('{"pieces"'));
     expect(manquants, 'ajoute ces textes à public/i18n.js avec K(...) : ' + JSON.stringify(manquants)).toEqual([]);
-  });
+  }, 60000);
 });

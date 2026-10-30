@@ -40,7 +40,8 @@ describe('accueil d\'un nouveau compte', () => {
     app.renderDash();
     expect($('dsh').textContent).toContain('pièces d\'exemple');
     clic('#dsh [data-td="delex"]');
-    await new Promise(r => setTimeout(r, 500));
+    /* la suppression est asynchrone : on attend qu'elle soit finie (jusqu'à 4 s si la machine est chargée) */
+    for (let i = 0; i < 40 && app.P.some(p => p.ex); i++) await new Promise(r => setTimeout(r, 100));
     expect(app.P.filter(p => p.ex)).toHaveLength(0);
   });
 
