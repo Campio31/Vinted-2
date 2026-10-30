@@ -6,6 +6,7 @@ window.VINTAGE={
   {t:'Étiquette d\'entretien',l:['Texte en une seule langue (souvent anglais ou français) : plutôt avant 1995.','Pictogrammes de lavage : à partir de la fin des années 70 en Europe.','Étiquette en satin ou en tissu rêche, cousue sur les quatre côtés : plutôt années 70 à 90.','Numéro RN (USA) : existe depuis 1959. Un numéro RN renvoie à un fabricant, tu peux le chercher dans la base de la FTC.','Plusieurs langues et code-barres sur l\'étiquette : plutôt après 2000.']},
   {t:'Coutures et finitions',l:['Ourlet à point simple (une seule ligne de couture) sur un t-shirt : plutôt avant 1995.','Coutures « chain stitch » apparentes sur les jeans : plutôt anciens.','Boutons en métal gravé, bien lourds : plutôt anciens.']},
   {t:'Fermetures éclair',l:['Talon, Scovill, Conmar, Crown : plutôt avant les années 80.','Zip en métal marqué YKK : l\'apparence du logo change selon les époques, compare avec des photos datées.','Zip en plastique moulé : plutôt à partir des années 70-80.']},
+  {t:'Boutons et rivets',l:['Boutons en métal gravés au nom de la marque, lourds : plutôt anciens.','Boutons en plastique moulé fin et léger : plutôt récents.','Rivets de jean avec le nom gravé au dos : repère de marque, compare avec des photos datées.']},
   {t:'Ce qui fait monter le prix',l:['Étiquette ancienne et lisible, photographiée de près.','Pays de fabrication d\'époque (USA, UK, France, Italie, Japon) cité dans l\'annonce.','Modèle ou coloris recherché, taille portable aujourd\'hui, bon état.','Écris les indices dans l\'annonce : un acheteur qui voit la preuve accepte mieux un prix plus élevé.']}],
  marques:[
  {n:'Levi\'s',a:['levis','levi','levi strauss'],r:[
@@ -47,5 +48,53 @@ window.VINTAGE={
  {n:'Kappa',a:['kappa','robe di kappa'],r:[
   {t:'Logos',l:['Logo « Omini » (deux silhouettes dos à dos) : années 70 à 2000.','« Robe di Kappa » : étiquette plus ancienne.','Made in Italy : plutôt avant 2000.']}]},
  {n:'Puma',a:['puma'],r:[
-  {t:'Époques',l:['Made in West Germany : avant 1990.','Logo puma bondissant avec « PUMA » sous le félin : étiquette ancienne.','Made in Yugoslavia : années 70-80.']}]}
+  {t:'Époques',l:['Made in West Germany : avant 1990.','Logo puma bondissant avec « PUMA » sous le félin : étiquette ancienne.','Made in Yugoslavia : années 70-80.']}]},
+ {n:'Wrangler',a:['wrangler','blue bell wrangler'],r:[
+  {t:'Étiquettes',l:['Mention « Blue Bell » sur l\'étiquette : fabricant d\'origine, plutôt avant 1990.','Made in USA : plutôt avant 1995 pour les jeans et les chemises western.','Grand « W » cousu sur la poche arrière : signature de la marque, il ne date pas la pièce à lui seul.']}]},
+ {n:'Lee',a:['lee','lee riders','lee cooper'],r:[
+  {t:'Étiquettes',l:['Mention « Union Made » ou étiquette syndicale : plutôt avant 1990.','Made in USA : plutôt avant 1995.','Étiquette « Lee Riders » : modèles classiques, années 70 à 90.','Coutures « single stitch » sur un jean : plutôt ancien.']}]},
+ {n:'Dickies',a:['dickies','williamson dickie'],r:[
+  {t:'Étiquettes',l:['Mention « Williamson-Dickie Mfg. Co. » : étiquette plutôt ancienne.','Made in USA : plutôt avant 2000.','Vêtements de travail (pantalons 874, vestes Eisenhower) : modèles recherchés en bon état.']}]},
+ {n:'Fila',a:['fila','fila biella'],r:[
+  {t:'Logos et époques',l:['Logo en « F » carré rouge et bleu : à partir des années 80.','Survêtements et polos de tennis (période Borg) : années 70 à 80, recherchés.','Made in Italy : plutôt avant 2000.']}]},
+ {n:'Ellesse',a:['ellesse'],r:[
+  {t:'Logos et époques',l:['Logo en demi-balle de tennis : années 80 à 90.','Made in Italy : plutôt avant 2000.','Combinaisons de ski et polos de tennis années 80 : très recherchés.']}]},
+ {n:'Umbro',a:['umbro'],r:[
+  {t:'Logos et époques',l:['Double losange (double diamond) : logo historique, années 80 à 90.','Made in England : plutôt avant 1995.','Maillots de football de clubs : recherchés quand ils sont d\'époque et en bon état.']}]},
+ {n:'Helly Hansen',a:['helly hansen','hh'],r:[
+  {t:'Étiquettes',l:['Made in Norway : plutôt avant 2000.','Polaires et cirés années 80 à 90 : très recherchés en couleurs vives.','Étiquette « Helly Tech » : membrane des années 90 et après.']}]},
+ {n:'Columbia',a:['columbia','columbia sportswear'],r:[
+  {t:'Étiquettes',l:['Veste Bugaboo ou Gore-Tex avec doublure amovible : années 90, recherchée.','Made in USA : plutôt avant 2000.']}]},
+ {n:'Timberland',a:['timberland'],r:[
+  {t:'Étiquettes',l:['Made in USA : plutôt avant 2000.','Étiquette « Weathergear » : vêtements des années 80 à 90.','Logo arbre brodé : plusieurs variantes, compare avec des photos datées.']}]},
+ {n:'Guess',a:['guess','guess jeans','georges marciano'],r:[
+  {t:'Étiquettes',l:['« Guess Georges Marciano » : étiquette ancienne, années 80 à début 90, très recherchée.','Made in USA : plutôt avant 1995, notamment pour les jeans.','Triangle rouge inversé : signature de la marque, il ne date pas la pièce seul.']}]},
+ {n:'Gap',a:['gap','gap kids'],r:[
+  {t:'Étiquettes',l:['Made in USA : plutôt années 80 à 90.','Grand logo « GAP » en lettres capitales sur sweat : années 90.','Étiquette bleu marine avec « GAP » : années 90, plus rare ensuite.']}]},
+ {n:'Napapijri',a:['napapijri','napapijri geographic'],r:[
+  {t:'Époques',l:['Veste Skidoo : modèle lancé en 1987, recherché.','Drapeau norvégien cousu sur la poitrine : repère de la marque, années 90 et après.','« Napapijri Geographic » : étiquette plutôt années 90.']}]},
+ {n:'Stone Island',a:['stone island','stone','stone island marina'],r:[
+  {t:'Étiquettes',l:['Badge boussole amovible sur le bras : repère de la marque, il ne date pas à lui seul.','Ligne « Marina » : début des années 80, très recherchée.','Les contrefaçons sont fréquentes : vérifie les coutures, le badge et l\'étiquette avant d\'annoncer une pièce ancienne.']}]},
+ {n:'Sergio Tacchini',a:['sergio tacchini','tacchini'],r:[
+  {t:'Époques',l:['Survêtements et polos de tennis années 80 à 90.','Made in Italy : plutôt avant 2000.','Combinaisons de couleurs vives : modèles recherchés.']}]},
+ {n:'Hugo Boss',a:['hugo boss','boss'],r:[
+  {t:'Étiquettes',l:['Made in West Germany : avant 1990.','« Hugo Boss » en lettres capitales : années 80 à 90 ; « BOSS » seul : plus récent.','Made in Germany ou Turkey : années 90 et après.']}]},
+ {n:'Calvin Klein',a:['calvin klein','ck','ck jeans'],r:[
+  {t:'Étiquettes',l:['« CK Calvin Klein Jeans » : années 90.','Made in USA : plutôt années 80 à 90.','Logo « CK » en grandes lettres sur t-shirt : années 90.']}]},
+ {n:'Nautica',a:['nautica','nautica competition'],r:[
+  {t:'Époques',l:['Drapeau de régate sur la poitrine : repère de la marque.','Veste « Nautica Competition » : années 90, recherchée.','Made in USA : plutôt avant 2000.']}]},
+ {n:'Harley-Davidson',a:['harley-davidson','harley davidson','harley'],r:[
+  {t:'T-shirts et vestes',l:['T-shirt à point simple, Made in USA : plutôt avant 1995.','Date imprimée en bas du dos ou de la poitrine (rallye, concession) : donne l\'année du modèle.','Étiquettes Hanes, Screen Stars ou Brockum : t-shirts des années 80 à 90.']}]},
+ {n:'Russell Athletic',a:['russell athletic','russell'],r:[
+  {t:'Étiquettes',l:['Made in USA : plutôt avant 2000.','Sweats lourds en coton épais : années 80 à 90.','Étiquette « Russell Athletic » avec le logo ancien : repère de l\'ancien fabricant.']}]},
+ {n:'Fruit of the Loom',a:['fruit of the loom','fruit'],r:[
+  {t:'Étiquettes',l:['Logo avec la corne d\'abondance : plutôt avant 2003.','Made in USA : plutôt avant 2000.','T-shirt à point simple : plutôt avant 1995.']}]},
+ {n:'Le Coq Sportif',a:['le coq sportif','coq sportif'],r:[
+  {t:'Époques',l:['Made in France : plutôt avant 2000.','Maillots de cyclisme et de football années 70 à 90 : recherchés.','Logo coq : variantes selon les époques, compare avec des photos datées.']}]},
+ {n:'Fred Perry',a:['fred perry'],r:[
+  {t:'Étiquettes',l:['Made in England : plutôt ancien.','Couronne de laurier brodée : signature de la marque.','Bandes sur le col et les manches (twin tipped) : modèle classique, ne date pas seul.']}]},
+ {n:'Chevignon',a:['chevignon'],r:[
+  {t:'Époques',l:['Blousons en cuir ou en toile, Made in France : années 80 à 90, très recherchés.','Écusson brodé avec la mention de la marque et un numéro : repère de la marque.','Made in Tunisia ou Portugal : plutôt années 90 et après.']}]},
+ {n:'Gant',a:['gant','gant usa'],r:[
+  {t:'Étiquettes',l:['« Gant Shirtmakers » : mention d\'origine de la marque, étiquette plutôt ancienne.','Made in USA : plutôt avant 2000.','Languette de boutonnage et patte de col cousue : chemises Oxford classiques.']}]}
  ]};
