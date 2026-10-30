@@ -25,11 +25,14 @@
 </head>
 <body>
 <div id="app">
- <header><h1 id="ttl">Ajouter</h1><div class="hr"><button type="button" class="ib" id="mic" aria-label="Commande vocale"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button type="button" class="ib" id="tl" aria-label="Outils"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button><div id="sync"><i></i><span>Chargement…</span></div></div></header>
+ <header><h1 id="ttl">Ajouter</h1><div class="hr"><button type="button" class="ib" id="mic" aria-label="Commande vocale"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><button type="button" class="ib" id="tl" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><div id="sync" hidden><i></i><span>Chargement…</span></div></div></header>
  <div id="ro" class="warn" hidden>Le stockage du navigateur est indisponible (navigation privée ?). Les données seront perdues à la fermeture : exporte une sauvegarde JSON.</div>
  <main>
-  <section id="v-add" class="view on"><div class="kpis" id="kp"></div><div class="card frm" id="fadd"></div></section>
+  <section id="v-add" class="view on"><div class="card frm" id="fadd"></div></section>
+  <section id="v-sales" class="view"></section>
+  <section id="v-tools" class="view"><div id="tv"></div></section>
   <section id="v-quick" class="view">
+   <div class="chips" style="margin-bottom:10px"><button type="button" class="chip sm" id="lv_back">‹ Ventes</button></div>
    <div id="gq"></div>
    <div id="vl">
     <div id="lh"></div>
@@ -72,6 +75,7 @@
     <label class="l" for="impt" style="margin-top:14px">Ou colle le JSON</label>
     <textarea id="impt" placeholder='{"pieces":[{"id":"i0001","cat":"Short","marque":"Nike","achat":4.5,"statut":"Disponible"}]}' style="font-family:ui-monospace,Consolas,monospace;font-size:13px"></textarea>
     <div class="acts two"><button class="btn" id="impb" type="button">Importer le texte</button><button class="btn sec" id="impm" type="button">Télécharger un modèle</button></div>
+    <div class="acts"><button class="btn sec" id="impo" type="button">Importer depuis Excel ou CSV…</button></div>
     <div class="hint" id="is"></div>
    </div>
    <div class="card" id="exc"></div>
@@ -80,10 +84,10 @@
  <nav id="nav">
   <div class="brand"><svg class="lg" viewBox="0 0 104 104" aria-hidden="true"><rect width="104" height="104" fill="#111111"/><rect x="12" y="68" width="80" height="18" rx="3" fill="#F1F2F4"/><rect x="18" y="46" width="68" height="18" rx="3" fill="#C9CBD0"/><rect x="32" y="14" width="58" height="18" rx="3" fill="#FF4A1C" transform="rotate(-12 62 24)"/><path d="M20 28H32M16 20H26" stroke="#FF4A1C" stroke-width="3" stroke-linecap="round" fill="none"/></svg><span>max</span></div>
   <button data-v="list" type="button" aria-label="Stock"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg><span class="nl">Stock</span></button>
-  <button data-v="quick" type="button" aria-label="Live"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span class="nl">Live</span><span class="nbg" id="nbg" hidden></span></button>
+  <button data-v="sales" type="button" aria-label="Vente"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg><span class="nl">Vente</span><span class="nbg" id="nbg" hidden></span></button>
   <button data-v="add" class="on addb" type="button" aria-label="Ajouter une pièce"><span class="fab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="nl">Ajouter</span></button>
   <button data-v="dash" type="button" aria-label="Bilan"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="nl">Bilan</span></button>
-  <button data-v="set" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="nl">Réglages</span></button>
+  <button data-v="tools" type="button" aria-label="Outils"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg><span class="nl">Outils</span></button>
  </nav>
 </div>
 <div id="auth" hidden><div class="card">
