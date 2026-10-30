@@ -13,7 +13,9 @@ function renderVendre(){$('gq').innerHTML=goalMini();renderLive()}
 
 /* mode Live TikTok */
 let liveSel=null,lf={prix:'',pseudo:''};
-export const colisList=()=>app.P.filter(p=>sold(p)&&!p.exp&&p.vt);
+/* colis à préparer : vendus, pas encore marqués prêts, et vendus il y a 14 jours ou moins (un vieux colis, par exemple d'un historique importé, est considéré comme parti) */
+export const COLIS_JOURS=14;
+export const colisList=()=>app.P.filter(p=>sold(p)&&!p.exp&&p.vt&&Date.now()-p.vt<=COLIS_JOURS*864e5);
 app.colisList = colisList;
 function liveStats(){const ls=LSg('liveStart',0),L=ls?app.P.filter(p=>sold(p)&&p.canal==='TikTok Live'&&(p.vt||0)>=ls):[];return{ls,n:L.length,ca:L.reduce((a,x)=>a+(x.pv||0),0),ben:L.reduce((a,x)=>a+profit(x),0)}}
 function renderLive(){renderLH();renderLCand();renderLCur();renderLCol()}

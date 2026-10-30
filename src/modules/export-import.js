@@ -14,7 +14,7 @@ app.exportJSON = exportJSON;
 app.importText = importText;
 
 /* ---------- export / import ---------- */
-export function renderSet(){app.renderSync();app.renderLang();app.renderTheme();renderCfg();renderBk();const n=app.P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?t('{n} dans les fichiers.',{n:tn(n,'pièce','pièces')}):t('Aucune pièce à exporter pour le moment.'))+(lb?' '+t('Dernière sauvegarde JSON : {d}.',{d:fd(lb)}):' '+t('Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.'));
+export function renderSet(){app.renderSync();app.renderAccount();app.renderLang();app.renderTheme();renderCfg();renderBk();const n=app.P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?t('{n} dans les fichiers.',{n:tn(n,'pièce','pièces')}):t('Aucune pièce à exporter pour le moment.'))+(lb?' '+t('Dernière sauvegarde JSON : {d}.',{d:fd(lb)}):' '+t('Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.'));
  const ex=app.P.filter(x=>x.ex).length;$('exc').innerHTML=`<h3>${t('Exemples')}</h3><p class="sub">${ex?t('{n} d\'exemple dans ton stock.',{n:tn(ex,'pièce','pièces')}):t('Charge des pièces fictives pour tester les écrans.')}</p><div class="acts">${ex?'<button class="btn sec" id="exd" type="button">'+t('Supprimer les exemples')+'</button>':'<button class="btn sec" id="exl" type="button">'+t('Charger des exemples')+'</button>'}</div>`;
  if($('exd'))$('exd').onclick=async()=>{const l=app.P.filter(x=>x.ex);for(const x of l)await app.remove(x.id);app.toast(t('Exemples supprimés'))};if($('exl'))$('exl').onclick=app.loadExamples}
 async function saveFile(name,data,type){

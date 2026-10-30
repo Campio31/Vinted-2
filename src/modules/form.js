@@ -73,6 +73,7 @@ export function mkForm(host,S,o){
   const fr=app.defFrais(v,'Vinted'),r=app.renta(a,v,fr,app.estDelai(S,v));el.innerHTML=`<div class="pv">${app.rentaHTML(r)}<div class="hint" style="margin-top:6px">${esc(t('Frais comptés : {f} (emballage, envoi et commission d\'après tes réglages)',{f:eur(fr)}))}</div></div>`}
  function cprev(){const e=host.querySelector('#cdp');if(!e)return;const c=genCode(Object.assign({},S,{id:S.id||'_new'}));e.textContent=c?t('Code : {c}',{c}):t('Code : renseigne catégorie, type, marque et grade')}
  function draw(){
+  if(o.onChange)Promise.resolve().then(()=>o.onChange(S));
   const cats=mrg(CATS0,freq('cat')),subs=S.cat?mrg(SUBS0[S.cat],subsOf(S.cat)):[],sizes=sizesFor(S.cat),provs=[...new Set([...PROV0,...freq('prov')])];
   const sizesSorted=sizes.sort((a,b)=>{const ia=SIZES.indexOf(a),ib=SIZES.indexOf(b);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return-1;if(ib>=0)return 1;return String(a).localeCompare(String(b),'fr',{numeric:true})});
   const rb=recentBrands(),sug=suggestBrand(S.marque);
@@ -140,12 +141,14 @@ export function mkForm(host,S,o){
   else if(t.id==='fv'){const v=t.value.replace(',','.');S.pvise=v;S._vt=1;updateRenta()}
   else if(t.dataset.d){S[t.dataset.d]=t.value.replace(',','.')}
   else if(t.dataset.k){S[t.dataset.k]=t.dataset.k==='madein'?cnFr(t.value):t.value}
-  cprev()});
+  cprev();if(o.onChange)o.onChange(S)});
  async function doPhoto(f){const st=$('phs');st.textContent=t('Enregistrement de la photo…');try{S.photo=await savePhoto(f);advance('photo');draw()}catch(er){st.textContent=t('Photo non enregistrée ({e}).',{e:(er&&(er.message||er.code))||t('erreur')})}}
  host.addEventListener('change',e=>{const t=e.target;
   if(t.classList&&t.classList.contains('fph')){const f=t.files&&t.files[0];t.value='';if(f)doPhoto(f);return}
   if(t.dataset.k==='etat'||t.dataset.k==='entree'||t.dataset.k==='pub')S[t.dataset.k]=t.value;
-  cprev()});
+  cprev();if(o.onChange)o.onChange(S)});
+ /* première étape pas encore remplie : c'est là que s'ouvre un brouillon repris */
+ function emptyFirst(){const L=['cat','sub','marque','taille','genre','grade','achat','renta','prov'].filter(k=>k!=='sub'||hasSub());const f=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='renta'?num(S.pvise)>0:k==='marque'?!!(S.marque||'').trim():!!S[k];return L.find(k=>!f(k))||'photo'}
  /* vrai dès qu'un champ est rempli (la date d'entrée par défaut ne compte pas) : le bouton Annuler la saisie s'active */
  function dirty(){return Object.keys(S).some(k=>k!=='entree'&&k[0]!=='_'&&(Array.isArray(S[k])?S[k].length>0:S[k]!==''&&S[k]!=null&&S[k]!==false))}
  function submit(dup){
@@ -157,5 +160,5 @@ export function mkForm(host,S,o){
   S.marque=app.canonVal('marque',canon(S.marque));['collab','prov','ballot','madein'].forEach(k=>{if(S[k])S[k]=app.canonVal(k,S[k])});S.achat=Math.round(a*100)/100;o.onSubmit(S,dup);
  }
  draw();
- return{draw,reset(ns){S=ns;errs={};G=new Set(edit?ORDER:['cat']);draw()},get state(){return S}};
+ return{draw,reset(ns,resume){S=ns;errs={};G=new Set(edit?ORDER:[resume?emptyFirst():'cat']);draw()},get state(){return S},get dirty(){return dirty()}};
 }

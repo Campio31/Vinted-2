@@ -13,7 +13,7 @@ const THEMES=[['light','Clair'],['dark','Sombre'],['auto','Automatique']];
 function applyTheme(t){document.documentElement.dataset.theme=t;const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=(t==='dark'||(t==='auto'&&matchMedia('(prefers-color-scheme:dark)').matches))?'#0E0F11':'#F1F2F4'}
 function renderTheme(){const th=LSg('theme','light');$('thc').innerHTML=`<h3>${t('Apparence')}</h3><p class="sub">${t('Le mode clair est utilisé par défaut. Choisis le mode sombre, ou laisse l\'appli suivre le réglage de ton téléphone. Ce choix est propre à cet appareil.')}</p><div class="chips">${THEMES.map(([k,l])=>`<button type="button" class="chip${th===k?' on':''}" data-th="${k}">${t(l)}</button>`).join('')}</div>`}
 /* ---------- langue (propre à l'appareil, enregistrée dans cfg) ---------- */
-const STATIC_SKIP='#kp,#fadd,#gq,#lh,#lc,#lcur,#lcol,#flt,#lst,#per,#dsh,#sy,#lgc,#thc,#cfgc,#bkc,#exc,#shc,#toast,#sync,#ttl,#au_msg,#au_msg2,#xs,#is,#insth,#phs,#scan_s,#au_eye';
+const STATIC_SKIP='#acc,#abo,#kp,#fadd,#gq,#lh,#lc,#lcur,#lcol,#flt,#lst,#per,#dsh,#sy,#lgc,#thc,#cfgc,#bkc,#exc,#shc,#toast,#sync,#ttl,#au_msg,#au_msg2,#xs,#is,#insth,#phs,#scan_s,#au_eye';
 /* textes fixes du HTML : traduits sur place, le français d'origine est gardé pour pouvoir changer de langue sans recharger */
 function applyStatic(){const skip=[...document.querySelectorAll(STATIC_SKIP)],inSkip=n=>skip.some(s=>s.contains(n));
  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),nodes=[];
