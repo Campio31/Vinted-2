@@ -18,8 +18,10 @@ function renderList(){
  const toks=app.searchToks(q),sco=new Map();let ps=stock.filter(p=>{if(!app.matchFilt(p))return false;if(!toks.length)return true;const s=app.searchScore(p,toks);if(s<0)return false;sco.set(p.id,s);return true});
  ps.sort((a,b)=>(toks.length?sco.get(b.id)-sco.get(a.id):0)||(app.filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
  const tot=ps.length;ps=ps.slice(0,app.lim);
- $('lst').innerHTML=ps.length?ps.map(p=>{if(lmode==='grid')return app.pieceTile(p,app.qSel===p.id);if(avail(p))return app.pieceRow(p,app.qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>${t('vendu {p}',{p:eur(p.pv)})}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?dj(a):''}</small></div>`;
-  return`<button type="button" class="li" data-id="${esc(p.id)}">${p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`}<div class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">'+t('exemple')+'</span>':''}</b><small>${esc([p.taille,tv(p.cat),tv(p.genre)].filter(Boolean).join(' · '))} ${tagOf(p)}</small></div>${pr}</button>`}).join('')+(tot>app.lim?`<button type="button" class="btn sec" id="more">${t('Afficher plus ({n})',{n:tot-app.lim})}</button>`:''):'<div class="empty">'+t('Aucune pièce.')+'</div>';
+ /* ligne « N résultats » avec un bouton pour effacer la recherche */
+ const srh=q?`<div class="hint srh" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 4px"><span>${t(tot>1?'{n} résultats pour « {q} »':'{n} résultat pour « {q} »',{n:tot,q:esc($('q').value.trim())})}</span><button type="button" class="lnk" id="q_clr">${t('Effacer')}</button></div>`:'';
+ $('lst').innerHTML=srh+(ps.length?ps.map(p=>{if(lmode==='grid')return app.pieceTile(p,app.qSel===p.id);if(avail(p))return app.pieceRow(p,app.qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>${t('vendu {p}',{p:eur(p.pv)})}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?dj(a):''}</small></div>`;
+  return`<button type="button" class="li" data-id="${esc(p.id)}">${p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`}<div class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">'+t('exemple')+'</span>':''}</b><small>${esc([p.taille,tv(p.cat),tv(p.genre)].filter(Boolean).join(' · '))} ${tagOf(p)}</small></div>${pr}</button>`}).join('')+(tot>app.lim?`<button type="button" class="btn sec" id="more">${t('Afficher plus ({n})',{n:tot-app.lim})}</button>`:''):'<div class="empty">'+t('Aucune pièce.')+'</div>');
  hydrate();
 }
 let lmode=LSg('lmode','grid');
@@ -51,4 +53,4 @@ export const fmtP=v=>Number.isInteger(v)?v+' €':app.fN(v)+' €';
 
 $('flt').onclick=e=>{const m=e.target.closest('[data-lm]');if(m){lmode=m.dataset.lm;LSs('lmode',lmode);app.qSel=null;app.renderList();return}const b=e.target.closest('[data-flt]');if(b){app.filt=b.dataset.flt;app.lim=60;app.renderList()}};
 $('q').oninput=()=>{app.lim=60;app.renderList()};
-$('lst').onclick=e=>{if(e.target.closest('#more')){app.lim+=60;app.renderList();return}if(app.sellClick(e,app.renderList))return;const b=e.target.closest('[data-id]');if(b)app.openSheet(b.dataset.id)};
+$('lst').onclick=e=>{if(e.target.closest('#q_clr')){$('q').value='';app.lim=60;app.renderList();return}if(e.target.closest('#more')){app.lim+=60;app.renderList();return}if(app.sellClick(e,app.renderList))return;const b=e.target.closest('[data-id]');if(b)app.openSheet(b.dataset.id)};

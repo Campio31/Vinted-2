@@ -56,7 +56,7 @@ export async function bulkPut(l,s,photos){app.importing=true;
    Une valeur vide dans la sauvegarde n'efface jamais un réglage déjà rempli ici. */
 const vide=v=>v==null||v===''||v===0||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length);
 export function restoreSettings(j){const st=j&&!Array.isArray(j)?j.settings:null;if(!st||typeof st!=='object'||Array.isArray(st))return 0;
- const o={};Object.keys(CFG0).forEach(k=>{if(DEVICE_KEYS.includes(k)||st[k]===undefined)return;if(vide(st[k])&&!vide(app.cfg[k]))return;o[k]=st[k]});
+ const o={};Object.keys(CFG0).forEach(k=>{if(k==='_ts'||DEVICE_KEYS.includes(k)||st[k]===undefined)return;if(vide(st[k])&&!vide(app.cfg[k]))return;o[k]=st[k]});
  if(!Object.keys(o).length)return 0;app.setCfg(o);app.scheduleRender();return Object.keys(o).length}
 export async function importText(txt){const s=$('is');let j;try{j=JSON.parse(txt)}catch(e){s.textContent=t('Ce texte n\'est pas un JSON valide. Vérifie les virgules et les guillemets.');return}
  const rows=Array.isArray(j)?j:Array.isArray(j&&j.pieces)?j.pieces:Array.isArray(j&&j.items)?j.items:null;if(!rows){s.textContent=t('Je cherche une liste « pieces » dans ce fichier.');return}

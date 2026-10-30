@@ -24,6 +24,7 @@ app.online = navigator.onLine;
 let flushing = false;
 let pulling = false;
 let pending = 0;
+let pendingSince = 0;
 let lastSync = null;
 let syncErr = '';
 let channel = null;
@@ -61,11 +62,17 @@ export function refreshStatus(){const el=$('sync');let c='',tx_;
  else if(flushing||pulling||pending||app.localState==='pend'){c='pend';tx_=t('Synchronisation…')+(pending?' ('+pending+')':'')}
  else tx_=t('Synchronisé');
  /* la pastille du haut n'apparaît que s'il y a un problème (enregistrement impossible, erreur de synchronisation) ; l'état complet est dans Réglages */
- el.className=c;el.querySelector('span').textContent=tx_;el.hidden=c!=='err';if(app.view==='set')renderSync()}
+ el.className=c;el.querySelector('span').textContent=tx_;el.hidden=c!=='err';updateDot();if(app.view==='set')renderSync()}
+/* petit point à côté de Réglages : hors ligne, ou des modifications qui attendent d'être envoyées depuis plus de 2 minutes */
+export function dotState({cloud:c,user,online,pending:p,since,now}){if(!c||!user)return null;if(!online)return{k:'offline',n:p};if(p&&since&&now-since>120000)return{k:'waiting',n:p};return null}
+app.dotState=dotState;
+function updateDot(){const d=$('offdot');if(!d)return;const s=dotState({cloud:app.cloud,user:app.user,online:app.online,pending,since:pendingSince,now:Date.now()});d.hidden=!s;if(!s)return;const txt=s.k==='offline'?t('Hors ligne')+(s.n?' · '+t('{n} en attente',{n:s.n}):''):t(s.n>1?'{n} modifications en attente':'{n} modification en attente',{n:s.n});d.title=txt;d.setAttribute('aria-label',txt)}
+$('offdot').onclick=()=>go('set');
+setInterval(()=>refreshStatus(),30000);
 const T=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(t('Délai dépassé : le serveur ne répond pas.'))),ms||30000))]);
 app.T = T;
 $('sync').onclick=()=>go('set');
-export const countPending=async()=>{pending=(await tx('outbox','readonly',s=>s.count()))||0;refreshStatus()};
+export const countPending=async()=>{pending=(await tx('outbox','readonly',s=>s.count()))||0;if(!pending)pendingSince=0;else if(!pendingSince)pendingSince=Date.now();refreshStatus()};
 const kickFlush=()=>{clearTimeout(kickT);kickT=setTimeout(()=>{flush()},400)};
 export async function queue(kind,id){if(!cloud||!app.IDB)return;await tx('outbox','readwrite',s=>{s.put({k:(kind==='photo'?'f:':'p:')+id,kind,id,ts:Date.now()+Math.random()})});await countPending();kickFlush()}
 export async function queueMany(ids,photoIds){if(!cloud||!app.IDB)return;await tx('outbox','readwrite',s=>{const t=Date.now();ids.forEach(id=>s.put({k:'p:'+id,kind:'put',id,ts:t+Math.random()}));(photoIds||[]).forEach(id=>s.put({k:'f:'+id,kind:'photo',id,ts:t+Math.random()}))});await countPending();kickFlush()}
@@ -81,7 +88,7 @@ async function flush(){if(!cloud||!app.user||flushing||!app.online||app.importin
  catch(e){syncErr=errMsg(e);report(e,{ou:'synchronisation'})}
  finally{flushing=false;await countPending()}}
 async function applyRows(rows){const ob=new Set((await tx('outbox','readonly',s=>s.getAllKeys()))||[]);const put=[],del=[];
- for(const r of rows){if(!r||!r.id||ob.has('p:'+r.id))continue;if(r.id==='__settings'){if(!r.deleted)applyCfg(r.data);continue}if(app.isDep(r.id)){app.depApply(r,del,put);continue}const i=app.P.findIndex(x=>x.id===r.id);
+ for(const r of rows){if(r&&r.id==='__settings'){if(!r.deleted)applyCfg(r.data);continue}if(!r||!r.id||ob.has('p:'+r.id))continue;if(app.isDep(r.id)){app.depApply(r,del,put);continue}const i=app.P.findIndex(x=>x.id===r.id);
   if(r.deleted){if(i>=0){app.P.splice(i,1);del.push(r.id)}}
   else{const d=Object.assign({},r.data,{id:r.id});if(i>=0){if(same(app.P[i],d))continue;app.P[i]=d}else app.P.push(d);put.push(d)}}
  if(put.length||del.length){await tx('pieces','readwrite',s=>{put.forEach(d=>s.put(d));del.forEach(id=>s.delete(id))});scheduleRender()}}
