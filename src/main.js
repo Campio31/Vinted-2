@@ -72,5 +72,6 @@ import './modules/progress.js';
 import './modules/wrapped-ready.js';
 import './modules/history.js';
 import './modules/account.js';
+import './modules/a11y.js';
 import './modules/boot.js';
 import './modules/updates.js';
