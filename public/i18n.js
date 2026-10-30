@@ -1742,3 +1742,8 @@ K('de chiffre d\'affaires','in revenue','di fatturato','de facturación','Umsatz
 K('{n} ventes, soit {p} % du total','{n} sales, {p}% of the total','{n} vendite, il {p}% del totale','{n} ventas, el {p} % del total','{n} Verkäufe, also {p} % der Gesamtzahl');
 K('{p} % de tes ventes','{p}% of your sales','{p}% delle tue vendite','{p} % de tus ventas','{p} % deiner Verkäufe');
 K('de marge','margin','di margine','de margen','Marge');
+K('{n} résultats pour « {q} »','{n} results for “{q}”','{n} risultati per «{q}»','{n} resultados para «{q}»','{n} Ergebnisse für „{q}“');
+K('{n} résultat pour « {q} »','{n} result for “{q}”','{n} risultato per «{q}»','{n} resultado para «{q}»','{n} Ergebnis für „{q}“');
+K('Effacer','Clear','Cancella','Borrar','Löschen');
+K('Fenêtre','Window','Finestra','Ventana','Fenster');
+K('Se connecter','Sign in','Accedi','Iniciar sesión','Anmelden');
