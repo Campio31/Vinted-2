@@ -40,6 +40,11 @@ self.addEventListener('fetch', e => {
     })));
     return;
   }
+  /* config.js (clés, DSN Sentry…) : le réseau d'abord, pour qu'un changement soit vu tout de suite ; le cache sert seulement hors-ligne */
+  if (url.pathname.endsWith('/config.js')) {
+    e.respondWith(fetch(req, { cache: 'no-store' }).then(r => { if (r.ok) caches.open(VERSION).then(c => c.put(req, r.clone())); return r; }).catch(() => caches.match(req, { ignoreSearch: true })));
+    return;
+  }
   e.respondWith(caches.match(req, { ignoreSearch: true }).then(hit => {
     const net = fetch(req).then(r => {
       if (r.ok) caches.open(VERSION).then(c => c.put(req, r.clone()));
