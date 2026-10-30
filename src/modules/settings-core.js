@@ -4,7 +4,7 @@ import { LSg, LSs } from './core.js';
 app.setCfg = setCfg;
 
 /* ---------- réglages (synchronisés entre appareils, sauf les clés propres à l'appareil) ---------- */
-export const CFG0={goal:0,goalCA:0,goalY:0,goalYCA:0,goalMode:'net',lang:'',emb:0.42,port:0,comV:0,comT:0,pf1:'',pf2:'',roi:100,minM:3,auto:false,lastAuto:'',remember:true,plafond:203100,plafondTva:91900,tauxSoc:12.3,periode:'M',fiscDeclared:{},alias:{},cash:null,cashDate:'',ballotBudget:0,depotH:'18:00',liveAt:'',notifOn:false,defis:[],_ts:{}};
+export const CFG0={goal:0,goalCA:0,goalY:0,goalYCA:0,goalMode:'net',lang:'',emb:0.42,port:0,comV:0,comT:0,pf1:'',pf2:'',roi:100,minM:3,auto:false,lastAuto:'',remember:true,plafond:203100,plafondTva:91900,finJours:21,tauxSoc:12.3,periode:'M',fiscDeclared:{},alias:{},cash:null,cashDate:'',ballotBudget:0,depotH:'18:00',liveAt:'',notifOn:false,defis:[],_ts:{}};
 export const DEVICE_KEYS=['lastAuto','remember','lang'];
 app.cfg = Object.assign({},CFG0,LSg('cfg',{}));
 export const syncCfg=()=>{const o={};Object.keys(app.cfg).forEach(k=>{if(!DEVICE_KEYS.includes(k))o[k]=app.cfg[k]});return o};

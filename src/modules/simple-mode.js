@@ -20,7 +20,7 @@ export function essentials() {
   const o = app.cfg.onb || {}, w = [];
   if (o.canal === 'live' || o.canal === 'both') w.push('live');
   if (o.statut === 'micro' || o.statut === 'pro') w.push('fisc');
-  ['coach', 'courbe', 'depenses', 'trophees', 'qr', 'aide', 'complete', 'fourn', 'vintage'].forEach(k => w.push(k));
+  ['colis', 'coach', 'depenses', 'trophees', 'qr', 'aide', 'complete', 'fourn', 'vintage'].forEach(k => w.push(k));
   return [...new Set(w)].filter(k => TOOLS.some(x => x.k === k)).slice(0, 8);
 }
 

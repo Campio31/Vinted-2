@@ -7,7 +7,7 @@ import { cohorteBody, courbeBody, livesBody, seuilCardTxt } from './analytics.js
 import { colisCost, fournLow, planTodayHTML, setTaskDone } from './supplies-planning.js';
 
 /* ---------- bilan personnalisable ---------- */
-const DASH_NEW=['courbe','seuil','fourn','planning'];
+const DASH_NEW=['seuil','fourn','planning'];
 function dashKeyed(){const box=$('dsh'),cnt={};return[...box.children].filter(el=>!el.classList.contains('dsa')).map(el=>{let k=el.dataset.ck;if(!k){const h=el.querySelector('h3[data-sec]');if(h)k='S:'+h.dataset.sec;else if(el.dataset.tool)k='T:'+el.dataset.tool;else{const c=el.classList.contains('hero')?'hero':el.classList.contains('kpis')?'kpis':el.classList.contains('coachc')?'coach':el.classList.contains('gcard')?'goal':el.dataset.nc?'nc':(el.className.split(' ')[0]||el.tagName.toLowerCase());cnt[c]=(cnt[c]||0)+1;k=c+cnt[c]}}return{el,k}})}
 function dashLabel(x){const el=x.el;if(el.dataset.lb)return el.dataset.lb;if(x.k.startsWith('T:')){const tl=TOOLS.find(z=>z.k===x.k.slice(2));if(tl)return t(tl.t)}if(x.k.startsWith('hero'))return t('Bénéfice net de la période');if(x.k.startsWith('kpis'))return x.k==='kpis1'?t('Chiffres clés'):t('Retours');if(x.k.startsWith('coach'))return t('Coach du lundi');if(x.k.startsWith('goal'))return t('Objectifs');const h=el.querySelector('h3');return(h?h.textContent:el.textContent).replace(/\s+/g,' ').trim().slice(0,36)||x.k}
 const dashHidden=()=>app.cfg.dash&&Array.isArray(app.cfg.dash.hide)?app.cfg.dash.hide:DASH_NEW;
@@ -16,7 +16,10 @@ function newCards(){const hid=dashHidden(),c=(k,h,fn)=>hid.includes(k)?`<div cla
 function dashApply(){const box=$('dsh'),hide=dashHidden(),order=(app.cfg.dash&&app.cfg.dash.order)||[],it=dashKeyed();it.forEach(x=>{x.el.style.display=hide.includes(x.k)?'none':''});
  if(order.length){const pos=k=>{const i=order.indexOf(k);return i<0?1e6:i};it.map((x,i)=>({x,i})).sort((a,b)=>pos(a.x.k)-pos(b.x.k)||a.i-b.i).forEach(o=>box.appendChild(o.x.el))}
  let dsa=box.querySelector('.dsa');if(!dsa){box.insertAdjacentHTML('afterbegin','<div class="dsa"></div>');dsa=box.querySelector('.dsa')}box.prepend(dsa);if(!dsa.querySelector('[data-dcust]'))dsa.insertAdjacentHTML('afterbegin',`<button type="button" class="chip sm" data-dcust="1">${t('Personnaliser')}</button>`)}
-const renderDash24=app.renderDash;app.renderDash=function(){renderDash24();if(!app.P.length||!$('dsh').children.length)return;$('dsh').insertAdjacentHTML('beforeend',newCards());dashApply();hydrate()};
+const renderDash24=app.renderDash;app.renderDash=function(){renderDash24();if(!app.P.length||!$('dsh').children.length)return;$('dsh').insertAdjacentHTML('beforeend',newCards());
+ /* la courbe de l'objectif se range juste après la carte Objectifs, sauf si tu as choisi un ordre */
+ {const cb=$('dsh').querySelector('[data-ck="courbe"]'),gl=$('dsh').querySelector('.card.goal')||$('dsh').querySelector('.gcard')||$('dsh').querySelector('.kpis');if(cb&&gl&&!(app.cfg.dash&&app.cfg.dash.order))gl.after(cb)}
+ dashApply();hydrate()};
 function openDashCustom(){const draw=()=>{const it=dashKeyed(),hide=dashHidden();
  showSheet(sheetHead(t('Personnaliser le bilan'))+`<p class="sub" style="margin:0 0 10px">${t('Choisis les cartes à afficher et leur ordre. Ça reste sur ton compte, pour tous tes appareils.')}</p>${it.map((x,i)=>`<div class="dcr${hide.includes(x.k)?' off':''}"><button type="button" class="chip sm${hide.includes(x.k)?'':' on'}" data-dv="${esc(x.k)}" aria-label="${t('Afficher ou masquer')}">${hide.includes(x.k)?t('Masquée'):t('Visible')}</button><span>${esc(dashLabel(x))}</span><button type="button" class="chip sm" data-dm="${esc(x.k)}|-1"${i?'':' disabled'} aria-label="${t('Monter')}">↑</button><button type="button" class="chip sm" data-dm="${esc(x.k)}|1"${i<it.length-1?'':' disabled'} aria-label="${t('Descendre')}">↓</button></div>`).join('')}
  <div class="acts two"><button type="button" class="btn sec" id="dc_rs">${t('Réinitialiser')}</button><button type="button" class="btn" id="dc_ok">${t('Terminé')}</button></div>`);

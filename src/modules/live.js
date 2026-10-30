@@ -13,12 +13,11 @@ function renderVendre(){$('gq').innerHTML=goalMini();renderLive()}
 
 /* mode Live TikTok */
 let liveSel=null,lf={prix:'',pseudo:''};
-/* colis à préparer : vendus, pas encore marqués prêts, et vendus il y a 14 jours ou moins (un vieux colis, par exemple d'un historique importé, est considéré comme parti) */
-export const COLIS_JOURS=14;
-export const colisList=()=>app.P.filter(p=>sold(p)&&!p.exp&&p.vt&&Date.now()-p.vt<=COLIS_JOURS*864e5);
-app.colisList = colisList;
+/* les colis à préparer ont leur propre outil (colis.js) ; ces exports gardent les anciens imports valides */
+import { colisList } from './colis.js';
+export { COLIS_JOURS, colisList } from './colis.js';
 function liveStats(){const ls=LSg('liveStart',0),L=ls?app.P.filter(p=>sold(p)&&p.canal==='TikTok Live'&&(p.vt||0)>=ls):[];return{ls,n:L.length,ca:L.reduce((a,x)=>a+(x.pv||0),0),ben:L.reduce((a,x)=>a+profit(x),0)}}
-function renderLive(){renderLH();renderLCand();renderLCur();renderLCol()}
+function renderLive(){renderLH();renderLCand();renderLCur();const n=colisList().length;if(n)$('lh').insertAdjacentHTML('beforeend',`<div class="tdx"><span>${t('{n} à préparer pour l\'envoi',{n})}</span><button type="button" class="btn sec" data-opencolis="1">${t('Colis à préparer')}</button></div>`)}
 function renderLH(){const s=liveStats();$('lh').innerHTML=s.ls?`<div class="live-h on"><span class="live-dot"></span><b>${t('EN DIRECT')}</b><span class="live-s">${tn(s.n,'vente','ventes')} · ${eur(s.ca)} · ${t('bénéfice {b}',{b:eur(s.ben)})}</span><button type="button" class="btn sm sec" id="l_end">${t('Terminer')}</button></div>`:`<div class="live-h"><b>${t('Mode Live TikTok')}</b><span class="live-s">${t('Démarre le live pour compter tes ventes.')}</span><button type="button" class="btn sm mint" id="l_start">${t('Démarrer')}</button></div>`}
 function renderLCand(){const q=$('ls').value.trim();const box=$('lc');if(liveSel){box.innerHTML='';return}
  const L=q?cand($('ls').value).slice(0,6):[];
@@ -30,14 +29,6 @@ function renderLCur(){const box=$('lcur');const p=liveSel&&app.P.find(x=>x.id===
  <div id="lr">${liveCalc(p)}</div>
  <label class="l" for="lb" style="margin-top:12px">${t('@pseudo de l\'acheteur')}</label><input type="text" id="lb" value="${esc(lf.pseudo)}" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off" spellcheck="false">
  <button type="button" class="btn mint lv-go" id="l_sell">${esc(t('Vendu à @{p}',{p:lf.pseudo.replace(/^@+/,'')||'…'}))}</button><button type="button" class="btn sec" id="l_chg" style="margin-top:8px">${t('Changer de pièce')}</button></div>`;hydrate()}
-let colisMode=LSg('colisMode','bac');
-function renderLCol(){const C=colisList(),box=$('lcol');
- const head=`<h3 style="margin:18px 0 8px">${t('À préparer ({n})',{n:C.length})}</h3>`+(C.length?`<div class="chips" style="margin-bottom:10px"><button type="button" class="chip sm${colisMode==='bac'?' on':''}" data-cm="bac">${t('Par bac')}</button><button type="button" class="chip sm${colisMode==='buyer'?' on':''}" data-cm="buyer">${t('Par acheteur')}</button></div>`:'');
- if(!C.length){box.innerHTML=head+'<div class="empty" style="padding:14px 8px">'+t('Rien à préparer. Les ventes faites dans l\'appli apparaissent ici.')+'</div>';return}
- if(colisMode==='bac'){const S2=[...C].sort((a,b)=>(a.bac||'￿').localeCompare(b.bac||'￿',app.LOC,{numeric:true})||(a.code||'').localeCompare(b.code||''));
-  box.innerHTML=head+'<div class="prepl">'+S2.map(x=>`<div class="pre"><span class="bacb">${esc(x.bac||'—')}</span><div class="pm"><b>${esc(title(x))}${x.taille?' · '+esc(x.taille):''}</b><small>${esc(x.code||'')} · ${x.acheteur?'@'+esc(x.acheteur)+' · ':''}${esc(tv(x.canal||''))}</small></div><button type="button" class="btn sm sec gh" data-proof="${esc(x.id)}">${t('Preuves')}</button><button type="button" class="btn sm mint" data-prep="${esc(x.id)}">${t('Prêt')}</button></div>`).join('')+'</div>';return}
- const g=new Map();[...C].sort((a,b)=>(b.vt||0)-(a.vt||0)).forEach(p=>{const k=p.acheteur||'';if(!g.has(k))g.set(k,[]);g.get(k).push(p)});
- box.innerHTML=head+[...g.entries()].map(([k,L])=>`<div class="parcel"><div class="ph"><b>${k?'@'+esc(k):t('Sans pseudo')}</b><span>${tn(L.length,'pièce','pièces')} · ${eur(L.reduce((a,x)=>a+(x.pv||0),0))}</span></div><ul>${L.map(x=>`<li><b>${esc(x.code||x.id)}</b> ${esc(title(x))}${x.taille?' · '+esc(x.taille):''} <button type="button" class="lnkb" data-proof="${esc(x.id)}">${t('preuves')}</button></li>`).join('')}</ul><button type="button" class="btn mint" data-col="${esc(k)}">${t('Colis prêt')}</button></div>`).join('')}
 function liveSelect(id){const p=app.P.find(x=>x.id===id);if(!p)return;liveSel=id;const pr=priceFor(p);lf={prix:pr?fN(pr):'',pseudo:''};$('ls').value='';renderLCand();renderLCur();const i=$('lb');if(i)i.focus()}
 $('ls').addEventListener('input',renderLCand);
 $('ls').addEventListener('keydown',e=>{if(e.key==='Enter'){const L=cand($('ls').value);if($('ls').value.trim()&&L.length){e.preventDefault();liveSelect(L[0].id)}}});
@@ -48,10 +39,8 @@ $('vl').addEventListener('click',e=>{
  const lp=e.target.closest('[data-lp]');if(lp){const x=num(lf.prix)||0;lf.prix=fN(Math.max(0,x+Number(lp.dataset.lp)));$('lp').value=lf.prix;const p=app.P.find(y=>y.id===liveSel);if(p)$('lr').innerHTML=liveCalc(p);return}
  if(e.target.closest('#l_chg')){liveSel=null;lf={prix:'',pseudo:''};renderLCand();renderLCur();$('ls').focus();return}
  if(e.target.closest('#l_sell')){liveSell();return}
- const cm=e.target.closest('[data-cm]');if(cm){colisMode=cm.dataset.cm;LSs('colisMode',colisMode);renderLCol();return}
- const pr=e.target.closest('[data-prep]');if(pr){const x=app.P.find(y=>y.id===pr.dataset.prep);if(x){const old=Object.assign({},x);app.save(Object.assign({},x,{exp:today()}));renderLCol();app.toast(t('Colis prêt')+(x.bac?t(' · bac {b}',{b:x.bac}):''),()=>{app.save(old);renderLCol()})}return}
- const col=e.target.closest('[data-col]');
- if(col){const k=col.dataset.col,L=colisList().filter(p=>(p.acheteur||'')===k),old=L.map(p=>Object.assign({},p));L.forEach(p=>app.save(Object.assign({},p,{exp:today()})));renderLCol();app.toast(k?t('Colis prêt pour @{k}',{k}):t('Colis prêt'),()=>{old.forEach(p=>app.save(p));renderLCol()})}});
+ if(e.target.closest('[data-opencolis]')){app.openColis();return}
+ });
 $('vl').addEventListener('input',e=>{
  if(e.target.id==='lp'){lf.prix=e.target.value;const p=app.P.find(y=>y.id===liveSel);if(p)$('lr').innerHTML=liveCalc(p)}
  if(e.target.id==='lb'){lf.pseudo=e.target.value;const b=$('l_sell');if(b)b.textContent=t('Vendu à @{p}',{p:lf.pseudo.replace(/^@+/,'')||'…'})}});

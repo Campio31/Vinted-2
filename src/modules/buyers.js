@@ -8,7 +8,7 @@ import { sheetHead, showSheet } from './tools-index.js';
 import { diffEv } from './trash-history.js';
 
 /* ===== v24 : lots, sélection, variantes, similaires, acheteurs ===== */
-Object.assign(CFG0,{dash:null,shop:null,fourn:[],plan:[],fixes:[],noirs:{},vibr:true,onehand:false});
+Object.assign(CFG0,{dash:null,shop:null,fourn:[],plan:[],fixes:[],apports:[],noirs:{},vibr:true,onehand:false});
 DEVICE_KEYS.push('onehand','vibr');
 export const r2=v=>Math.round(v*100)/100;
 export const buzz=ms=>{try{if(app.cfg.vibr!==false&&navigator.vibrate)navigator.vibrate(ms)}catch(e){}};
