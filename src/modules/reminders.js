@@ -20,7 +20,7 @@ function rappelsList(){const R=[],now=new Date(),nc=colisList().length;
  const ev=commEvents().find(e=>{const i=evInfo(e);return i.prep&&i.dd<=e.lead});if(ev){const i=evInfo(ev);R.push({k:'ev:'+ev.key,tone:'o',txt:t(i.dd>1?'{e} dans {n} jours : prépare tes promos et tes lots':'{e} dans {n} jour : prépare tes promos et tes lots',{e:t(ev.name),n:i.dd}),tool:'calcom'})}
  const u=app.P.filter(unpub).length,pt=app.P.filter(p=>p.pub===today()).length;if(u&&pt<5)R.push({k:'pub',tone:'o',txt:t(5-pt>1?'Publie {n} pièces aujourd\'hui ({u} pas encore en ligne)':'Publie {n} pièce aujourd\'hui ({u} pas encore en ligne)',{n:5-pt,u}),topub:1});
  return R}
-function rappelsCardHTML(){const R=app.rappelsList();if(!R.length)return'';return`<div class="card" data-nc="1"><h3 style="margin:0 0 8px">${t('Aujourd\'hui')}</h3>${R.map(r=>`<button type="button" class="rap rap-${r.tone}" ${r.topub?'data-topub="1"':'data-tool="'+r.tool+'"'}><i></i><span>${esc(r.txt)}</span></button>`).join('')}</div>`}
+function rappelsCardHTML(){const R=app.rappelsList();if(!R.length)return'';return`<div class="card" data-nc="1"><h3 style="margin:0 0 8px">${t('Rappels du jour')}</h3>${R.map(r=>`<button type="button" class="rap rap-${r.tone}" ${r.topub?'data-topub="1"':'data-tool="'+r.tool+'"'}><i></i><span>${esc(r.txt)}</span></button>`).join('')}</div>`}
 async function notify(titre,body,tag){if(!('Notification' in window)||Notification.permission!=='granted')return;try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg&&reg.showNotification)reg.showNotification(titre,{body,tag,icon:'icons/icon-192.png',badge:'icons/icon-192.png'});else new Notification(titre,{body,tag,icon:'icons/icon-192.png'})}catch(e){}}
 export function checkNotifs(){if(pushIsOn())return;if(!app.cfg.notifOn||!('Notification' in window)||Notification.permission!=='granted'||!app.P.length)return;const d=LSg('notifSent',{});if(d.day!==today()){d.day=today();d.k=[]}
  app.rappelsList().forEach(r=>{if(d.k.includes(r.k))return;d.k.push(r.k);notify('Max',r.txt,r.k)});LSs('notifSent',d)}
@@ -56,6 +56,7 @@ function pushItems(){const out=[],now=new Date(),nc=colisList().length,hm=String
  if(app.cfg.liveAt){const dt=new Date(app.cfg.liveAt);if(!isNaN(dt))add('live:'+app.cfg.liveAt,new Date(dt-2*3600e3),t(dt.getHours()>=17?'Live ce soir à {h}':'Live aujourd\'hui à {h}',{h:hh(pad(dt.getHours(),2)+':'+pad(dt.getMinutes(),2))}))}
  const ev=commEvents().find(e=>{const i=evInfo(e);return i.prep&&i.dd<=e.lead});
  if(ev){const dd0=evInfo(ev).dd;for(let o=0;o<2;o++){const dd=dd0-o;if(dd<0)continue;const d=at(o,9,0);add('ev:'+ev.key+':'+ldate(d),d,dd>0?t(dd>1?'{e} dans {n} jours : prépare tes promos et tes lots':'{e} dans {n} jour : prépare tes promos et tes lots',{e:t(ev.name),n:dd}):t('{e} : c\'est aujourd\'hui !',{e:t(ev.name)}))}}
+ (app.pushExtra||[]).forEach(f=>f(at,add));
  return out}
 async function pushSync(force){if(!pushIsOn()||!app.user||app.importing||!app.loaded)return;
  const items=pushItems(),k=app.user.id+JSON.stringify(items);if(!force&&LSg('pushLast','')===k)return;

@@ -12,7 +12,7 @@ const STEPS = [
     ['pro', 'Autre statut professionnel', 'Société, EI, etc.'],
   ] },
   { k: 'canal', q: 'Où vends-tu surtout ?', h: 'Tu pourras vendre partout, c\'est juste pour commencer.', o: [
-    ['vinted', 'Vinted', 'Annonces et négociation'],
+    ['vinted', 'Vinted', 'Annonces et ventes à distance'],
     ['live', 'TikTok Live', 'Ventes en direct'],
     ['both', 'Les deux', 'Vinted et lives'],
     ['autre', 'Ailleurs', 'Leboncoin, vide-greniers, Instagram…'],

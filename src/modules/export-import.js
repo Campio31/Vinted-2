@@ -4,7 +4,7 @@ import { setSync, tx } from './storage.js';
 import { phBlob } from './photos.js';
 import { STAT } from './stock-view.js';
 import { stats } from './dashboard.js';
-import { syncCfg } from './settings-core.js';
+import { CFG0, DEVICE_KEYS, syncCfg } from './settings-core.js';
 import { renderBk } from './backup.js';
 import { renderCfg } from './settings-costs.js';
 
@@ -52,6 +52,12 @@ export async function bulkPut(l,s,photos){app.importing=true;
  app.renderAll();setSync('pend');
  try{await tx('pieces','readwrite',st=>{l.forEach(x=>st.put(x))});await app.queueMany(l.map(x=>x.id),Object.keys(photos));setSync('ok')}catch(e){setSync('err');throw e}finally{app.importing=false}
  app.renderAll()}
+/* Une sauvegarde contient aussi les réglages (objectifs, coûts, plateformes…) : on les remet, sauf ceux propres à l'appareil.
+   Une valeur vide dans la sauvegarde n'efface jamais un réglage déjà rempli ici. */
+const vide=v=>v==null||v===''||v===0||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length);
+export function restoreSettings(j){const st=j&&!Array.isArray(j)?j.settings:null;if(!st||typeof st!=='object'||Array.isArray(st))return 0;
+ const o={};Object.keys(CFG0).forEach(k=>{if(DEVICE_KEYS.includes(k)||st[k]===undefined)return;if(vide(st[k])&&!vide(app.cfg[k]))return;o[k]=st[k]});
+ if(!Object.keys(o).length)return 0;app.setCfg(o);app.scheduleRender();return Object.keys(o).length}
 export async function importText(txt){const s=$('is');let j;try{j=JSON.parse(txt)}catch(e){s.textContent=t('Ce texte n\'est pas un JSON valide. Vérifie les virgules et les guillemets.');return}
  const rows=Array.isArray(j)?j:Array.isArray(j&&j.pieces)?j.pieces:Array.isArray(j&&j.items)?j.items:null;if(!rows){s.textContent=t('Je cherche une liste « pieces » dans ce fichier.');return}
  const photos=(j&&!Array.isArray(j)&&j.photos&&typeof j.photos==='object')?j.photos:{};
@@ -59,7 +65,10 @@ export async function importText(txt){const s=$('is');let j;try{j=JSON.parse(txt
  if(!l.length){s.textContent=t('Aucune pièce valide (il faut un identifiant et une catégorie ou une marque).');return}
  s.textContent=t('Import en cours…');
  try{await bulkPut(l,s,photos)}catch(err){s.textContent=t('Import interrompu : {e}. Relance-le, les pièces déjà enregistrées seront simplement remplacées.',{e:err&&err.message||t('erreur')});return}
- if(j&&Array.isArray(j.depenses))for(const d of j.depenses){if(d&&d.id&&app.isDep(d.id))app.depSave(d)}const ign=rows.length-l.length,n=l.length;s.textContent=tn(n,'pièce importée','pièces importées')+(ign?' · '+tn(ign,'ligne ignorée','lignes ignorées'):'')+'.';app.toast(tn(n,'pièce importée','pièces importées'));$('impt').value=''}
+ if(j&&Array.isArray(j.depenses))for(const d of j.depenses){if(d&&d.id&&app.isDep(d.id))app.depSave(d)}
+ const restored=restoreSettings(j);
+ const ign=rows.length-l.length,n=l.length;s.textContent=tn(n,'pièce importée','pièces importées')+(ign?' · '+tn(ign,'ligne ignorée','lignes ignorées'):'')+(restored?' · '+t('réglages et objectifs restaurés'):'')+'.';app.toast(tn(n,'pièce importée','pièces importées'));$('impt').value=''}
+$('impo').onclick=()=>app.openTool('importo');
 $('impb').onclick=()=>{const t=$('impt').value.trim();if(!t){$('is').textContent=window.t('Colle d\'abord ton JSON, ou choisis un fichier.');return}importText(t)};
 $('imp').onchange=async e=>{const f=e.target.files[0];if(!f)return;await importText(await f.text());e.target.value=''};
 $('impm').onclick=()=>saveFile('modele-import-stock.json',JSON.stringify({pieces:[{id:'i0001',code:'ShSpoSt0A-001',cat:'Short',sub:'Sport',marque:'Starter',taille:'M',genre:'Homme',grade:'A',achat:4.5,prov:'Pawpick',coul:['Bleu'],mat:['Polyester'],etat:'RAS',entree:'2026-08-23',statut:'Disponible'},{id:'i0002',cat:'Tshirt',sub:'T-Imprimé',marque:'Pokémon',taille:'L',genre:'Homme',grade:'A',achat:2.49,prov:'Providence',entree:'2026-08-24',statut:'Vendu',pv:8,dv:'2026-09-07',canal:'Vinted'}],settings:{}},null,1),'application/json');

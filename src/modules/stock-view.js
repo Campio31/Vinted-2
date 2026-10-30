@@ -8,12 +8,14 @@ app.renderList = renderList;
 export const STAT={Disponible:'En stock',Vendu:'Vendus','Pas Disponible':'Indispo'};
 const tagOf=p=>p.statut==='Vendu'?'<span class="tag v">'+t('Vendu')+'</span>':p.statut==='Pas Disponible'?'<span class="tag x">'+t('Indispo')+'</span>':'<span class="tag">'+t('Stock')+'</span>';
 function renderList(){
- const F=['Tous','Disponible','Apub','Enligne','Vendu','Pas Disponible'].concat(app.P.some(app.incomplete)?['Incomplet']:[]),cnt=k=>app.P.filter(p=>app.matchFiltK(p,k)).length;
+ /* l'onglet Stock ne montre que le stock : les pièces vendues sont dans l'onglet Vente */
+ if(app.filt==='Vendu')app.filt='Tous';
+ const stock=app.P.filter(p=>!sold(p)),F=['Tous','Disponible','Apub','Enligne','Pas Disponible'].concat(stock.some(app.incomplete)?['Incomplet']:[]),cnt=k=>stock.filter(p=>app.matchFiltK(p,k)).length;
  $('flt').innerHTML=F.map(k=>`<button class="chip sm${app.filt===k?' on':''}" type="button" data-flt="${k}">${t(app.FLAB[k]||STAT[k])} · ${cnt(k)}</button>`).join('')+`<span class="vt"><button type="button" data-lm="grid" aria-label="${t('Grille')}"${lmode==='grid'?' class="on"':''}><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button><button type="button" data-lm="list" aria-label="${t('Liste')}"${lmode==='list'?' class="on"':''}><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></span>`;
  $('lst').className=lmode==='grid'?'grid':'';
  if(!app.P.length){$('lst').innerHTML=`<div class="card empty"><b>${app.loaded?t('Ton stock est vide'):t('Chargement…')}</b>${app.loaded?'<br>'+t('Ajoute ta première pièce depuis l\'onglet Ajouter, importe ta sauvegarde (onglet Export), ou charge quelques exemples.')+'<br><button class="btn" id="exb" type="button">'+t('Charger des exemples')+'</button>':''}</div>`;if($('exb'))$('exb').onclick=app.loadExamples;return}
  const q=$('q').value.trim().toLowerCase();
- const toks=app.searchToks(q),sco=new Map();let ps=app.P.filter(p=>{if(!app.matchFilt(p))return false;if(!toks.length)return true;const s=app.searchScore(p,toks);if(s<0)return false;sco.set(p.id,s);return true});
+ const toks=app.searchToks(q),sco=new Map();let ps=stock.filter(p=>{if(!app.matchFilt(p))return false;if(!toks.length)return true;const s=app.searchScore(p,toks);if(s<0)return false;sco.set(p.id,s);return true});
  ps.sort((a,b)=>(toks.length?sco.get(b.id)-sco.get(a.id):0)||(app.filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
  const tot=ps.length;ps=ps.slice(0,app.lim);
  $('lst').innerHTML=ps.length?ps.map(p=>{if(lmode==='grid')return app.pieceTile(p,app.qSel===p.id);if(avail(p))return app.pieceRow(p,app.qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>${t('vendu {p}',{p:eur(p.pv)})}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?dj(a):''}</small></div>`;

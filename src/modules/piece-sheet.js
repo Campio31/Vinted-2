@@ -9,7 +9,7 @@ app.openSheet = openSheet;
 export function closeSheet(){$('sheet').hidden=true}
 $('sheet').onclick=e=>{if(e.target===$('sheet')||e.target.closest('[data-x]'))closeSheet()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeSheet()});
-document.addEventListener('click',e=>{const c=e.target.closest('.chip[data-t]');if(!c)return;const inp=$(c.dataset.t),on=/^(s|e)_plat$/.test(c.dataset.t)||!c.classList.contains('on');inp.value=on?c.dataset.v:'';c.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c&&on))});
+document.addEventListener('click',e=>{const c=e.target.closest('.chip[data-t]');if(!c)return;const inp=$(c.dataset.t),on=/^(s|e)_plat$/.test(c.dataset.t)||!c.classList.contains('on');inp.value=on?app.pfShow(c.dataset.v):'';c.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c&&on))});
 const CANAUX=['Vinted','TikTok Live','Autre'];
 function openSheet(id,m){
  const p=app.P.find(x=>x.id===id);if(!p)return closeSheet();$('sheet').hidden=false;const c=$('shc');m=m||'view';
@@ -49,22 +49,22 @@ function openSheet(id,m){
   $('d_no').onclick=()=>app.openSheet(id);$('d_ok').onclick=()=>{app.remove(id);closeSheet();app.toast(t('Pièce supprimée'),()=>app.save(p))}}
  if(m==='sell'){const adv=app.advice(p),pr0=app.priceFor(p);c.innerHTML=head(t('Marquer comme vendu'))+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · ${t('acheté {p}',{p:eur(p.achat)})}</p>
   <div class="fld" id="s_w"><label class="l" for="s_prix">${t('Prix de vente')}</label><div class="price"><input type="text" inputmode="decimal" id="s_prix" placeholder="0${app.DS}00" value="${pr0?app.fN(pr0):''}"><span>€</span></div>${adv.ok?`<div class="hint">${t('Prix conseillé : {p} ({n} ventes comparables). Modifie-le si besoin.',{p:eur(adv.reco),n:adv.n})}</div>`:''}</div>
-  <div class="fld"><label class="l" for="s_plat">${t('Vendu sur')}</label><input type="text" id="s_plat" value="Vinted"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${x==='Vinted'?' on':''}" data-t="s_plat" data-v="${x}">${tv(x)}</button>`).join('')}</div></div>
+  <div class="fld"><label class="l" for="s_plat">${t('Vendu sur')}</label><input type="text" id="s_plat" value="${esc(app.pfShow('Vinted'))}"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${x==='Vinted'?' on':''}" data-t="s_plat" data-v="${x}">${tv(x)}</button>`).join('')}</div></div>
   <div class="row2 fld"><div><label class="l" for="s_date">${t('Date de vente')}</label><input type="date" id="s_date" value="${today()}"></div><div><label class="l" for="s_frais">${t('Frais')}</label><div class="price"><input type="text" inputmode="decimal" id="s_frais" value="${app.fN(app.defFrais(pr0||0,'Vinted'))}"><span>€</span></div></div></div>
   <div class="hint">${t('Frais : commission, envoi à ta charge… Sur Vinted, les frais de protection sont payés par l\'acheteur.')}</div><div class="fld" style="margin-top:12px"><label class="l" for="s_ps">${t('@pseudo de l\'acheteur (facultatif)')}</label><input type="text" id="s_ps" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"></div><div class="pv" id="s_pv"></div></div>
   <div class="acts"><button class="btn mint" id="s_ok" type="button">${t('Valider la vente')}</button>${back}</div>`;
   let ft=false;
   const pv=()=>{const x=num($('s_prix').value),f=num($('s_frais').value)||0;$('s_pv').innerHTML=isNaN(x)?t('Bénéfice net : —'):app.rentaHTML(app.renta(p.achat||0,x,f,app.ageDelai(p),true))};
-  const auto=()=>{if(ft)return;const x=num($('s_prix').value);$('s_frais').value=app.fN(app.defFrais(isNaN(x)?0:x,$('s_plat').value.trim()||'Vinted'))};
+  const auto=()=>{if(ft)return;const x=num($('s_prix').value);$('s_frais').value=app.fN(app.defFrais(isNaN(x)?0:x,app.pfKey($('s_plat').value.trim())||'Vinted'))};
   pv();$('s_prix').oninput=()=>{auto();pv()};$('s_frais').oninput=()=>{ft=true;pv()};
   document.querySelectorAll('[data-t="s_plat"]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>{auto();pv()},0)));
   $('g_no').onclick=()=>app.openSheet(id);
   $('s_ok').onclick=()=>{const x=num($('s_prix').value);$('s_w').classList.toggle('err',isNaN(x)||x<0);if(isNaN(x)||x<0)return app.toast(t('Indique le prix de vente'));
-   if(!app.guardSale(p,x,num($('s_frais').value)||0,$('s_date').value||today()))return;const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:$('s_plat').value.trim()||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0,vt:Date.now()});{const ps0=$('s_ps')?$('s_ps').value.trim().replace(/^@+/,''):'';if(ps0)q.acheteur=ps0}app.save(q);closeSheet();app.toast(t('Vendu · bénéfice {b}',{b:eur(profit(q))})+(p.bac?t(' · bac {b}',{b:p.bac}):''),()=>app.save(p))}}
+   if(!app.guardSale(p,x,num($('s_frais').value)||0,$('s_date').value||today()))return;const q=Object.assign({},p,{statut:'Vendu',pv:x,canal:app.pfKey($('s_plat').value.trim())||'Autre',dv:$('s_date').value||today(),frais:num($('s_frais').value)||0,vt:Date.now()});{const ps0=$('s_ps')?$('s_ps').value.trim().replace(/^@+/,''):'';if(ps0)q.acheteur=ps0}app.save(q);closeSheet();app.toast(t('Vendu · bénéfice {b}',{b:eur(profit(q))})+(p.bac?t(' · bac {b}',{b:p.bac}):''),()=>app.save(p))}}
  if(m==='esale'){c.innerHTML=head(t('Modifier la vente'))+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · ${t('acheté {p}',{p:eur(p.achat)})}</p>
   <div class="fld" id="e_w"><label class="l" for="e_prix">${t('Prix de vente')}</label><div class="price"><input type="text" inputmode="decimal" id="e_prix" value="${app.fN(p.pv||0)}"><span>€</span></div></div>
   <div class="row2 fld"><div><label class="l" for="e_date">${t('Date de vente')}</label><input type="date" id="e_date" value="${esc(ok(p.dv)?p.dv:today())}"></div><div><label class="l" for="e_frais">${t('Frais')}</label><div class="price"><input type="text" inputmode="decimal" id="e_frais" value="${app.fN(p.frais||0)}"><span>€</span></div></div></div>
-  <div class="fld"><label class="l" for="e_plat">${t('Vendu sur')}</label><input type="text" id="e_plat" value="${esc(p.canal||'Vinted')}"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${(p.canal||'Vinted')===x?' on':''}" data-t="e_plat" data-v="${x}">${tv(x)}</button>`).join('')}</div></div>
+  <div class="fld"><label class="l" for="e_plat">${t('Vendu sur')}</label><input type="text" id="e_plat" value="${esc(app.pfShow(p.canal||'Vinted'))}"><div class="chips sug">${CANAUX.map(x=>`<button type="button" class="chip sm${(p.canal||'Vinted')===x?' on':''}" data-t="e_plat" data-v="${x}">${tv(x)}</button>`).join('')}</div></div>
   <div class="fld"><label class="l" for="e_ps">${t('@pseudo de l\'acheteur (facultatif)')}</label><input type="text" id="e_ps" value="${esc(p.acheteur?'@'+p.acheteur:'')}" placeholder="@${t('pseudo')}" autocapitalize="none" autocomplete="off"></div>
   <div class="pv" id="e_pv"></div></div>
   <div class="acts"><button class="btn mint" id="e_ok" type="button">${t('Enregistrer la vente')}</button>${back}</div>`;
@@ -75,7 +75,7 @@ function openSheet(id,m){
   $('g_no').onclick=()=>app.openSheet(id);
   $('e_ok').onclick=()=>{const x=num($('e_prix').value),d=$('e_date').value;$('e_w').classList.toggle('err',isNaN(x)||x<0);
    if(isNaN(x)||x<0)return app.toast(t('Indique le prix de vente'));if(!ok(d))return app.toast(t('Indique la date de vente'));
-   if(!app.guardSale(p,x,num($('e_frais').value)||0,d))return;const q=Object.assign({},p,{pv:x,dv:d,canal:$('e_plat').value.trim()||'Autre',frais:num($('e_frais').value)||0}),ps=$('e_ps').value.trim().replace(/^@+/,'');if(ps)q.acheteur=ps;else delete q.acheteur;
+   if(!app.guardSale(p,x,num($('e_frais').value)||0,d))return;const q=Object.assign({},p,{pv:x,dv:d,canal:app.pfKey($('e_plat').value.trim())||'Autre',frais:num($('e_frais').value)||0}),ps=$('e_ps').value.trim().replace(/^@+/,'');if(ps)q.acheteur=ps;else delete q.acheteur;
    app.save(q);app.openSheet(id);app.toast(t('Vente modifiée ✓'),()=>{app.save(p);app.openSheet(id)})}}
  if(m==='ret'){c.innerHTML=head(t('Enregistrer un retour'))+`<div class="card"><p class="sub" style="margin-bottom:12px">${esc(title(p))} · ${t('vendu {p}',{p:eur(p.pv)})}. ${t('La pièce repasse en stock et la vente est retirée du bilan.')}</p>
   <div class="row2"><div><label class="l" for="r_date">${t('Date du retour')}</label><input type="date" id="r_date" value="${today()}"></div><div><label class="l" for="r_p">${t('Montant remboursé')}</label><div class="price"><input type="text" inputmode="decimal" id="r_p" value="${String(p.pv||'').replace('.',app.DS)}"><span>€</span></div></div></div></div>

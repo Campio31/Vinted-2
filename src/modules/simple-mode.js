@@ -3,7 +3,7 @@ import { app } from '../state.js';
 import { $, age, avail, eur, eurR, ok, profit, sold, today } from './core.js';
 import { CFG0 } from './settings-core.js';
 import { go } from './nav.js';
-import { TOOLS, openTools } from './tools-index.js';
+import { TOOLS } from './tools-index.js';
 
 /* ---------- mode simple / avancé et écran « Aujourd'hui » ---------- */
 /* Mode avancé (par défaut pour les comptes existants) : tout est visible, comme avant.
@@ -18,10 +18,9 @@ let touched = false;
 /* les 8 outils du mode simple : ceux qui servent à ton profil d'abord, puis les basiques */
 export function essentials() {
   const o = app.cfg.onb || {}, w = [];
-  if (o.canal === 'live' || o.canal === 'both') w.push('lives');
-  if (o.canal === 'vinted' || o.canal === 'both') w.push('nego');
+  if (o.canal === 'live' || o.canal === 'both') w.push('live');
   if (o.statut === 'micro' || o.statut === 'pro') w.push('fisc');
-  ['planning', 'coach', 'courbe', 'depenses', 'rapport', 'visuels', 'ballot', 'aide'].forEach(k => w.push(k));
+  ['coach', 'courbe', 'depenses', 'trophees', 'qr', 'aide', 'complete', 'fourn', 'vintage'].forEach(k => w.push(k));
   return [...new Set(w)].filter(k => TOOLS.some(x => x.k === k)).slice(0, 8);
 }
 
@@ -34,12 +33,12 @@ app.toolsView = function () {
   if (more) return { list: [...main, ...rest], head, foot: `<button type="button" class="btn sec" data-moretools="0" style="margin-top:12px">${t('Moins d\'outils')}</button>${replay}` };
   return { list: main, head, foot: `<button type="button" class="btn sec" data-moretools="1" style="margin-top:12px">${t('Plus d\'outils')} (${rest.length})</button>${replay}` };
 };
-$('tl').addEventListener('click', () => { more = false; }, true);
-$('shc').addEventListener('click', e => {
+$('nav').addEventListener('click', e => { if (e.target.closest('[data-v="tools"]')) more = false; }, true);
+$('tv').addEventListener('click', e => {
   const m = e.target.closest('[data-mode]');
-  if (m) { app.setCfg({ mode: m.dataset.mode }, true); more = false; showAll = false; app.renderAll(); return openTools(); }
+  if (m) { app.setCfg({ mode: m.dataset.mode }, true); more = false; showAll = false; app.renderAll(); return app.renderTools(); }
   const mo = e.target.closest('[data-moretools]');
-  if (mo) { more = mo.dataset.moretools === '1'; return openTools(); }
+  if (mo) { more = mo.dataset.moretools === '1'; return app.renderTools(); }
   if (e.target.closest('[data-wreplay]')) { $('sheet').hidden = true; app.openWelcome(); }
 });
 
@@ -65,7 +64,7 @@ export function todayHTML() {
   const tile = (act, big, label, small, extra) => `<button type="button" class="tdt" data-td="${act}"><b>${big}</b><span>${label}</span>${extra || ''}<small>${small}</small></button>`;
   const tiles = [
     tile('list', d.toPub, t('à publier'), t('Disponibles, pas encore en ligne')),
-    tile('quick', d.soldN, d.soldN > 1 ? t('vendues aujourd\'hui') : t('vendue aujourd\'hui'), d.soldCA ? t('{c} encaissés', { c: eur(d.soldCA) }) : t('Touche pour vendre une pièce')),
+    tile('sales', d.soldN, d.soldN > 1 ? t('vendues aujourd\'hui') : t('vendue aujourd\'hui'), d.soldCA ? t('{c} encaissés', { c: eur(d.soldCA) }) : t('Touche pour voir tes ventes')),
     tile('list', d.stale, t('à relancer'), t('En stock depuis 60 jours ou plus')),
     tile('month', eur(d.month), d.useCA ? t('de CA ce mois-ci') : t('de bénéfice ce mois-ci'), d.goal > 0 ? t('{p} % de ton objectif de {g}', { p: d.pct, g: eurR(d.goal) }) : t('Fixe un objectif dans Réglages'), d.goal > 0 ? `<div class="tdp"><i style="width:${d.pct}%"></i></div>` : ''),
   ].join('');
@@ -93,7 +92,7 @@ $('dsh').addEventListener('click', async e => {
   const b = e.target.closest('[data-td]');
   if (!b) return;
   const a = b.dataset.td;
-  if (a === 'list' || a === 'quick' || a === 'add') return go(a);
+  if (a === 'list' || a === 'sales' || a === 'add') return go(a);
   if (a === 'month') { if (todayData().goal > 0) app.openTool('courbe'); else go('set'); return; }
   if (a === 'examples') return app.loadExamples();
   if (a === 'delex') { for (const x of app.P.filter(p => p.ex)) await app.remove(x.id); return app.toast(t('Exemples supprimés')); }

@@ -12,8 +12,11 @@ app.incBanner = incBanner;
 
 /* ===== 6. Raccourcis clavier et glisser ===== */
 export function markPublished(p){if(!p||sold(p)||p.pub===today())return;const old=Object.assign({},p);app.save(Object.assign({},p,{pub:today()}));app.toast(t('Publié aujourd\'hui · {t}',{t:title(p)}),()=>app.save(old),5000)}
-function openHelp(){const K=[['N','Ajouter une pièce'],['S','Stock'],['L','Live'],['B','Bilan'],['R','Réglages'],['/','Chercher dans le stock'],['O','Outils'],['M','Commande vocale'],['C','Compléter des fiches'],['?','Cette aide']],T=[['V','Vendre la carte survolée ou sélectionnée'],['P','La marquer publiée'],['↵','Ouvrir sa fiche'],['Esc','Fermer']];
- showSheet(sheetHead(t('Raccourcis'))+`<div class="card"><span class="l">${t('sur ordinateur')}</span>${K.map(k=>`<div class="kr"><kbd>${k[0]}</kbd><span>${t(k[1])}</span></div>`).join('')}<span class="l" style="margin-top:12px">${t('sur une carte du stock')}</span>${T.map(k=>`<div class="kr"><kbd>${k[0]}</kbd><span>${t(k[1])}</span></div>`).join('')}</div><div class="card"><span class="l">${t('sur téléphone')}</span><div class="kr"><kbd>→</kbd><span>${t('Glisser une carte vers la droite : vendu')}</span></div><div class="kr"><kbd>←</kbd><span>${t('Glisser une carte vers la gauche : publié aujourd\'hui')}</span></div></div>`)}
+/* Les raccourcis sont une section du Centre d'aide (Outils, Aide et raccourcis) */
+function shortcutsHTML(){const K=[['N','Ajouter une pièce'],['S','Stock'],['L','Live'],['B','Bilan'],['R','Réglages'],['/','Chercher dans le stock'],['O','Outils'],['M','Commande vocale'],['C','Compléter des fiches'],['?','Cette aide']],T=[['V','Vendre la carte survolée ou sélectionnée'],['P','La marquer publiée'],['↵','Ouvrir sa fiche'],['Esc','Fermer']];
+ return`<span class="l">${t('sur ordinateur')}</span>${K.map(k=>`<div class="kr"><kbd>${k[0]}</kbd><span>${t(k[1])}</span></div>`).join('')}<span class="l" style="margin-top:12px">${t('sur une carte du stock')}</span>${T.map(k=>`<div class="kr"><kbd>${k[0]}</kbd><span>${t(k[1])}</span></div>`).join('')}<span class="l" style="margin-top:12px">${t('sur téléphone')}</span><div class="kr"><kbd>→</kbd><span>${t('Glisser une carte vers la droite : vendu')}</span></div><div class="kr"><kbd>←</kbd><span>${t('Glisser une carte vers la gauche : publié aujourd\'hui')}</span></div>`}
+app.shortcutsHTML=shortcutsHTML;
+function openHelp(){app.openAide()}
 let hoverId=null;
 const idOf=el=>{const t=el&&el.closest&&el.closest('.tl,.qrow');const d=t&&t.querySelector('[data-id]');return d?d.dataset.id:null};
 $('lst').addEventListener('mouseover',e=>{hoverId=idOf(e.target)});$('lst').addEventListener('mouseleave',()=>{hoverId=null});

@@ -7,8 +7,11 @@ import { lastDay } from './fiscal.js';
 
 app.reportHTML = reportHTML;
 app.openReport = openReport;
+app.rapportCardHTML = rapportCardHTML;
 
-/* --- bilan mensuel imprimable en PDF --- */
+/* --- bilan mensuel imprimable en PDF (carte dans le Bilan) --- */
+function rapportCardHTML(){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-1);
+ return`<button type="button" class="card minic" data-tool="rapport" data-lb="${esc(t('Bilan mensuel PDF'))}"><span class="l">${t('bilan mensuel')}</span><b>${esc(MOIS[d.getMonth()]+' '+d.getFullYear())}</b><span class="mini-s">${t('PDF pour ton comptable : ventes, dépenses, repères fiscaux')}</span></button>`}
 function reportHTML(m){const[y,mo]=m.split('-').map(Number),a=m+'-01',b=m+'-'+pad(lastDay(y,mo),2),S=app.P.filter(p=>sold(p)&&ok(p.dv)&&p.dv>=a&&p.dv<=b).sort((x,z)=>x.dv.localeCompare(z.dv)),st=stats(S),dep=app.DEP.filter(d=>ok(d.date)&&d.date>=a&&d.date<=b).sort((x,z)=>x.date.localeCompare(z.date)),dt=dep.reduce((s,d)=>s+(d.montant||0),0),
  ret=[];app.P.forEach(p=>(p.retours||[]).forEach(r=>{if(ok(r.d)&&r.d>=a&&r.d<=b)ret.push({p,r})}));const rt=ret.reduce((s,x)=>s+(x.r.p||0),0),cot=st.ca*(+app.cfg.tauxSoc||0)/100,pl=group(S,'canal').sort((x,z)=>z.ca-x.ca),bd=dep.reduce((o,d)=>{const k=d.cat||'Autre';o[k]=(o[k]||0)+(d.montant||0);return o},{}),stk=app.P.filter(avail);
  const mark='<svg viewBox="0 0 104 104" width="34" height="34"><rect width="104" height="104" rx="22" fill="#111"/><rect x="12" y="68" width="80" height="18" rx="3" fill="#F1F2F4"/><rect x="18" y="46" width="68" height="18" rx="3" fill="#C9CBD0"/><rect x="32" y="14" width="58" height="18" rx="3" fill="#FF4A1C" transform="rotate(-12 62 24)"/></svg>',R=v=>eur(v),N=v=>v>0?'−'+eur(v):eur(0);

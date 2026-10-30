@@ -9,7 +9,7 @@ app.depCardHTML = depCardHTML;
 const CLOSED0=['Par catégorie','Meilleures marques','Provenance','Six derniers mois','Par plateforme','Analyse des retours','Analyse par ballot'];
 function collapsify(){const sv=LSg('dsec',null),shut=sv===null?CLOSED0.slice():sv;
  document.querySelectorAll('#dsh>.card').forEach(c=>{const h=c.querySelector('h3');if(!h||c.matches('.coachc,.minic,.goal,[data-nc]'))return;const key=I18N.unt(h.textContent.split('·')[0].replace(/\d+/g,'').trim());
-  const hd=h.parentElement.classList.contains('calh')?h.parentElement:h;c.classList.add('cs');hd.classList.add('hd');h.dataset.sec=key;if(shut.includes(key))c.classList.add('shut')});
+  const hd=h.closest('.calh')||h;c.classList.add('cs');hd.classList.add('hd');h.dataset.sec=key;if(shut.includes(key))c.classList.add('shut')});
  const f=document.querySelector('#dsh>.card.cs');if(f)f.insertAdjacentHTML('beforebegin','<div class="dsa"><button type="button" class="chip sm" data-allsec="1">'+t('Tout replier')+'</button><button type="button" class="chip sm" data-allsec="0">'+t('Tout déplier')+'</button></div>')}
 function saveSec(){LSs('dsec',[...document.querySelectorAll('#dsh .card.cs.shut h3[data-sec]')].map(h=>h.dataset.sec))}
 const renderDash0=app.renderDash;app.renderDash=function(){renderDash0();collapsify()};

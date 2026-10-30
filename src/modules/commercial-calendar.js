@@ -4,11 +4,12 @@ import { sheetHead, showSheet } from './tools-index.js';
 
 app.calCardHTML = calCardHTML;
 app.openCalcom = openCalcom;
+app.commEventsAll = () => commEvents(true);
 
 /* --- 4. calendrier commercial --- */
 function easterOf(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return y+'-'+pad(mo,2)+'-'+pad(da,2)}
 function nthDow(y,m,dow,n){if(n>0){const d=new Date(y,m-1,1),off=(dow-d.getDay()+7)%7;return y+'-'+pad(m,2)+'-'+pad(1+off+7*(n-1),2)}const l=new Date(y,m,0),off=(l.getDay()-dow+7)%7;return y+'-'+pad(m,2)+'-'+pad(l.getDate()-off,2)}
-export function commEvents(){const out=[],t=today();[new Date().getFullYear(),new Date().getFullYear()+1].forEach(y=>{
+export function commEvents(all){const out=[],t=today(),Y=new Date().getFullYear();(all?[Y-1,Y,Y+1]:[Y,Y+1]).forEach(y=>{
  const bf=addDays(nthDow(y,11,4,4),1);
  [['Soldes d\'hiver',nthDow(y,1,3,2),21,'Prépare tes baisses de prix et tes lots sur les pièces qui stagnent.',['Pantalon','Veste','Sweat']],
   ['Saint-Valentin',y+'-02-14',14,'Mets en avant pulls, chemises et robes, et propose des lots à deux.',['Sweat','Chemise','RobeJupe']],
@@ -22,7 +23,7 @@ export function commEvents(){const out=[],t=today();[new Date().getFullYear(),ne
   ['Black Friday',bf,21,'Prépare ta promo (par exemple -15 % dès 2 pièces) et tes lots à l\'avance.',['Sweat','Veste','Pantalon']],
   ['Cyber Monday',addDays(bf,3),7,'Relance les pièces qui n\'ont pas bougé pendant le Black Friday.',[]],
   ['Noël',y+'-12-25',28,'Sweats, vestes et pulls : mets-les en ligne dès début décembre.',['Sweat','Veste','Pantalon']]
- ].forEach(([name,date,lead,tip,cats])=>{if(date>=t)out.push({name,date,lead,tip,cats,start:addDays(date,-lead),key:name+' '+y})})});
+ ].forEach(([name,date,lead,tip,cats])=>{if(all||date>=t)out.push({name,date,lead,tip,cats,start:addDays(date,-lead),key:name+' '+y})})});
  return out.sort((a,b)=>a.date.localeCompare(b.date))}
 export function evInfo(ev){const t=today(),dd=days(t,ev.date),st=app.P.filter(avail),rel=ev.cats.length?st.filter(p=>ev.cats.includes(p.cat)):st,up=rel.filter(p=>!ok(p.pub)).length;return{dd,prep:t>=ev.start,rel:rel.length,up,startIn:days(t,ev.start)}}
 function calCardHTML(){const ev=commEvents().find(e=>days(today(),e.date)<=90);if(!ev)return'';const i=evInfo(ev);

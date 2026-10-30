@@ -10,8 +10,8 @@ app.openDefis = openDefis;
 /* --- 6. défis du mois --- */
 const DEFI_T={pub:['Publier','pièces publiées'],sold:['Vendre','ventes'],ca:['Atteindre','€ de chiffre d\'affaires'],add:['Ajouter','pièces au stock']};
 export function defiProg(d){const m=d.m;if(d.type==='pub')return app.P.filter(p=>(p.pub||'').startsWith(m)).length;if(d.type==='add')return app.P.filter(p=>(p.entree||'').startsWith(m)).length;const S=app.P.filter(p=>sold(p)&&(p.dv||'').startsWith(m));return d.type==='sold'?S.length:S.reduce((a,p)=>a+(p.pv||0),0)}
-const defiTxt=d=>d.type==='ca'?t('Atteindre {n} de chiffre d\'affaires',{n:eurR(d.target)}):d.type==='pub'?t('Publier {n} pièces',{n:d.target}):d.type==='sold'?t('Vendre {n} pièces',{n:d.target}):t('Ajouter {n} pièces au stock',{n:d.target});
-function defisNow(){const m=today().slice(0,7);return(app.cfg.defis||[]).filter(d=>d.m===m)}
+export const defiTxt=d=>d.type==='ca'?t('Atteindre {n} de chiffre d\'affaires',{n:eurR(d.target)}):d.type==='pub'?t('Publier {n} pièces',{n:d.target}):d.type==='sold'?t('Vendre {n} pièces',{n:d.target}):t('Ajouter {n} pièces au stock',{n:d.target});
+export function defisNow(){const m=today().slice(0,7);return(app.cfg.defis||[]).filter(d=>d.m===m)}
 function defiCardHTML(){const L=defisNow();if(!L.length)return`<button type="button" class="card minic" data-tool="defis"><span class="l">${t('défi du mois')}</span><b>—</b><span class="mini-s">${t('Lance un défi : « publie 100 pièces ce mois-ci »')}</span></button>`;
  const d=L[0],g=defiProg(d),pc=Math.min(1,g/d.target);return`<button type="button" class="card minic" data-tool="defis"><span class="l">${t('défi du mois')}</span><b>${d.type==='ca'?eurR(g):g} <small>${t('sur {n}',{n:d.type==='ca'?eurR(d.target):d.target})}</small></b><div class="rl dk"><b class="gc-${pc>=1?'g':'o'}" style="width:${(pc*100).toFixed(1)}%"></b></div><span class="mini-s">${esc(defiTxt(d))}</span></button>`}
 export function openDefis(){const m=today().slice(0,7),L=defisNow(),PRE=[['pub',100],['sold',50],['ca',1000],['add',50]];

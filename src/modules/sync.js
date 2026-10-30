@@ -60,7 +60,8 @@ export function refreshStatus(){const el=$('sync');let c='',tx_;
  else if(!app.online){c='pend';tx_=t('Hors ligne')+(pending?' · '+t('{n} en attente',{n:pending}):'')}
  else if(flushing||pulling||pending||app.localState==='pend'){c='pend';tx_=t('Synchronisation…')+(pending?' ('+pending+')':'')}
  else tx_=t('Synchronisé');
- el.className=c;el.querySelector('span').textContent=tx_;if(app.view==='set')renderSync()}
+ /* la pastille du haut n'apparaît que s'il y a un problème (enregistrement impossible, erreur de synchronisation) ; l'état complet est dans Réglages */
+ el.className=c;el.querySelector('span').textContent=tx_;el.hidden=c!=='err';if(app.view==='set')renderSync()}
 const T=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(t('Délai dépassé : le serveur ne répond pas.'))),ms||30000))]);
 app.T = T;
 $('sync').onclick=()=>go('set');
