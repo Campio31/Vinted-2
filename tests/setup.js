@@ -12,6 +12,7 @@ document.body.innerHTML = body;
 window.STOCK_CONFIG = {};
 window.matchMedia = window.matchMedia || (q => ({ matches: false, media: q, addEventListener() {}, removeEventListener() {} }));
 window.scrollTo = () => {};
+Element.prototype.scrollIntoView = function () {}; // pas de défilement dans jsdom
 window.print = () => {};
 globalThis.matchMedia = window.matchMedia;
 globalThis.__RELEASE__ = 'test';

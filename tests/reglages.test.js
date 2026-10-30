@@ -45,8 +45,8 @@ describe('plateformes au choix', () => {
     app.setCfg({ pf1: '', pf2: '' });
     nav.go('set');
     const txt = $('cfgc').textContent;
-    expect(txt).toMatch(/Plateforme 1/);
-    expect(txt).toMatch(/Plateforme 2/);
+    expect(txt).toContain(t('Plateforme {n}', { n: 1 }));
+    expect(txt).toContain(t('Plateforme {n}', { n: 2 }));
     expect(txt).not.toMatch(/Vinted|TikTok/);
     expect($('lgc').textContent).not.toMatch(/Vinted/);
   });

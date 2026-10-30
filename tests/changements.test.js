@@ -108,7 +108,7 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     app.renderDash();
     const card = document.querySelector('#dsh [data-tool="treso"]');
     expect(card).toBeTruthy();
-    expect(card.textContent).toContain('trésorerie estimée');
+    expect(card.textContent).toContain(t('trésorerie estimée'));
   });
 
   it('avec un solde indiqué, le calcul repart de ce solde', async () => {

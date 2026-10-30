@@ -51,9 +51,9 @@ describe('Wrapped : images et mode discret', () => {
     const d = W.wrappedData(moisAvant(1)), out = await W.makeWrapped(d, false);
     const all = texts.join(' | ');
     expect(out.length).toBeGreaterThanOrEqual(7);
-    expect(all).toContain('Ta pièce star');
-    expect(all).toContain('Par rapport à');
-    expect(all).toContain('Ton jour de vente');
+    expect(all).toContain(t('Ta pièce star'));
+    expect(all).toContain(t('Par rapport à {p}', { p: '' }).trim().slice(0, 8));
+    expect(all).toContain(t('Ton jour de vente'));
     expect(all).toMatch(/€/);
   });
   it('en mode discret, aucun euro n\'est écrit', async () => {

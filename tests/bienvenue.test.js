@@ -14,14 +14,14 @@ describe('accueil d\'un nouveau compte', () => {
     expect(app.P).toHaveLength(0);
     await new Promise(r => setTimeout(r, 1600));
     expect($('welcome').hidden).toBe(false);
-    expect($('welcome').textContent).toContain('Question 1 sur 3');
+    expect($('welcome').textContent).toContain(t('Question {i} sur {n}', { i: 1, n: 3 }));
   });
 
   it('3 questions, puis profil, objectif, mode simple et pièces d\'exemple', async () => {
     clic('[data-wo="micro"]');
-    expect($('welcome').textContent).toContain('Question 2 sur 3');
+    expect($('welcome').textContent).toContain(t('Question {i} sur {n}', { i: 2, n: 3 }));
     clic('[data-wo="live"]');
-    expect($('welcome').textContent).toContain('Question 3 sur 3');
+    expect($('welcome').textContent).toContain(t('Question {i} sur {n}', { i: 3, n: 3 }));
     expect(document.querySelector('[data-wgo]').disabled).toBe(true);
     clic('[data-wo="comp"]');
     expect(document.querySelector('[data-wgo]').disabled).toBe(false);

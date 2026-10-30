@@ -26,7 +26,7 @@ describe('fenêtres des outils', () => {
 describe('fiche d\'une pièce', () => {
   for (const mode of [undefined, 'edit', 'sell', 'ann', 'del']) it('mode ' + (mode || 'fiche') + ' (en stock)', () => { const p = app.P.find(x => x.statut === 'Disponible'); app.openSheet(p.id, mode); expect(document.getElementById('shc').innerHTML.length).toBeGreaterThan(50); });
   for (const mode of [undefined, 'esale', 'ret']) it('mode ' + (mode || 'fiche') + ' (vendue)', () => { const p = app.P.find(x => x.statut === 'Vendu' && x.acheteur); app.openSheet(p.id, mode); expect(document.getElementById('shc').innerHTML.length).toBeGreaterThan(50); });
-  it('la fiche montre les pièces similaires', () => { const p = app.P.find(x => x.statut === 'Vendu'); app.openSheet(p.id); expect(document.getElementById('shc').textContent).toMatch(/similaires/); });
+  it('la fiche montre les pièces similaires', () => { const p = app.P.find(x => x.statut === 'Vendu'); app.openSheet(p.id); expect(document.getElementById('shc').textContent).toContain(t('Pièces similaires déjà vendues')); });
 });
 
 describe('bilan', () => {
