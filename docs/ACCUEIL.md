@@ -17,7 +17,7 @@ Trois questions, avec « Passer » et « Retour » :
 2. **Canal** : Vinted, TikTok Live, les deux, ailleurs.
 3. **Objectif** : argent de poche (100 € de bénéfice par mois), complément (500 €), en vivre (2 000 €).
 
-Ce que ça change : l'objectif de départ (seulement si tu n'en as pas déjà un), et les 8 outils du mode simple (Ligne fiscale pour un micro-entrepreneur ou un pro, Bilan des lives pour TikTok, Négociation pour Vinted). Les réponses sont gardées dans les réglages, donc sur tous les appareils : l'accueil ne se représente pas sur un second appareil.
+Ce que ça change : l'objectif de départ (seulement si tu n'en as pas déjà un), et les 8 outils du mode simple (Ligne fiscale pour un micro-entrepreneur ou un pro, Live et Bilan des lives pour TikTok). Les réponses sont gardées dans les réglages, donc sur tous les appareils : l'accueil ne se représente pas sur un second appareil.
 
 La case « Charger quelques pièces d'exemple » est cochée par défaut. Les exemples sont marqués, jamais comptés dans les analyses de qualité des achats, et se suppriment en un clic depuis la carte « Aujourd'hui » (ou Réglages, Exemples).
 
