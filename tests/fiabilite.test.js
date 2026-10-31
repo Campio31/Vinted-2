@@ -158,11 +158,12 @@ describe('Réglages : sections, à propos, légal', () => {
     const l = [...$('auth').querySelectorAll('a')].map(a => a.getAttribute('href'));
     expect(l).toEqual(expect.arrayContaining(['conditions.html', 'confidentialite.html']));
   });
-  it('les deux pages légales existent et ont leur modèle à compléter', () => {
+  it('les deux pages légales existent, avec ou sans les passages « À COMPLÉTER » (une fois remplis, ils disparaissent)', () => {
     for (const f of ['confidentialite.html', 'conditions.html']) {
       const h = fs.readFileSync(path.join(root, 'public', f), 'utf8');
       expect(h).toMatch(/<title>/);
-      expect(h).toMatch(/À COMPLÉTER/);
+      expect(h).toMatch(/Dernière mise à jour/);
+      expect(h.length).toBeGreaterThan(1500);
     }
     expect(fs.readFileSync(path.join(root, 'docs/compte-setup.sql'), 'utf8')).toMatch(/delete_my_account/);
   });
