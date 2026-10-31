@@ -7,5 +7,5 @@ window.STOCK_CONFIG = {
   vapidPublicKey: 'BHeliuiV1EPO5RL-vr5nYUdDumr-RFk7iaoBk5C282V5n0NvyzKjDDzKzC4nFz1bMHeoNWEvGtt51h5yfN-RSS8'   // clé PUBLIQUE des notifications push (générée avec generer-cles-vapid.html, voir PUSH-ET-CLASSEMENT.md). Jamais la clé privée.
   ,
   sentryDsn: 'https://cad6b7aa43eac1f9ad58f246d595d224@o4512341501345792.ingest.de.sentry.io/4512341528477776',   // suivi des erreurs : colle ici le DSN de ton projet Sentry (voir docs/SENTRY.md). Vide = rien n'est envoyé.
-  feedbackEmail: ''   // adresse de contact affichée dans Réglages, À propos (elle est PUBLIQUE). Vide = un bouton « Écrire ou proposer une idée » à la place.
+  feedbackEmail: 'thomaswholesale31@gmail.com'   // adresse de contact affichée dans Réglages, À propos (elle est PUBLIQUE). Vide = un bouton « Écrire ou proposer une idée » à la place.
 };
