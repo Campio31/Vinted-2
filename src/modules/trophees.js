@@ -19,7 +19,7 @@ export const CATS = [
   { k: 'acheteurs', t: 'Acheteurs', d: 'Acheteurs différents', th: [10, 40, 120, 400, 1000], f: 'n', v: () => new Set(R().filter(sold).map(p => String(p.acheteur || '').toLowerCase().replace(/^@/, '')).filter(Boolean)).size },
   { k: 'ecoul', t: 'Écoulement', d: 'Part de tes pièces vendues (à partir de 20 pièces)', th: [30, 45, 60, 75, 90], f: 'p', v: () => { const a = R(); return a.length >= 20 ? a.filter(sold).length / a.length * 100 : 0; } },
   { k: 'defis', t: 'Défis', d: 'Défis réussis', th: [3, 10, 25, 60, 150], f: 'n', v: () => (app.cfg.defis || []).filter(d => d.done).length },
-  { k: 'cartes', t: 'Collection', d: 'Cartes différentes', th: [5, 15, 30, 45, 60], f: 'n', v: () => owned() },
+  { k: 'cartes', t: 'Collection', d: 'Cartes différentes', th: [5, 12, 22, 32, 43], f: 'n', v: () => owned() },
 ];
 
 export function trophyData() {
@@ -39,7 +39,7 @@ export function checkTrophies() {
   const up = Object.keys(cur).filter(k => cur[k] > (seen[k] || 0));
   if (!up.length) return;
   LSs('trophSeen', cur);
-  up.forEach(k => { for (let i = (seen[k] || 0) + 1; i <= cur[k]; i++) grantPack('p', 't:' + k + ':' + i); });
+  up.forEach(k => { for (let i = (seen[k] || 0) + 1; i <= cur[k]; i++) grantPack(i >= 4 ? 'a' : 'p', 't:' + k + ':' + i); });
   const c = CATS.find(x => x.k === up[0]);
   app.toast(t('Trophée {n} : {c}', { n: t(TIERS[cur[up[0]] - 1]), c: t(c.t) }) + ' · ' + t('un pack premium t\'attend'), null, 6000);
 }

@@ -3,7 +3,7 @@ import { $, LSg, LSs, esc, eur, ok, sold, today } from './core.js';
 import { sheetHead, showSheet } from './tools-index.js';
 import { FLAME, MOIS, streakInfo } from './gamification.js';
 import { defiDone, defiProg, defiTxt, defisOf } from './challenges.js';
-import { cartesBody, cartesClick, packsLeft } from './cartes.js';
+import { cartesBody, cartesClick, checkUniques, packsLeft } from './cartes.js';
 import { CATS, TIERS, checkTrophies, trophyData } from './trophees.js';
 import { rangBody, rangClick, rangInit } from './rang.js';
 
@@ -74,4 +74,4 @@ export function checkLevel() {
   if (L.i > seen) { LSs('lvlSeen', L.i); app.toast(t('Niveau {l} atteint !', { l: t(L.cur.n) }), null, 5000); }
 }
 const scheduleBadges0 = app.scheduleBadges;
-app.scheduleBadges = function () { scheduleBadges0(); clearTimeout(lvT); lvT = setTimeout(() => { checkLevel(); checkTrophies(); }, 1000); };
+app.scheduleBadges = function () { scheduleBadges0(); clearTimeout(lvT); lvT = setTimeout(() => { checkLevel(); checkTrophies(); checkUniques(); }, 1000); };

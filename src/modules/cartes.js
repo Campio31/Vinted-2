@@ -1,104 +1,166 @@
 import { app } from '../state.js';
-import { esc } from './core.js';
+import { esc, ok, sold } from './core.js';
 import { CFG0 } from './settings-core.js';
-import { catSvg } from './stock-view.js';
+import { BACKC, COL, backSVG, garmentSVG, packSVG } from './cartes-art.js';
 
-/* ---------- jeu de cartes ---------- */
-/* Chaque défi réussi offre un pack de 3 cartes (pack premium : au moins une carte Rare ou mieux). Cinq raretés.
-   Les cartes n'ont aucune valeur réelle et ne servent qu'à collectionner. Tout est gardé dans les réglages (cfg.cartes), donc sur tous tes appareils. */
+/* ---------- Cartes à collectionner : Collection Hiver (43 cartes, direction « Papier Encré ») ---------- */
+/* Des cartes à collectionner, pas un jeu : aucun point d'attaque ni de défense, aucun prix. Chaque carte est un vêtement ou une pièce de l'univers de Max.
+   Sept raretés, des versions Super (fond noir) de Rare à Mythique, et un état (de Correct à Neuf) que suivent les marques d'usure.
+   Packs « Cristal » : Givre (simple), Glacier (rare), Aurore (sublime). Tout est gardé dans les réglages (cfg.cartes), donc sur tous tes appareils. */
 Object.assign(CFG0, { cartes: null });
 
-export const RARETES = ['Commune', 'Rare', 'Épique', 'Légendaire', 'Mythique'];
-const ODDS = { s: [68, 22, 7.5, 2.2, 0.3], p: [0, 72, 20, 6.5, 1.5] };
-export const DUST = [1, 3, 8, 20, 50];
-export const CRAFT = [5, 15, 40, 100, 250];
-const PITY = 4;
-const slug = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-');
-const B = (set, r, L) => L.map(n => ({ id: 'b-' + slug(n), n, set, r, k: 'brand' }));
-const P = (set, r, L) => L.map(([n, cat]) => ({ id: 'p-' + slug(n), n, set, r, k: 'piece', cat }));
-const O = (set, r, L) => L.map(([n, ic]) => ({ id: 'o-' + slug(n), n, set, r, k: 'objet', ic }));
-export const SETS = ['Fast-fashion', 'Classiques', 'Street et outdoor', 'Légendes', 'Pièces', 'Revendeur', 'Mythiques'];
-export const CARDS = [
-  ...B('Fast-fashion', 0, ['Zara', 'H&M', 'Kiabi', 'Decathlon', 'Primark', 'Bershka', 'Pull&Bear', 'Jules', 'Celio', 'C&A', 'Gémo', 'Mango']),
-  ...B('Classiques', 1, ['Nike', 'Adidas', 'Puma', 'Levi\'s', 'Lacoste', 'Tommy Hilfiger', 'Ralph Lauren', 'Calvin Klein', 'Reebok', 'Champion', 'Fila', 'Diesel']),
-  ...B('Street et outdoor', 2, ['The North Face', 'Carhartt', 'Patagonia', 'Stüssy', 'Dickies', 'Timberland', 'Kappa', 'Ellesse']),
-  ...B('Légendes', 3, ['Supreme', 'Stone Island', 'Burberry', 'Moncler', 'C.P. Company']),
-  ...P('Pièces', 0, [['T-shirt', 'Tshirt'], ['Polo', 'Polo'], ['Chemise', 'Chemise'], ['Short', 'Short'], ['Pantalon', 'Pantalon'], ['Sweat', 'Sweat']]),
-  ...P('Pièces', 1, [['Jean', 'Pantalon'], ['Veste', 'Veste'], ['Doudoune', 'Veste'], ['Robe', 'RobeJupe'], ['Maillot', 'Maillot']]),
-  ...P('Pièces', 2, [['Baskets', 'Chaussures'], ['Sac', 'Sac']]),
-  ...O('Revendeur', 0, [['Carton d\'expédition', 'box'], ['Rouleau de scotch', 'tape']]),
-  ...O('Revendeur', 1, [['Étiqueteuse', 'tag'], ['Pèse-colis', 'scale']]),
-  ...O('Revendeur', 2, [['Anneau lumineux', 'light']]),
-  ...O('Revendeur', 3, [['Live à 100 ventes', 'star']]),
-  ...O('Mythiques', 4, [['Trouvaille du siècle', 'star'], ['Étiquette dorée', 'tag'], ['Archive 1990', 'tape'], ['Le ballot parfait', 'box']]),
+export const RARETES = ['Commune', 'Peu commune', 'Rare', 'Épique', 'Légendaire', 'Mythique', 'Unique'];
+export const TIRAGE = [0, 50000, 10000, 2500, 500, 100, 3];       /* tirage standard (0 = illimité) */
+export const TIRAGE_SUPER = [0, 0, 1000, 250, 50, 10, 0];          /* tirage de la version Super (de Rare à Mythique) */
+export const POINTS = [1, 2, 4, 7, 12, 20, 50];                     /* points de rareté */
+export const ETATS = ['Correct', 'Bon', 'Très bon', 'Excellent', 'Neuf'];
+const ETAT_W = [34, 30, 20, 13, 3];                                 /* Neuf est l'état le plus rare, dans chaque rareté */
+const SUPER_P = 0.1;                                                /* 1 000 sur 10 000, 250 sur 2 500, 50 sur 500, 10 sur 100 */
+/* chances d'obtenir chaque rareté dans un pack (Commune, Peu commune, Rare, Épique, Légendaire, Mythique). Les Uniques ne sortent jamais d'un pack. */
+const ODDS = { base: [60, 28, 9, 2.4, 0.55, 0.05], rare: [0, 0, 78, 16, 5.2, 0.8], epic: [0, 0, 0, 70, 24, 6] };
+const PACK_N = { s: { n: 3, rare: 0, epic: 0 }, p: { n: 3, rare: 1, epic: 0 }, a: { n: 3, rare: 0, epic: 2 } };
+const PITY = 4;                                                     /* 4 packs Givre sans Rare : le 5e en contient une */
+export const SET_NAME = 'Collection Hiver';
+
+const C = (r, name, type, mat, epoque, taille, coul, sil, pat, hist, o = {}) => Object.assign({ r, name, type, mat, epoque, taille, coul, sil, pat, hist }, o);
+const RAW = [
+  C(0, 'BONNET POMPON', 'Bonnet', 'Laine', 1994, 'U', 'Rouge', 'bonnet', 'uni', 'Tricoté par une grand-mère pour un petit-fils qui détestait avoir froid aux oreilles.', { opt: { pom: 1 } }),
+  C(0, 'ÉCHARPE RAYÉE', 'Écharpe', 'Laine', 1988, 'U', 'Bleu', 'echarpe', 'hstripes', 'Elle a fait trois hivers, deux écoles et un voyage en train sans jamais se perdre.'),
+  C(0, 'PULL TORSADÉ', 'Pull', 'Maille', 1982, 'L', 'Écru', 'pull', 'cable', 'Chaque torsade a pris une soirée entière devant la télévision.'),
+  C(0, 'JEAN BRUT', 'Jean', 'Denim', 1999, '40', 'Bleu', 'jean', 'denim', 'Jamais lavé la première année, pour que le bleu garde ses plis.'),
+  C(0, 'GILET MATELASSÉ', 'Gilet', 'Polyester', 2004, 'M', 'Jaune', 'gilet', 'quilt', 'Le gilet des matins de marché, sans manches pour garder les mains libres.'),
+  C(0, 'MOUFLES NORDIQUES', 'Moufles', 'Laine', 1979, 'U', 'Rouge', 'moufles', 'nordic', 'Rapportées d\'un séjour en Norvège, et jamais dépareillées depuis.'),
+  C(0, 'CHEMISE FLANELLE', 'Chemise', 'Flanelle', 1991, 'M', 'Rouge', 'chemise', 'check', 'Portée ouverte sur un t-shirt, comme dans tous les garages de la rue.'),
+  C(0, 'BOTTES DE PLUIE', 'Bottes', 'Caoutchouc', 1986, '38', 'Vert', 'bottes', 'uni', 'Toujours une flaque pour justifier l\'achat.'),
+  C(0, 'SAC CABAS', 'Sac', 'Toile', 1996, 'U', 'Beige', 'cabas', 'uni', 'Il a porté le pain, les livres, puis un chat un jour de déménagement.'),
+  C(0, 'JUPE ÉCOSSAISE', 'Jupe', 'Laine', 1975, '38', 'Vert', 'jupe', 'check', 'Un tartan choisi pour le plaisir de tourner dans la cour.'),
+  C(1, 'PULL JACQUARD', 'Pull', 'Laine', 1983, 'L', 'Vert', 'pull', 'jacquard', 'Motif dessiné à la main, un losange à la fois, sur du papier quadrillé.'),
+  C(1, 'PARKA ORANGE', 'Parka', 'Nylon', 1992, 'M', 'Orange', 'parka', 'uni', 'Visible à cent mètres dans la neige, ce qui était le but.'),
+  C(1, 'MANTEAU CAMEL', 'Manteau', 'Laine', 1971, '40', 'Camel', 'manteau', 'uni', 'Le manteau des rendez-vous importants et des gares sous la pluie.'),
+  C(1, 'CARDIGAN BOUTONNÉ', 'Cardigan', 'Laine', 1985, 'M', 'Moutarde', 'cardigan', 'uni', 'Un bouton dépareillé, recousu à la main, par fierté.'),
+  C(1, 'ÉCHARPE TARTAN', 'Écharpe', 'Cachemire', 1980, 'U', 'Bordeaux', 'echarpe', 'check', 'Offerte un Noël, gardée pour les grandes occasions, donc très peu portée.'),
+  C(1, 'BONNET NORVÈGE', 'Bonnet', 'Laine', 1987, 'U', 'Bleu', 'bonnet', 'nordic', 'Des flocons tricotés pour lutter contre un vrai blizzard.'),
+  C(1, 'ROBE LAINAGE', 'Robe', 'Laine', 1969, '36', 'Bordeaux', 'robe', 'uni', 'Cousue sur mesure, avec la doublure plus soignée que le dessus.'),
+  C(1, 'BASKETS MONTANTES', 'Baskets', 'Cuir', 1989, '42', 'Blanc', 'baskets', 'uni', 'Blanches le premier jour, légendaires le deuxième.'),
+  C(1, 'PANTALON VELOURS', 'Pantalon', 'Velours', 1977, '38', 'Brun', 'pantalon', 'cord', 'Il fait « frrr » quand on marche : on le reconnaît avant de le voir.'),
+  C(1, 'GANTS EN CUIR', 'Gants', 'Cuir', 1968, '7', 'Noir', 'gants', 'uni', 'Doublés de soie, assouplis par dix ans de volants.'),
+  C(2, 'TRUCKER INDIGO', 'Veste', 'Denim brut', 1974, 'M', 'Indigo', 'veste', 'denim', 'Un denim assez raide pour tenir debout tout seul au début.'),
+  C(2, 'DUFFLE-COAT MARINE', 'Manteau', 'Laine', 1966, '42', 'Marine', 'manteau', 'uni', 'Les boutons en bois s\'attrapent même avec des gants.', { opt: { toggles: 1 } }),
+  C(2, 'PULL ISLANDAIS', 'Pull', 'Laine', 1978, 'L', 'Crème', 'pull', 'nordic', 'Tricoté avec la laine d\'un mouton qui n\'a jamais quitté son île.'),
+  C(2, 'BOTTES FOURRÉES', 'Bottes', 'Cuir', 1981, '39', 'Brun', 'bottes', 'uni', 'Pour les trottoirs gelés et les cheminées allumées.', { opt: { fur: 1 } }),
+  C(2, 'CAPE EN TWEED', 'Cape', 'Tweed', 1963, 'U', 'Gris', 'cape', 'tweed', 'On la porte comme une promesse de ne jamais être en retard.'),
+  C(3, 'RUNNER \'86', 'Sneakers', 'Cuir & mesh', 1986, '42', 'Bleu', 'sneaker', 'uni', 'Chaussée pour un marathon, portée surtout pour aller chercher le pain.'),
+  C(3, 'BLOUSON AVIATEUR', 'Blouson', 'Cuir', 1973, 'L', 'Brun', 'blouson', 'uni', 'Le col en mouton a vu plus de ciels que son propriétaire.'),
+  C(3, 'MOON BOOTS', 'Bottes', 'Nylon', 1979, '37', 'Argent', 'moonboots', 'uni', 'Pensées pour marcher sur la Lune, utilisées pour marcher sur un parking enneigé.'),
+  C(3, 'DOUDOUNE FLUO', 'Doudoune', 'Nylon', 1993, 'M', 'Rose', 'doudoune', 'quilt', 'Impossible de la perdre dans une foule, et c\'était sa fonction.'),
+  C(3, 'PULL SKI 84', 'Pull', 'Acrylique', 1984, 'L', 'Jaune', 'pull', 'nordic', 'Porté aux sports d\'hiver par toute une famille, dans toutes les tailles.'),
+  C(4, 'TRENCH 1954', 'Manteau', 'Gabardine', 1954, '38', 'Beige', 'manteau', 'uni', 'Cousu pour les grandes avenues, il a traversé les années sans prendre une ride.', { fin: 'or', opt: { belt: 1 } }),
+  C(4, 'CAPE D\'OPÉRA', 'Cape', 'Velours', 1958, 'U', 'Noir', 'cape', 'uni', 'Elle n\'a connu que des soirs de première et des escaliers en marbre.', { fin: 'or' }),
+  C(4, 'ROBE DE GALA', 'Robe', 'Satin', 1961, '36', 'Champagne', 'robe', 'uni', 'Portée une seule fois, mais dans le plus beau bal de la saison.', { fin: 'or' }),
+  C(4, 'BOTTES CAVALIÈRES', 'Bottes', 'Cuir', 1957, '40', 'Cognac', 'bottesH', 'uni', 'Cirées chaque dimanche, comme un rituel plus ancien que la maison.', { fin: 'or' }),
+  C(4, 'TOQUE ZIBELINE', 'Chapeau', 'Fourrure', 1960, 'U', 'Marron', 'toque', 'uni', 'Elle se transmet de mère en fille avec l\'ordre de ne jamais la prêter.', { fin: 'or' }),
+  C(5, 'ROBE ÉTOILE', 'Robe du soir', 'Soie', 1962, '36', 'Nuit', 'robe', 'uni', 'Le tissu change de couleur selon l\'heure et le regard.', { fin: 'holo' }),
+  C(5, 'MANTEAU AURORE', 'Manteau', 'Soie & laine', 1965, '40', 'Irisé', 'manteau', 'uni', 'On raconte qu\'il a été teint avec la première lumière du matin.', { fin: 'holo', opt: { belt: 1 } }),
+  C(5, 'GANTS COMÈTE', 'Gants', 'Soie', 1959, '7', 'Argent', 'gants', 'uni', 'Légers comme une traînée de lumière dans un ciel d\'hiver.', { fin: 'holo' }),
+  C(5, 'ÉCHARPE GALAXIE', 'Écharpe', 'Soie', 1971, 'U', 'Violet', 'echarpe', 'uni', 'Dans ses plis, on devine les constellations les soirs de grand froid.', { fin: 'holo' }),
+  C(5, 'BONNET CONSTELLATION', 'Bonnet', 'Cachemire', 1968, 'U', 'Indigo', 'bonnet', 'uni', 'Chaque point brillant est une étoile retrouvée par sa propriétaire.', { fin: 'holo' }),
+  C(6, 'LA PREMIÈRE', 'Blazer', 'Laine', 1978, '40', 'Ivoire', 'blazer', 'uni', 'Le tout premier article vendu sur Max. Il n\'existe qu\'en trois exemplaires.', { fin: 'or', e: 5, unique: 'first' }),
+  C(6, 'LE CINTRE D\'OR', 'Objet', 'Laiton', 1950, '—', 'Or', 'cintre', 'uni', 'Le cintre de tous les cintres : il a porté la collection entière.', { fin: 'or', e: 5, unique: 'hundred' }),
+  C(6, 'LE COLIS ZÉRO', 'Objet', 'Carton', 2019, '—', 'Kraft', 'colis', 'uni', 'Le premier colis expédié depuis Max, fermé avec trop de scotch.', { fin: 'or', e: 5, unique: 'parcel' }),
 ];
+export const CARDS = RAW.map((c, i) => Object.assign(c, { id: 'h' + String(i + 1).padStart(2, '0'), num: i + 1, tot: RAW.length, set: SET_NAME }));
 const byId = Object.fromEntries(CARDS.map(c => [c.id, c]));
-const IC = {
-  box: '<path d="M3 8l9-5 9 5-9 5zM3 8v8l9 5 9-5V8M12 13v8"/>', tape: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>', tag: '<path d="M4 4h8l8 8-8 8-8-8z"/><circle cx="8.500" cy="8.500" r="1.200"/>',
-  scale: '<path d="M5 20h14M12 4v16M5 8h14l-3 6H8z"/>', light: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/>', star: '<path d="M12 3l2.500 5.500 6 .7-4.500 4 1.300 6L12 16.300 6.700 19.200 8 13.200 3.500 9.200l6-.7z"/>',
-};
+export const cardById = id => byId[id];
+export const RCOL = BACKC;
 
 /* ---- état ---- */
-const blank = () => ({ own: {}, dust: 0, s: 0, p: 0, paid: [], pity: 0, sets: [] });
+const blank = () => ({ own: {}, s: 0, p: 0, a: 0, paid: [], pity: 0, sets: [] });
 export const state = () => Object.assign(blank(), app.cfg.cartes || {});
 const save = o => app.setCfg({ cartes: o });
-export const owned = () => CARDS.filter(c => state().own[c.id] > 0).length;
-export const packsLeft = () => { const s = state(); return s.s + s.p; };
+const has = (s, id) => !!(s.own[id] && (s.own[id].n || s.own[id] > 0));
+export const owned = () => { const s = state(); return CARDS.filter(c => has(s, c.id)).length; };
+export const packsLeft = () => { const s = state(); return s.s + s.p + s.a; };
 
 function rnd() { const a = new Uint32Array(1); (window.crypto || globalThis.crypto).getRandomValues(a); return a[0] / 4294967296; }
-function rarity(odds) { let x = rnd() * odds.reduce((a, b) => a + b, 0); for (let i = 0; i < odds.length; i++) { x -= odds[i]; if (x < 0) return i; } return 0; }
+function pickIdx(w) { let x = rnd() * w.reduce((a, b) => a + b, 0); for (let i = 0; i < w.length; i++) { x -= w[i]; if (x < 0) return i; } return 0; }
 const cardOf = r => { const L = CARDS.filter(c => c.r === r); return L[Math.floor(rnd() * L.length)]; };
+const draw = odds => { const c = cardOf(pickIdx(odds)), e = c.e || pickIdx(ETAT_W) + 1, sup = c.r >= 2 && c.r <= 5 && rnd() < SUPER_P; return { c, e, sup }; };
 
-/** Offre un pack (kind : 's' standard, 'p' premium). `id` évite de l'offrir deux fois pour le même défi. */
+/** Offre un pack (s : Givre, p : Glacier, a : Aurore). `id` évite de l'offrir deux fois pour le même défi ou palier. */
 export function grantPack(kind, id) {
   const s = state();
   if (id && s.paid.includes(id)) return false;
-  s[kind]++; if (id) s.paid = [...s.paid, id].slice(-500);
+  s[kind] = (s[kind] || 0) + 1; if (id) s.paid = [...s.paid, id].slice(-500);
   save(s); return true;
 }
 
-/** Ouvre un pack : renvoie les cartes tirées [{c, nouv}] et met la collection à jour. */
+/** Ouvre un pack : renvoie les cartes tirées [{c, e, sup, nouv}] et met la collection à jour. */
 export function openPack(kind) {
-  const s = state();
-  if (!(s[kind] > 0)) return null;
+  const s = state(), P = PACK_N[kind];
+  if (!P || !(s[kind] > 0)) return null;
   s[kind]--;
-  const rs = [0, 1, 2].map(() => rarity(ODDS[kind]));
-  if (kind === 'p' && !rs.some(r => r >= 1)) rs[2] = rarity(ODDS.p);
-  if (kind === 's') { if (rs.some(r => r >= 1)) s.pity = 0; else if (s.pity >= PITY) { rs[2] = rarity(ODDS.p); s.pity = 0; } else s.pity++; }
+  const L = [];
+  for (let i = 0; i < P.n; i++) L.push(draw(ODDS.base));
+  for (let i = 0; i < P.rare; i++) L.push(draw(ODDS.rare));
+  for (let i = 0; i < P.epic; i++) L.push(draw(ODDS.epic));
+  if (kind === 's') { if (L.some(x => x.c.r >= 2)) s.pity = 0; else if (s.pity >= PITY) { L[2] = draw(ODDS.rare); s.pity = 0; } else s.pity++; }
+  L.sort((a, b) => a.c.r - b.c.r);                                  /* la plus rare en dernier : la révélation monte en puissance */
   const own = Object.assign({}, s.own), res = [];
-  rs.forEach(r => { const c = cardOf(r), nouv = !(own[c.id] > 0); own[c.id] = (own[c.id] || 0) + 1; if (!nouv) s.dust += DUST[r]; res.push({ c, nouv }); });
+  L.forEach(x => {
+    const o = Object.assign({ n: 0, e: 0, s: 0 }, typeof own[x.c.id] === 'object' ? own[x.c.id] : {}), nouv = !o.n;
+    own[x.c.id] = { n: o.n + 1, e: Math.max(o.e, x.e), s: o.s || (x.sup ? 1 : 0) };
+    res.push(Object.assign({ nouv }, x));
+  });
   s.own = own;
-  /* collection complète : un pack premium, une seule fois */
   const bonus = [];
-  SETS.forEach(n => { if (!s.sets.includes(n) && CARDS.filter(c => c.set === n).every(c => own[c.id] > 0)) { s.sets = [...s.sets, n]; s.p++; bonus.push(n); } });
+  if (!s.sets.includes('hiver') && CARDS.every(c => has({ own }, c.id))) { s.sets = [...s.sets, 'hiver']; s.a++; bonus.push(SET_NAME); }
   save(s);
-  return { res, bonus };
+  return { res, bonus, kind };
 }
 
-/** Fabrique une carte manquante avec la poussière des doublons. */
-export function craft(id) {
-  const s = state(), c = byId[id];
-  if (!c || s.own[id] > 0 || s.dust < CRAFT[c.r]) return false;
-  s.dust -= CRAFT[c.r]; s.own = Object.assign({}, s.own, { [id]: 1 });
-  save(s); return true;
+/** Cartes Uniques : elles se gagnent par un geste, jamais dans un pack (première vente, premier colis, 100 ventes). */
+export function checkUniques() {
+  if (app.importing || !app.loaded) return [];
+  const s = state(), R = app.P.filter(p => !p.ex), S = R.filter(sold), got = [];
+  const cond = { first: S.length >= 1, parcel: S.some(p => ok(p.exp)), hundred: S.length >= 100 };
+  const own = Object.assign({}, s.own);
+  CARDS.filter(c => c.unique && cond[c.unique] && !has({ own }, c.id)).forEach(c => { own[c.id] = { n: 1, e: 5, s: 0 }; got.push(c); });
+  if (got.length) { s.own = own; save(s); got.forEach(c => app.toast(t('Carte Unique obtenue : {n}', { n: c.name }), null, 6000)); }
+  return got;
 }
 
 /* ---- affichage ---- */
-const icon = c => c.k === 'piece' ? catSvg({ cat: c.cat }) : c.k === 'objet' ? `<svg viewBox="0 0 24 24" aria-hidden="true">${IC[c.ic]}</svg>` : `<span class="mono">${esc(c.n.replace(/[^A-Za-zÀ-ÿ&]/g, '').slice(0, 2).toUpperCase())}</span>`;
-const nm = c => c.k === 'brand' ? c.n : t(c.n);
-export const cardTile = (c, n, big, down) => `<button type="button" class="cdk r${c.r}${n > 0 ? '' : ' miss'}${big ? ' big' : ''}${down ? ' down' : ''}" ${down ? 'data-flip="1"' : `data-card="${esc(c.id)}"`} aria-label="${esc(nm(c) + ' · ' + t(RARETES[c.r]))}"><span class="cdi">${icon(c)}</span><b>${esc(nm(c))}</b><i>${t(RARETES[c.r])}</i>${n > 1 ? `<em>×${n}</em>` : ''}</button>`;
+let uid = 0;
+const nn = n => String(n).padStart(2, '0');
+const tir = (c, sup) => { const v = sup ? TIRAGE_SUPER[c.r] : TIRAGE[c.r]; return v ? v.toLocaleString(app.LOC) : t('ILLIMITÉ'); };
+const spark = '<svg class="cgs" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 L14.5 9.5 L23 12 L14.5 14.5 L12 23 L9.5 14.5 L1 12 L9.5 9.5 Z"/></svg>';
+/** Recto d'une carte (360 × 504, tout se met à l'échelle de sa largeur). */
+export function cardFront(c, e = 5, sup = false) {
+  const id = ++uid, dots = [1, 2, 3, 4, 5].map(i => `<i class="pt${i <= e ? ' on' : ''}"></i>`).join('');
+  return `<div class="cdn r${c.r}${sup ? ' sup' : ''}${c.fin ? ' f-' + c.fin : ''}" style="--rc:${RCOL[c.r]}"><div class="cdh"><span class="cdr">${esc(t(RARETES[c.r]).toUpperCase())} · ${POINTS[c.r]} ${t('pts')}</span><b class="cdt">${esc(c.name)}</b><small>${esc(c.type)} · ${esc(c.mat)}</small><span class="cdnn">${nn(c.num)} / ${c.tot}</span></div>
+   <div class="cdd">${spark}${spark}${spark}${garmentSVG(c, id, e)}</div>
+   <div class="cdf"><div><span>${t('ÉPOQUE')}</span><b>${c.epoque}</b></div><div><span>${t('TAILLE')}</span><b>${esc(c.taille)}</b></div><div><span>${t('COULEUR')}</span><b><i class="sw" style="background:${COL[c.coul] || '#ccc'}" title="${esc(c.coul)}"></i></b></div><div><span>${t('ÉTAT')}</span><b class="pts" title="${esc(t(ETATS[e - 1]))}">${dots}</b></div></div>
+   <div class="cdi"><span>${t('SON HISTOIRE')}</span><em>${esc(c.hist)}</em></div><div class="cdb"><span>${t('COLLECTION HIVER').toUpperCase()}</span><span>${t('TIRAGE')} ${tir(c, sup)}</span></div>${sup ? `<span class="cdsup">${t('SUPER')}</span>` : ''}</div>`;
+}
+/** Une carte en tuile : recto si on la possède, sinon son dos en gris. down : face cachée (ouverture d'un pack). */
+export function cardTile(c, o = {}) {
+  const { e = 5, sup = false, n = 1, down = false, big = false, miss = false } = o;
+  const uidb = ++uid;
+  return `<button type="button" class="cdk${big ? ' big' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? 'data-flip="1"' : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb) : ''}</span>`}${n > 1 ? `<em class="cdx">×${n}</em>` : ''}</button>`;
+}
 let shown = null, sel = '';
+const PNAME = { s: ['Givre', 'Pack simple : 3 cartes'], p: ['Glacier', 'Pack rare : 4 cartes, une Rare ou mieux'], a: ['Aurore', 'Pack sublime : 5 cartes, deux Épiques ou mieux'] };
 export function cartesBody() {
   const s = state(), got = owned();
-  const bar = `<div class="gcard cartes-h"><div class="gh2"><span>${t('Ma collection')}</span><span>${got} / ${CARDS.length}</span></div><div class="rl"><b class="gc-g" style="width:${(got / CARDS.length * 100).toFixed(1)}%"></b></div>
-   <div class="packs"><div><b>${s.s}</b><span>${t('packs')}</span><button type="button" class="btn sm" data-popen="s"${s.s ? '' : ' disabled'}>${t('Ouvrir')}</button></div><div><b>${s.p}</b><span>${t('packs premium')}</span><button type="button" class="btn sm mint" data-popen="p"${s.p ? '' : ' disabled'}>${t('Ouvrir')}</button></div><div><b>${s.dust}</b><span>${t('poussière')}</span></div></div>
-   <div class="gl2">${t('Un pack par défi réussi, un pack premium pour un défi du mois (au moins une carte Rare). Les doublons deviennent de la poussière pour fabriquer une carte qui te manque.')}</div></div>`;
-  const open = shown ? `<div class="card popen"><h3>${shown.bonus.length ? t('Collection complète : un pack premium en cadeau') : t('Ton pack')}</h3><div class="prow">${shown.res.map(x => cardTile(x.c, 1, true, true)).join('')}</div><div class="acts two"><button type="button" class="btn sec" data-pflip="1">${t('Tout révéler')}</button><button type="button" class="btn" data-pclose="1">${t('Ranger dans ma collection')}</button></div></div>` : '';
-  const one = sel && byId[sel] ? (() => { const c = byId[sel], n = s.own[c.id] || 0; return `<div class="card csel"><div class="prow">${cardTile(c, n, true)}</div><p class="sub" style="margin:8px 0">${n ? t('Tu as cette carte') + (n > 1 ? ' ×' + n : '') + ' · ' + t(c.set) : t('Il te manque cette carte : {c} poussière pour la fabriquer.', { c: CRAFT[c.r] })}</p>${n ? '' : `<button type="button" class="btn" data-craft="${esc(c.id)}"${s.dust >= CRAFT[c.r] ? '' : ' disabled'}>${t('Fabriquer ({c} poussière)', { c: CRAFT[c.r] })}</button>`}</div>`; })() : '';
-  const sets = SETS.map(n => { const L = CARDS.filter(c => c.set === n), k = L.filter(c => s.own[c.id] > 0).length; return `<div class="card cset"><div class="gh2"><b>${t(n)}</b><span>${k} / ${L.length}${k === L.length ? ' ✓' : ''}</span></div><div class="cgrid">${L.map(c => cardTile(c, s.own[c.id] || 0)).join('')}</div></div>`; }).join('');
-  return bar + open + one + sets;
+  const bar = `<div class="gcard cartes-h"><div class="gh2"><span>${t(SET_NAME)}</span><span>${got} / ${CARDS.length}</span></div><div class="rl"><b class="gc-g" style="width:${(got / CARDS.length * 100).toFixed(1)}%"></b></div>
+   <div class="packs">${['s', 'p', 'a'].map(k => `<div class="pkc"><div class="pkm">${packSVG(k, 'm' + k + (++uid))}</div><b>${s[k] || 0}</b><span>${t(PNAME[k][0])}</span><button type="button" class="btn sm${k === 'p' ? ' mint' : ''}" data-popen="${k}"${s[k] ? '' : ' disabled'}>${t('Ouvrir')}</button></div>`).join('')}</div>
+   <div class="gl2">${t('Un défi de la semaine offre un pack Givre, un défi du mois un pack Glacier, un trophée Platine ou Diamant un pack Aurore. Les Uniques se gagnent par un geste, jamais dans un pack.')}</div></div>`;
+  const open = shown ? `<div class="card popen"><h3>${shown.bonus.length ? t('Collection complète : un pack Aurore en cadeau') : t('Ton pack {n}', { n: t(PNAME[shown.kind][0]) })}</h3><div class="pkw k-${shown.kind}">${packSVG(shown.kind, 'o' + (++uid))}</div><div class="prow n${shown.res.length}">${shown.res.map(x => cardTile(x.c, { e: x.e, sup: x.sup, down: true })).join('')}</div><div class="acts two"><button type="button" class="btn sec" data-pflip="1">${t('Tout révéler')}</button><button type="button" class="btn" data-pclose="1">${t('Ranger dans ma collection')}</button></div></div>` : '';
+  const one = sel && byId[sel] ? (() => { const c = byId[sel], o = typeof s.own[c.id] === 'object' ? s.own[c.id] : null; return `<div class="card csel">${o ? cardTile(c, { e: o.e || 5, sup: !!o.s, n: o.n, big: true }) : `<div class="prow">${cardTile(c, { miss: true, big: true })}</div>`}<p class="sub" style="margin:8px 0 0">${o ? t('Tu as cette carte') + (o.n > 1 ? ' ×' + o.n : '') + (o.s ? ' · ' + t('version Super') : '') + ' · ' + t('meilleur état : {e}', { e: t(ETATS[(o.e || 5) - 1]) }) : c.unique ? t('Carte Unique : elle se gagne par un geste, jamais dans un pack.') : t('Il te manque cette carte.')}</p></div>`; })() : '';
+  const groups = RARETES.map((rn, r) => { const L = CARDS.filter(c => c.r === r); if (!L.length) return ''; const k = L.filter(c => has(s, c.id)).length; return `<div class="card cset"><div class="gh2"><b>${t(rn)}</b><span>${k} / ${L.length}${k === L.length ? ' ✓' : ''}</span></div><div class="cgrid">${L.map(c => { const o = typeof s.own[c.id] === 'object' ? s.own[c.id] : null; return o ? cardTile(c, { e: o.e || 5, sup: !!o.s, n: o.n }) : cardTile(c, { miss: true }); }).join('')}</div></div>`; }).join('');
+  return bar + open + one + groups;
 }
-/** Gère les touches de l'onglet Cartes ; renvoie true si l'écran doit être redessiné. */
+/** Gère les touches de l'onglet Cartes ; renvoie true si l'écran doit être redessiné, false si non, null si ce n'est pas pour nous. */
 export function cartesClick(e) {
   const o = e.target.closest('[data-popen]');
   if (o) { const r = openPack(o.dataset.popen); if (r) { shown = r; sel = ''; return true; } return false; }
@@ -108,7 +170,5 @@ export function cartesClick(e) {
   if (e.target.closest('[data-pclose]')) { shown = null; return true; }
   const c = e.target.closest('[data-card]');
   if (c) { sel = sel === c.dataset.card ? '' : c.dataset.card; return true; }
-  const k = e.target.closest('[data-craft]');
-  if (k) { craft(k.dataset.craft); return true; }
   return null;
 }
