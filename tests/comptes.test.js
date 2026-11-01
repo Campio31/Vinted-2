@@ -4,7 +4,7 @@ import { app } from '../src/state.js';
 
 const $ = id => document.getElementById(id);
 const tick = ms => new Promise(r => setTimeout(r, ms));
-const iso = d => d.toISOString().slice(0, 10);
+const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const jour = n => iso(new Date(Date.now() + n * 864e5));
 let nav, fin;
 beforeAll(async () => {

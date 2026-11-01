@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import { demarrer } from './helpers.js';
 import { app } from '../src/state.js';
 import { addDays, today } from '../src/modules/core.js';
@@ -12,6 +12,7 @@ beforeAll(async () => {
   A = await import('../src/modules/autopilot.js');
   nav = await import('../src/modules/nav.js');
 });
+beforeEach(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date('2026-11-11T12:00:00')); });
 afterEach(() => { app.setCfg({ rules: {}, ruleSnooze: {}, apLog: [], apStats: { lots: 0, items: 0, min: 0 } }); localStorage.removeItem('ruleSeen'); app.P = app.P.filter(p => !p.id.startsWith('ru-')); vi.useRealTimers(); });
 const base = () => app.P.find(p => p.statut === 'Disponible');
 const mk = (id, o) => { const p = Object.assign({}, base(), { id }, o); app.P.push(p); return p; };

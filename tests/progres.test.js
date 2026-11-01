@@ -87,7 +87,7 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     expect($('shc').textContent).toMatch(/points/);
     expect($('shc').querySelector('.med')).toBeNull();
     $('shc').querySelector('[data-ptab="cartes"]').click();
-    expect($('shc').querySelectorAll('.cdk').length).toBeGreaterThan(50);
+    expect($('shc').querySelectorAll('.cdk').length).toBe(43);
     $('shc').querySelector('[data-ptab="trophees"]').click();
     expect($('shc').querySelectorAll('.tro').length).toBe(10);
     $('shc').querySelector('[data-ptab="classement"]').click();
@@ -143,16 +143,53 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     app.P = app.P.filter(p => p.id !== 'prg-add');
   });
 
-  it('un pack premium donne au moins une carte Rare ou mieux, les doublons font de la poussière, et on fabrique une carte', async () => {
+  it('Glacier donne 4 cartes dont une Rare ou mieux, Aurore 5 dont deux Épiques ou mieux, et les Uniques ne sortent jamais d\'un pack', async () => {
     const K = await import('../src/modules/cartes.js');
-    app.setCfg({ cartes: { own: {}, dust: 0, s: 0, p: 40, paid: [], pity: 0, sets: [] } });
-    for (let i = 0; i < 40; i++) { const r = K.openPack('p'); expect(r.res.some(x => x.c.r >= 1)).toBe(true); }
-    expect(K.state().dust).toBeGreaterThan(0);
-    const manque = K.CARDS.find(c => !K.state().own[c.id] && c.r === 0);
-    if (manque) { app.setCfg({ cartes: Object.assign({}, K.state(), { dust: 10 }) }); expect(K.craft(manque.id)).toBe(true); expect(K.state().own[manque.id]).toBe(1); expect(K.state().dust).toBe(10 - K.CRAFT[0]); }
+    app.setCfg({ cartes: { own: {}, s: 0, p: 40, a: 40, paid: [], pity: 0, sets: [] } });
+    for (let i = 0; i < 40; i++) {
+      const g = K.openPack('p'); expect(g.res).toHaveLength(4); expect(g.res.some(x => x.c.r >= 2)).toBe(true);
+      const a = K.openPack('a'); expect(a.res).toHaveLength(5); expect(a.res.filter(x => x.c.r >= 3).length).toBeGreaterThanOrEqual(2);
+      expect([...g.res, ...a.res].every(x => x.c.r < 6)).toBe(true);
+    }
     app.setCfg({ cartes: null });
   });
 
+  it('la Collection Hiver : 43 cartes, 7 raretés avec la bonne répartition, Uniques toujours Neuves', async () => {
+    const K = await import('../src/modules/cartes.js');
+    expect(K.CARDS).toHaveLength(43);
+    expect(K.RARETES).toHaveLength(7);
+    expect([0, 1, 2, 3, 4, 5, 6].map(r => K.CARDS.filter(c => c.r === r).length)).toEqual([10, 10, 5, 5, 5, 5, 3]);
+    expect(new Set(K.CARDS.map(c => c.id)).size).toBe(43);
+    expect(K.CARDS.filter(c => c.r === 6).every(c => c.e === 5 && c.unique)).toBe(true);
+    expect(K.CARDS.every(c => c.hist && c.epoque && c.taille && c.coul && c.sil)).toBe(true);
+    expect(K.TIRAGE).toEqual([0, 50000, 10000, 2500, 500, 100, 3]);
+    expect(K.TIRAGE_SUPER).toEqual([0, 0, 1000, 250, 50, 10, 0]);
+  });
+
+  it('une carte se dessine en entier : en-tête, illustration, fiche, histoire, pied, état et version Super', async () => {
+    const K = await import('../src/modules/cartes.js');
+    const c = K.CARDS[0], h = document.createElement('div');
+    h.innerHTML = K.cardFront(c, 2, false) + K.cardFront(K.CARDS.find(x => x.r === 3), 5, true);
+    const front = h.querySelector('.cdn');
+    for (const s of ['.cdh', '.cdd svg.cga', '.cdf', '.cdi', '.cdb']) expect(front.querySelector(s), s).toBeTruthy();
+    expect(front.textContent).toContain('01 / 43');
+    expect(front.querySelectorAll('.pt.on')).toHaveLength(2);
+    expect(h.querySelector('.cdn.sup .cdsup')).toBeTruthy();
+    expect(front.textContent).not.toMatch(/€/);
+  });
+
+  it('les Uniques se gagnent par un geste : première vente, colis expédié', async () => {
+    const K = await import('../src/modules/cartes.js');
+    app.setCfg({ cartes: null });
+    app.P = app.P.filter(p => !p.ex);
+    const v = app.P.find(p => p.statut === 'Vendu');
+    const got = K.checkUniques();
+    expect(got.map(c => c.unique)).toContain('first');
+    expect(K.state().own[got[0].id]).toMatchObject({ n: 1, e: 5 });
+    expect(K.checkUniques()).toHaveLength(0);
+    void v;
+    app.setCfg({ cartes: null });
+  });
   it('l\'onglet Cartes ouvre un pack à l\'écran', async () => {
     const K = await import('../src/modules/cartes.js');
     app.setCfg({ cartes: { own: {}, dust: 0, s: 1, p: 0, paid: [], pity: 0, sets: [] } });
