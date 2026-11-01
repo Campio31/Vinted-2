@@ -77,9 +77,10 @@ describe('Live dans les outils', () => {
 });
 
 describe('outils retirés', () => {
-  it('ballot, négociation, photos, trésorerie, bilan mensuel et visuels ne sont plus dans la liste', () => {
+  it('ballot, négociation, photos, trésorerie et visuels ne sont plus dans la liste (les rapports PDF sont revenus)', () => {
     const k = tools.TOOLS.map(x => x.k);
-    for (const x of ['ballot', 'nego', 'photos', 'treso', 'rapport', 'visuels']) expect(k).not.toContain(x);
+    for (const x of ['ballot', 'nego', 'photos', 'treso', 'visuels', 'scan']) expect(k).not.toContain(x);
+    expect(k).toContain('rapport');
   });
 });
 

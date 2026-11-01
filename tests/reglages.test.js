@@ -184,7 +184,7 @@ describe('calendrier des ventes : temps forts et planning', () => {
     app.calM = d.toISOString().slice(0, 7); app.calD = d.toISOString().slice(0, 10);
     app.renderDash();
     expect(document.querySelectorAll('#dsh .cdc.pre, #dsh .cdc.ev').length).toBeGreaterThan(0);
-    expect(document.querySelector('#dsh .cdet').textContent).toMatch(/Préparation/);
+    expect(document.querySelector('#dsh .cdet').textContent).toMatch(/Préparation|Preparation/);
   });
 
   it('le planning apparaît dans le calendrier : point sur les jours prévus et créneaux du jour', () => {

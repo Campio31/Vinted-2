@@ -111,10 +111,13 @@ describe('Défis et trophées : un seul écran', () => {
     let c = P.carnet().find(x => x.k === m);
     expect(c.s).toBe('cur');
     const avant = P.xpData().xp;
+    /* une pièce entrée ce mois-ci, pour que le défi « ajouter 1 pièce » soit réussi même le 1er du mois */
+    app.P.push({ id: 'prg-add', cat: 'Tshirt', marque: 'Test', statut: 'Disponible', entree: new Date().toISOString().slice(0, 10) });
     app.setCfg({ defis: [{ id: 'd1', type: 'add', target: 1, m }] });
     c = P.carnet().find(x => x.k === m);
     expect(c.s).toBe('ok');
     expect(P.xpData().xp).toBe(avant + 5);
+    app.P = app.P.filter(p => p.id !== 'prg-add');
     expect(P.carnet()).toHaveLength(12);
   });
 
