@@ -24,7 +24,8 @@ export function finDate(p) {
 }
 export const finManual = p => !!p && ok(p.fin);
 export const isFinal = (p, now = today()) => { const d = finDate(p); return !!d && d <= now; };
-export const pendingSales = (now = today()) => app.P.filter(p => { const d = finDate(p); return d && d > now; });
+/* ventes pas encore finalisées, seulement celles qui comptent pour la déclaration (un compte non pris en compte n'a rien à finaliser) */
+export const pendingSales = (now = today()) => app.P.filter(p => { const d = finDate(p); return d && d > now && (!app.countsForFisc || app.countsForFisc(p)); });
 
 app.finDate = finDate;
 app.isFinal = isFinal;
