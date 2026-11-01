@@ -1,8 +1,41 @@
 import { app } from '../state.js';
 import { $, LSg, LSs, age, avail, dj, esc, eur, idn, isnum, profit, sold, title } from './core.js';
 import { hydrate, phImg } from './photos.js';
+import { activeChips, activeCount, facet, filterLabel, openFilters } from './filters.js';
 
 app.renderList = renderList;
+
+/* ---------- filtres du Stock (fenêtre « Filtres », voir filters.js) ---------- */
+const ADVK = ['cat', 'genre', 'taille', 'marque', 'bac', 'age', 'photo'];
+const adv = Object.assign({ cat: '', genre: '', taille: '', marque: '', bac: '', age: '', photo: '', tri: '' }, LSg('stockAdv', {}));
+const AGEB = { 30: a => a < 30, 90: a => a >= 30 && a < 90, 91: a => a >= 90 };
+app.advMatch = p => (!adv.cat || p.cat === adv.cat) && (!adv.genre || p.genre === adv.genre) && (!adv.taille || p.taille === adv.taille) && (!adv.marque || p.marque === adv.marque) && (!adv.bac || p.bac === adv.bac)
+  && (!adv.age || AGEB[adv.age](age(p))) && (!adv.photo || (adv.photo === 'sans' ? !p.photo : !!p.photo));
+const advSave = () => { const o = Object.assign({}, adv); delete o.st; LSs('stockAdv', o); };
+function openStockFilters() {
+  const S = () => app.P.filter(p => !sold(p));
+  adv.st = app.filt;
+  openFilters({
+    title: t('Filtres du stock'), state: adv,
+    groups: () => {
+      const L = S();
+      return [
+        { k: 'st', l: t('Statut'), o: ['Tous', 'Disponible', 'Apub', 'Enligne', 'Pas Disponible', 'Incomplet'].map(k => [k, t(app.FLAB[k] || STAT[k]), L.filter(p => app.matchFiltK(p, k)).length]) },
+        { k: 'cat', l: t('Catégorie'), o: facet(L, p => p.cat).map(([v, n]) => [v, tv(v), n]) },
+        { k: 'genre', l: t('Genre'), o: facet(L, p => p.genre).map(([v, n]) => [v, tv(v), n]) },
+        { k: 'taille', l: t('Taille'), o: facet(L, p => p.taille).map(([v, n]) => [v, v, n]) },
+        { k: 'marque', l: t('Marque'), o: facet(L, p => p.marque).map(([v, n]) => [v, v, n]) },
+        { k: 'bac', l: t('Bac'), o: facet(L, p => p.bac).map(([v, n]) => [v, v, n]) },
+        { k: 'age', l: t('En stock depuis'), o: [['30', t('Moins de 30 jours')], ['90', t('30 à 90 jours')], ['91', t('Plus de 90 jours')]] },
+        { k: 'photo', l: t('Photo'), o: [['sans', t('Sans photo')], ['avec', t('Avec photo')]] },
+        { k: 'tri', l: t('Trier par'), o: [['old', t('Plus anciennes d\'abord')], ['achatD', t('Prix d\'achat, du plus cher')], ['achatA', t('Prix d\'achat, du moins cher')], ['pub', t('En ligne depuis le plus longtemps')]] },
+      ].filter(g => g.o.length);
+    },
+    changed: () => { app.filt = adv.st || 'Tous'; app.lim = 60; advSave(); renderList(); },
+    count: () => S().filter(p => app.matchFilt(p)).length,
+    clear: () => { ADVK.concat('tri').forEach(k => { adv[k] = ''; }); adv.st = 'Tous'; },
+  });
+}
 
 /* ---------- vue Stock ---------- */
 export const STAT={Disponible:'En stock',Vendu:'Vendus','Pas Disponible':'Indispo'};
@@ -10,17 +43,19 @@ const tagOf=p=>p.statut==='Vendu'?'<span class="tag v">'+t('Vendu')+'</span>':p.
 function renderList(){
  /* l'onglet Stock ne montre que le stock : les pièces vendues sont dans l'onglet Vente */
  if(app.filt==='Vendu')app.filt='Tous';
- const stock=app.P.filter(p=>!sold(p)),F=['Tous','Disponible','Apub','Enligne','Pas Disponible'].concat(stock.some(app.incomplete)?['Incomplet']:[]),cnt=k=>stock.filter(p=>app.matchFiltK(p,k)).length;
- $('flt').innerHTML=F.map(k=>`<button class="chip sm${app.filt===k?' on':''}" type="button" data-flt="${k}">${t(app.FLAB[k]||STAT[k])} · ${cnt(k)}</button>`).join('')+`<span class="vt"><button type="button" data-lm="grid" aria-label="${t('Grille')}"${lmode==='grid'?' class="on"':''}><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button><button type="button" data-lm="list" aria-label="${t('Liste')}"${lmode==='list'?' class="on"':''}><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></span>`;
+ const stock=app.P.filter(p=>!sold(p)),F=['Tous','Disponible','Apub','Enligne','Pas Disponible'].concat(stock.some(app.incomplete)?['Incomplet']:[]),cnt=k=>stock.filter(p=>app.matchFiltK(p,k)).length,nAdv=activeCount(adv,ADVK);
+ $('flt').innerHTML=F.map(k=>`<button class="chip sm${app.filt===k?' on':''}" type="button" data-flt="${k}">${t(app.FLAB[k]||STAT[k])} · ${cnt(k)}</button>`).join('')+`<button type="button" class="chip sm fbtn${nAdv?' on':''}" data-fadv="1">${filterLabel(nAdv)}</button><span class="vt"><button type="button" data-lm="grid" aria-label="${t('Grille')}"${lmode==='grid'?' class="on"':''}><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg></button><button type="button" data-lm="list" aria-label="${t('Liste')}"${lmode==='list'?' class="on"':''}><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></span>`;
  $('lst').className=lmode==='grid'?'grid':'';
  if(!app.P.length){$('lst').innerHTML=`<div class="card empty"><b>${app.loaded?t('Ton stock est vide'):t('Chargement…')}</b>${app.loaded?'<br>'+t('Ajoute ta première pièce depuis l\'onglet Ajouter, importe ta sauvegarde (onglet Export), ou charge quelques exemples.')+'<br><button class="btn" id="exb" type="button">'+t('Charger des exemples')+'</button>':''}</div>`;if($('exb'))$('exb').onclick=app.loadExamples;return}
  const q=$('q').value.trim().toLowerCase();
  const toks=app.searchToks(q),sco=new Map();let ps=stock.filter(p=>{if(!app.matchFilt(p))return false;if(!toks.length)return true;const s=app.searchScore(p,toks);if(s<0)return false;sco.set(p.id,s);return true});
- ps.sort((a,b)=>(toks.length?sco.get(b.id)-sco.get(a.id):0)||(app.filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
+ const TRI={old:(a,b)=>(a.entree||'').localeCompare(b.entree||''),achatD:(a,b)=>(b.achat||0)-(a.achat||0),achatA:(a,b)=>(a.achat||0)-(b.achat||0),pub:(a,b)=>(a.pub||'9').localeCompare(b.pub||'9')}[adv.tri];
+ ps.sort((a,b)=>(toks.length?sco.get(b.id)-sco.get(a.id):0)||(TRI?TRI(a,b):0)||(app.filt==='Vendu'?(b.dv||'').localeCompare(a.dv||''):0)||(b.entree||'').localeCompare(a.entree||'')||(b.cree||0)-(a.cree||0)||idn(b.id)-idn(a.id));
  const tot=ps.length;ps=ps.slice(0,app.lim);
  /* ligne « N résultats » avec un bouton pour effacer la recherche */
  const srh=q?`<div class="hint srh" style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 4px"><span>${t(tot>1?'{n} résultats pour « {q} »':'{n} résultat pour « {q} »',{n:tot,q:esc($('q').value.trim())})}</span><button type="button" class="lnk" id="q_clr">${t('Effacer')}</button></div>`:'';
- $('lst').innerHTML=srh+(ps.length?ps.map(p=>{if(lmode==='grid')return app.pieceTile(p,app.qSel===p.id);if(avail(p))return app.pieceRow(p,app.qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>${t('vendu {p}',{p:eur(p.pv)})}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?dj(a):''}</small></div>`;
+ const act=activeChips(adv,ADVK,{cat:v=>tv(v),genre:v=>tv(v),taille:v=>t('Taille {s}',{s:v}),bac:v=>t('Bac {b}',{b:v}),age:v=>({30:t('Moins de 30 jours'),90:t('30 à 90 jours'),91:t('Plus de 90 jours')})[v],photo:v=>v==='sans'?t('Sans photo'):t('Avec photo')});
+ $('lst').innerHTML=act+srh+(ps.length?ps.map(p=>{if(lmode==='grid')return app.pieceTile(p,app.qSel===p.id);if(avail(p))return app.pieceRow(p,app.qSel===p.id);const a=age(p),pr=sold(p)?`<div class="p ${profit(p)>=0?'g':'b'}">${profit(p)>=0?'+':''}${eur(profit(p))}<small>${t('vendu {p}',{p:eur(p.pv)})}</small></div>`:`<div class="p">${isnum(p.achat)?eur(p.achat):''}<small>${avail(p)?dj(a):''}</small></div>`;
   return`<button type="button" class="li" data-id="${esc(p.id)}">${p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`}<div class="m"><b>${esc(title(p))}${p.ex?'<span class="ex">'+t('exemple')+'</span>':''}</b><small>${esc([p.taille,tv(p.cat),tv(p.genre)].filter(Boolean).join(' · '))} ${tagOf(p)}</small></div>${pr}</button>`}).join('')+(tot>app.lim?`<button type="button" class="btn sec" id="more">${t('Afficher plus ({n})',{n:tot-app.lim})}</button>`:''):'<div class="empty">'+t('Aucune pièce.')+'</div>');
  hydrate();
 }
@@ -51,6 +86,6 @@ function iconKey(p){const c=app.nrm(p.cat),s=app.nrm(p.sub);
 export const catSvg=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[iconKey(p)]}</svg>`;
 export const fmtP=v=>Number.isInteger(v)?v+' €':app.fN(v)+' €';
 
-$('flt').onclick=e=>{const m=e.target.closest('[data-lm]');if(m){lmode=m.dataset.lm;LSs('lmode',lmode);app.qSel=null;app.renderList();return}const b=e.target.closest('[data-flt]');if(b){app.filt=b.dataset.flt;app.lim=60;app.renderList()}};
+$('flt').onclick=e=>{if(e.target.closest('[data-fadv]'))return openStockFilters();const m=e.target.closest('[data-lm]');if(m){lmode=m.dataset.lm;LSs('lmode',lmode);app.qSel=null;app.renderList();return}const b=e.target.closest('[data-flt]');if(b){app.filt=b.dataset.flt;app.lim=60;app.renderList()}};
 $('q').oninput=()=>{app.lim=60;app.renderList()};
-$('lst').onclick=e=>{if(e.target.closest('#q_clr')){$('q').value='';app.lim=60;app.renderList();return}if(e.target.closest('#more')){app.lim+=60;app.renderList();return}if(app.sellClick(e,app.renderList))return;const b=e.target.closest('[data-id]');if(b)app.openSheet(b.dataset.id)};
+$('lst').onclick=e=>{const fc=e.target.closest('[data-fclr]');if(fc){if(fc.dataset.fclr==='*')ADVK.forEach(k=>{adv[k]=''});else adv[fc.dataset.fclr]='';advSave();app.lim=60;renderList();return}if(e.target.closest('#q_clr')){$('q').value='';app.lim=60;app.renderList();return}if(e.target.closest('#more')){app.lim+=60;app.renderList();return}if(app.sellClick(e,app.renderList))return;const b=e.target.closest('[data-id]');if(b)app.openSheet(b.dataset.id)};

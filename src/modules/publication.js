@@ -33,7 +33,7 @@ const FLAB={Tous:'Tous',Incomplet:'À compléter',Apub:'À publier',Enligne:'En 
 app.FLAB = FLAB;
 const matchFiltK=(p,k)=>k==='Tous'||(k==='Incomplet'?incomplete(p):k==='Apub'?unpub(p):k==='Enligne'?onl(p):p.statut===k);
 app.matchFiltK = matchFiltK;
-export const matchFilt=p=>matchFiltK(p,app.filt);
+export const matchFilt=p=>matchFiltK(p,app.filt)&&(!app.advMatch||app.advMatch(p));
 app.matchFilt = matchFilt;
 function pubBlock(st){const u=st.filter(x=>!ok(x.pub));if(!u.length)return'';const c=u.reduce((a,x)=>a+(x.achat||0),0);
  return`<div class="pubb"><div><b>${tn(u.length,'pièce jamais publiée','pièces jamais publiées')}</b><span>${t('{a} d\'achat immobilisés : elles ne peuvent pas se vendre tant qu\'elles ne sont pas en ligne.',{a:eurR(c)})}</span></div><button type="button" class="btn sm mint" data-topub="1">${t('Voir à publier')}</button></div>`}

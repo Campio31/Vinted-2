@@ -8,6 +8,7 @@ import { MOIS } from './gamification.js';
 import { compressBlob } from './photo-compress.js';
 
 app.depSave = depSave;
+app.depRemove = id => depRemove(id);
 app.openDepenses = openDepenses;
 
 /* --- dépenses hors pièces --- */

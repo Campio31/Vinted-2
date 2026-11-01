@@ -10,7 +10,7 @@ export function showSheet(html){$('shc').onclick=null;$('shc').onchange=null;$('
 export const TI=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 export const TOOLS=[
  {k:'coach',t:'Coach du lundi',d:'Ton plan de la semaine en 30 secondes',i:TI('<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m4 6 5-3 5 4 6-4"/>')},
- {k:'qr',t:'Étiquettes QR et bacs',d:'Imprime des étiquettes, range dans un bac, retrouve vite',i:TI('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM19 17v3h-3"/>')},
+ {k:'qr',t:'Scanner QR et étiquettes',d:'Scanne une pièce, imprime des étiquettes, range dans un bac',i:TI('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM19 17v3h-3"/>')},
  {k:'trophees',t:'Défis et trophées',d:'Niveau, défi du mois, série de publication, badges et classement entre amis',i:TI('<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8"/>')},
  {k:'fisc',t:'Ligne fiscale',d:'Plafond micro-entrepreneur, alerte et déclaration URSSAF',i:TI('<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/>')},
  {k:'complete',t:'Compléter les fiches',d:'Fiches sans grade, état ou code, 10 à la suite',i:TI('<path d="M5 12l4.5 4.5L19 7"/>')},
@@ -19,8 +19,7 @@ export const TOOLS=[
  {k:'trash',t:'Corbeille',d:'Récupère une pièce supprimée par erreur (30 jours)',i:TI('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>')},
  {k:'wrapped',t:'Wrapped',d:'Ton récap du mois ou de l\'année, à partager en story',i:TI('<path d="M12 3l2.5 5.5 6 .7-4.5 4 1.3 6L12 16.3 6.7 19.2 8 13.2 3.5 9.2l6-.7z"/>')},
  {k:'rappels',t:'Rappels et notifications',d:'Colis à déposer, live prévu, temps forts',i:TI('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>')},
- {k:'aide',t:'Aide et raccourcis',d:'Réponses, raccourcis clavier, nouveautés et idées',i:TI('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/>')},
- {k:'scan',t:'Scanner un QR',d:'Ouvre la fiche et dit dans quel bac se trouve la pièce',i:TI('<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/>')}];
+ {k:'aide',t:'Aide et raccourcis',d:'Réponses, raccourcis clavier, nouveautés et idées',i:TI('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/>')}];
 /* L'onglet Outils (view v-tools). Le mode simple (simple-mode.js) fournit app.toolsView : outils à montrer, plus l'en-tête et le pied de la liste */
 export function renderTools(){const v=app.toolsView?app.toolsView():{list:TOOLS,head:'',foot:''};$('tv').innerHTML=v.head+`<div class="tools">${v.list.map(x=>`<button type="button" class="tool" data-tool="${x.k}"><span class="tic">${x.i}</span><span class="tx"><b>${t(x.t)}</b><small>${t(x.d)}</small></span></button>`).join('')}</div>`+v.foot}
 app.renderTools=renderTools;

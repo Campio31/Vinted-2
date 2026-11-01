@@ -19,6 +19,8 @@ function dashApply(){const box=$('dsh'),hide=dashHidden(),order=(app.cfg.dash&&a
 const renderDash24=app.renderDash;app.renderDash=function(){renderDash24();if(!app.P.length||!$('dsh').children.length)return;$('dsh').insertAdjacentHTML('beforeend',newCards());
  /* la courbe de l'objectif se range juste après la carte Objectifs, sauf si tu as choisi un ordre */
  {const cb=$('dsh').querySelector('[data-ck="courbe"]'),gl=$('dsh').querySelector('.card.goal')||$('dsh').querySelector('.gcard')||$('dsh').querySelector('.kpis');if(cb&&gl&&!(app.cfg.dash&&app.cfg.dash.order))gl.after(cb)}
+ /* les cartes ajoutées ici arrivent après le repli des sections : on les rend pliables aussi */
+ if(app.collapsify)app.collapsify();
  dashApply();hydrate()};
 function openDashCustom(){const draw=()=>{const it=dashKeyed(),hide=dashHidden();
  showSheet(sheetHead(t('Personnaliser le bilan'))+`<p class="sub" style="margin:0 0 10px">${t('Choisis les cartes à afficher et leur ordre. Ça reste sur ton compte, pour tous tes appareils.')}</p>${it.map((x,i)=>`<div class="dcr${hide.includes(x.k)?' off':''}"><button type="button" class="chip sm${hide.includes(x.k)?'':' on'}" data-dv="${esc(x.k)}" aria-label="${t('Afficher ou masquer')}">${hide.includes(x.k)?t('Masquée'):t('Visible')}</button><span>${esc(dashLabel(x))}</span><button type="button" class="chip sm" data-dm="${esc(x.k)}|-1"${i?'':' disabled'} aria-label="${t('Monter')}">↑</button><button type="button" class="chip sm" data-dm="${esc(x.k)}|1"${i<it.length-1?'':' disabled'} aria-label="${t('Descendre')}">↓</button></div>`).join('')}

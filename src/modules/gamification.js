@@ -14,8 +14,17 @@ export const FLAME='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1
 
 /* ===== 1. Gamification ===== */
 function pubDays(){const s=new Set();app.P.forEach(p=>{if(ok(p.pub))s.add(p.pub)});return s}
-export function streakInfo(){const s=pubDays();let d=today(),n=0;if(!s.has(d))d=addDays(d,-1);while(s.has(d)){n++;d=addDays(d,-1)}
- let best=0,run=0,prev=null;[...s].sort().forEach(x=>{run=prev&&days(prev,x)===1?run+1:1;best=Math.max(best,run);prev=x});return{n,best,today:s.has(today())}}
+/* Série de publication, avec un jour de repos par semaine (du lundi au dimanche) : un seul jour sans publier dans la même semaine ne casse pas la série.
+   Deux jours sans publier d'affilée, ou un deuxième jour de repos dans la semaine, la cassent. Les jours de repos ne comptent pas dans le nombre de jours. */
+const monday=d=>addDays(d,-((new Date(d+'T12:00:00').getDay()+6)%7));
+function streakRuns(s){let n=0,rests=new Set(),prev=null,best=0;
+ [...s].sort().forEach(d=>{if(prev===null)n=1;else{const g=days(prev,d)-1;let live=g===0;if(g===1){const w=monday(addDays(prev,1));if(!rests.has(w)){rests.add(w);live=true}}if(live)n++;else{n=1;rests=new Set()}}best=Math.max(best,n);prev=d});
+ return{n,best,rests,last:prev}}
+export function streakInfo(){const s=pubDays(),r=streakRuns(s),t0=today();let n=0,pending=false;
+ if(r.last){const miss=r.last===t0?0:days(r.last,t0)-1;
+  if(miss===0)n=r.n;else if(miss===1&&!r.rests.has(monday(addDays(r.last,1)))){n=r.n;pending=true}}
+ const wk=monday(t0),used=n>0&&(r.rests.has(wk)||(pending&&monday(addDays(r.last,1))===wk));
+ return{n,best:r.best,today:s.has(t0),pending,restLeft:n>0&&!used}}
 function monthCA(){const o={};app.P.forEach(p=>{if(sold(p)&&ok(p.dv)){const m=p.dv.slice(0,7);o[m]=(o[m]||0)+(p.pv||0)}});return o}
 function ballotStats(){const g={};app.P.forEach(p=>{if(p.ballot)(g[p.ballot]=g[p.ballot]||[]).push(p)});const out=[];
  Object.entries(g).forEach(([name,l])=>{const cost=l.reduce((a,x)=>a+(x.achat||0),0),start=l.map(x=>x.entree).filter(ok).sort()[0];if(cost<=0||!start)return;
@@ -24,7 +33,7 @@ function ballotStats(){const g={};app.P.forEach(p=>{if(p.ballot)(g[p.ballot]=g[p
 export function badgeList(){const B=[],S=app.P.filter(sold),n=S.length,ca=S.reduce((a,x)=>a+(x.pv||0),0),st=streakInfo(),mc=monthCA(),cur=today().slice(0,7),prevBest=Math.max(0,...Object.entries(mc).filter(([m])=>m!==cur).map(e=>e[1])),bs=ballotStats();
  [10,25,50,100,250,500,1000].forEach(k=>B.push({id:'v'+k,g:'Ventes',t:t('{k} ventes',{k}),d:t('Vends {k} pièces',{k}),ok:n>=k,prog:Math.min(k,n)+' / '+k}));
  [1000,5000,10000,25000].forEach(k=>B.push({id:'ca'+k,g:'Chiffre d\'affaires',t:t('{k} encaissés',{k:eurR(k)}),d:t('Cumule {k} de ventes',{k:eurR(k)}),ok:ca>=k,prog:eurR(Math.min(k,ca))+' / '+eurR(k)}));
- [3,7,14,30,60].forEach(k=>B.push({id:'s'+k,g:'Série',t:t('Série de {k} jours',{k}),d:t('Publie {k} jours de suite',{k}),ok:st.best>=k,prog:Math.min(k,st.best)+' / '+t('{k} jours',{k})}));
+ [3,7,14,30,60].forEach(k=>B.push({id:'s'+k,g:'Série',t:t('Série de {k} jours',{k}),d:t('Publie {k} jours de suite, avec un jour de repos par semaine permis',{k}),ok:st.best>=k,prog:Math.min(k,st.best)+' / '+t('{k} jours',{k})}));
  [7,14,30].forEach(k=>{const b=bs.filter(x=>x.days!==null&&x.days<=k).sort((a,b)=>a.days-b.days)[0];B.push({id:'b'+k,g:'Ballots',t:t('Ballot rentabilisé en {k} jours',{k}),d:b?t('{a} : couvert en {b} j',{a:b.name,b:b.days}):t('Rentabilise un ballot en {k} jours ou moins',{k}),ok:!!b,prog:bs.length?tn(bs.length,'ballot suivi','ballots suivis'):t('Renseigne le champ ballot')})});
  B.push({id:'rec',g:'Records',t:t('Record de CA mensuel'),d:mc[cur]>0&&prevBest>0?(mc[cur]>=prevBest?t('Ce mois : {a}, ton meilleur',{a:eurR(mc[cur])}):t('Record : {a}, ce mois {b}',{a:eurR(prevBest),b:eurR(mc[cur]||0)})):t('Bats ton meilleur mois'),ok:mc[cur]>0&&prevBest>0&&mc[cur]>=prevBest,prog:prevBest?eurR(mc[cur]||0)+' / '+eurR(prevBest):t('aucun mois de référence')});
  const gk=goalKinds().find(k=>goalCalc(k,'m')),g=gk&&goalCalc(gk,'m');B.push({id:'obj',g:'Objectif',t:t('Objectif du mois atteint'),d:t('Atteins ton objectif mensuel'),ok:!!g&&g.cur>=g.g,prog:g?Math.round(g.pct*100)+' %':t('objectif non défini')});
