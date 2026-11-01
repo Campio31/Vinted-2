@@ -242,3 +242,9 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .apm button.on{background:var(--denim);color:var(--on)}.apm button:disabled{opacity:.45;cursor:not-allowed}
 .apj{margin-top:6px}.apj>div{display:flex;gap:8px;font-size:12px;padding:5px 0;border-top:1px solid var(--line);align-items:baseline}
 .apj span{color:var(--mute);flex:none}.apj b{flex:1;font-weight:600}.apj .un b{text-decoration:line-through;color:var(--mute)}.apj em{font-style:normal;color:var(--mute)}
+
+/* ===== v36 : règles de Max ===== */
+.apq{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px 0;font-size:12px;font-weight:700;color:var(--denim)}
+.apq.ign{color:var(--red);font-weight:500}.apq .lnk{font-size:12px;white-space:nowrap}
+.rur{border-top:1px solid var(--line);padding:8px 0}.rur:first-of-type{border-top:0}
+.rup{margin:4px 0 4px 36px;max-width:220px}
