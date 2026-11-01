@@ -11,3 +11,6 @@
 **Journal** (`cfg.apLog`, 60 derniers) et **temps gagné** (`cfg.apStats`, estimation : 0,3 min par vente finalisée, 0,5 par colis, 1 par publication, 1,5 par prix).
 
 Rien n'est publié sur une plateforme et rien n'est modifié sans validation. Les phases suivantes (règles planifiées, IA pour les textes, fiches par photo) viendront enrichir ce moteur.
+## Phase 2 : règles planifiées (v36)
+
+Dix règles (RULES dans utopilot.js), toutes actives au départ, réglables dans Réglages. Une règle ne fait que **proposer** : sa tâche passe en tête de « Ma journée » avec la mention « Règle ». Règle coupée = tâche masquée. « Pas maintenant » reporte au lendemain. Au plus 3 tâches marquées par jour. Règle ignorée 3 jours de suite : proposition de la désactiver (compteur dans le navigateur). Les règles sont évaluées à l'ouverture de l'appli : rien ne tourne appli fermée (cela demanderait un traitement serveur, non prévu).
