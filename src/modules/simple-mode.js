@@ -11,7 +11,6 @@ import { TOOLS } from './tools-index.js';
 Object.assign(CFG0, { mode: 'avance', onb: null });
 
 const isSimple = () => app.cfg.mode === 'simple';
-let more = false;
 let showAll = false;
 let touched = false;
 
@@ -24,21 +23,18 @@ export function essentials() {
   return [...new Set(w)].filter(k => TOOLS.some(x => x.k === k)).slice(0, 8);
 }
 
+/* Onglet Outils : 6 grandes tuiles (ceux de ton profil), puis tous les autres en liste compacte (tools-index.js).
+   Le mode simple ne change plus que le Bilan ; il garde le lien « Revoir l'accueil ». */
+app.essentials = () => essentials().slice(0, 6);
 app.toolsView = function () {
   const simple = isSimple();
   const head = `<div class="chips" style="margin-bottom:12px"><button type="button" class="chip sm${simple ? ' on' : ''}" data-mode="simple">${t('Mode simple')}</button><button type="button" class="chip sm${simple ? '' : ' on'}" data-mode="avance">${t('Mode avancé')}</button></div>`;
-  if (!simple) return { list: TOOLS, head, foot: '' };
-  const E = essentials(), main = E.map(k => TOOLS.find(x => x.k === k)), rest = TOOLS.filter(x => !E.includes(x.k));
   const replay = `<div class="wfoot"><button type="button" class="wlnk" data-wreplay="1">${t('Revoir l\'accueil')}</button></div>`;
-  if (more) return { list: [...main, ...rest], head, foot: `<button type="button" class="btn sec" data-moretools="0" style="margin-top:12px">${t('Moins d\'outils')}</button>${replay}` };
-  return { list: main, head, foot: `<button type="button" class="btn sec" data-moretools="1" style="margin-top:12px">${t('Plus d\'outils')} (${rest.length})</button>${replay}` };
+  return { list: TOOLS, head, foot: simple ? replay : '' };
 };
-$('nav').addEventListener('click', e => { if (e.target.closest('[data-v="tools"]')) more = false; }, true);
 $('tv').addEventListener('click', e => {
   const m = e.target.closest('[data-mode]');
-  if (m) { app.setCfg({ mode: m.dataset.mode }, true); more = false; showAll = false; app.renderAll(); return app.renderTools(); }
-  const mo = e.target.closest('[data-moretools]');
-  if (mo) { more = mo.dataset.moretools === '1'; return app.renderTools(); }
+  if (m) { app.setCfg({ mode: m.dataset.mode }, true); showAll = false; app.renderAll(); return app.renderTools(); }
   if (e.target.closest('[data-wreplay]')) { $('sheet').hidden = true; app.openWelcome(); }
 });
 
