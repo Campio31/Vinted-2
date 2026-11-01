@@ -12,6 +12,7 @@ const jour = n => iso(new Date(Date.now() + n * 864e5));
 let fin, nav, ana, art;
 beforeAll(async () => {
   await demarrer(120);
+  app.setCfg({ fiscQ: { statut: 'micro', activite: 'march', creation: '2020-01-01', vl: 'bareme', tva: 'franchise', periode: 'M' } }, true);
   fin = await import('../src/modules/finalisation.js');
   nav = await import('../src/modules/nav.js');
   ana = await import('../src/modules/analytics.js');

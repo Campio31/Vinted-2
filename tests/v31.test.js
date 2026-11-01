@@ -8,6 +8,7 @@ const tick = ms => new Promise(r => setTimeout(r, ms));
 let nav, tools, gam, rap, fin;
 beforeAll(async () => {
   await demarrer(150);
+  app.setCfg({ fiscQ: { statut: 'micro', activite: 'march', creation: '2020-01-01', vl: 'bareme', tva: 'franchise', periode: 'M' } }, true);
   nav = await import('../src/modules/nav.js');
   tools = await import('../src/modules/tools-index.js');
   gam = await import('../src/modules/gamification.js');

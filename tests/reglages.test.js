@@ -105,8 +105,8 @@ describe('outils déplacés ou retirés', () => {
   it('la liste ne contient plus les outils fusionnés ou retirés', () => {
     const k = tools.TOOLS.map(x => x.k);
     for (const x of ['importo', 'help', 'lives', 'cohortes', 'tranches', 'boutique', 'calcom', 'planning']) expect(k, x).not.toContain(x);
-    expect(k).toContain('aide');
-    expect(tools.TOOLS.find(x => x.k === 'aide').t).toBe('Aide et raccourcis');
+    expect(k).not.toContain('aide');
+    for (const x of ['seuil', 'fourn', 'confort']) expect(k, x).not.toContain(x);
   });
 
   it('l\'import Excel ou CSV est dans les Réglages', async () => {
