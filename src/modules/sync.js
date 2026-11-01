@@ -53,7 +53,7 @@ export function errMsg(e){const m=String(e&&(e.message||e.error_description)||e|
  if(/email not confirmed/i.test(m))return t('Confirme d\'abord ton e-mail (lien reçu par mail).');
  if(/signups not allowed|signup.*disabled/i.test(m))return t('La création de compte est désactivée.');
  return m}
-export function refreshStatus(){const el=$('sync');let c='',tx_;
+export function refreshStatus(){const el=$('sync');if(!el)return;let c='',tx_;
  if(app.localState==='err'){c='err';tx_=t('Non enregistré')}
  else if(!cloud)tx_=t(app.IDB?'Sur cet appareil':'Mémoire temporaire');
  else if(!app.user){c='pend';tx_=t('Non connecté')}

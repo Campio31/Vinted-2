@@ -1,6 +1,7 @@
 import { app } from '../state.js';
 
-export const $=id=>document.getElementById(id);
+/* sans page (fin d'un test, onglet fermé), une écriture qui se termine en retard ne plante pas */
+export const $=id=>typeof document==='undefined'?null:document.getElementById(id);
 /* langue : t() traduit un texte français (clé), tv() une valeur enregistrée, tn() gère le pluriel ; le français reste la langue de référence (voir i18n.js) */
 app.LANG = detectLang();
 app.LOC = undefined;
