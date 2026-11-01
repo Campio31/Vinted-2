@@ -31,7 +31,6 @@ describe('traductions : aucun texte oublié', () => {
     for (const mode of ['simple', 'avance']) {
       app.setCfg({ mode, onb: { statut: 'micro', canal: 'both', obj: 'comp' } }, true);
       nav.go('tools'); await tick(20);
-      document.querySelector('#tv [data-moretools="1"]')?.click();
       for (const k of tools.TOOLS.map(x => x.k).concat(['treso', 'rapport', 'calcom', 'planning', 'defis', 'importo', 'lives', 'cohortes', 'help', 'news', 'idee', 'wrapped'])) {
         if (k === 'scan' || k === 'live') continue;
         try { await app.openTool(k); } catch (e) { /* un outil qui échoue sera vu par les autres tests */ }

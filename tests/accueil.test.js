@@ -14,38 +14,35 @@ describe('mode simple et avancé', () => {
     expect(app.toolsView().list).toHaveLength(TOOLS.length);
   });
 
-  it('mode simple : 8 outils sans doublon, le reste derrière « Plus d\'outils »', async () => {
+  it('mode simple : 6 outils choisis sans doublon, tous les outils restent dans la liste', async () => {
     const { TOOLS } = await import('../src/modules/tools-index.js');
     cfg({ mode: 'simple', onb: { statut: 'part', canal: 'vinted', obj: 'comp' } });
-    const v = app.toolsView();
-    expect(v.list).toHaveLength(8);
-    expect(new Set(v.list.map(x => x.k)).size).toBe(8);
-    expect(v.foot).toContain('data-moretools="1"');
-    expect(v.foot).toContain(`(${TOOLS.length - 8})`);
-    expect(v.list.map(x => x.k)).not.toContain('live');
-    expect(v.list.map(x => x.k)).not.toContain('fisc');
+    const E = app.essentials();
+    expect(E).toHaveLength(6);
+    expect(new Set(E).size).toBe(6);
+    expect(app.toolsView().list).toHaveLength(TOOLS.length);
+    expect(E).not.toContain('live');
+    expect(E).not.toContain('fisc');
   });
 
   it('le profil choisit les outils : micro-entrepreneur et TikTok', async () => {
     cfg({ mode: 'simple', onb: { statut: 'micro', canal: 'both', obj: 'vivre' } });
-    const k = app.toolsView().list.map(x => x.k);
-    expect(k).toEqual(expect.arrayContaining(['fisc', 'live']));
-    expect(k).toHaveLength(8);
+    expect(app.essentials()).toEqual(expect.arrayContaining(['fisc', 'live']));
+    expect(app.essentials()).toHaveLength(6);
   });
 
-  it('l\'onglet Outils affiche 8 outils puis tout au clic sur « Plus d\'outils »', async () => {
+  it('l\'onglet Outils : 6 grandes tuiles, puis tous les autres en liste compacte, dans les deux modes', async () => {
     const { TOOLS, openTools } = await import('../src/modules/tools-index.js');
     openTools();
     expect(app.view).toBe('tools');
-    expect(document.querySelectorAll('#tv .tool')).toHaveLength(8);
-    document.querySelector('#tv [data-moretools="1"]').click();
-    expect(document.querySelectorAll('#tv .tool')).toHaveLength(TOOLS.length);
+    expect(document.querySelectorAll('#tv .tool')).toHaveLength(6);
+    expect(document.querySelectorAll('#tv .tool2')).toHaveLength(TOOLS.length - 6);
     document.querySelector('#tv [data-mode="avance"]').click();
     expect(app.cfg.mode).toBe('avance');
-    expect(document.querySelectorAll('#tv .tool')).toHaveLength(TOOLS.length);
+    expect(document.querySelectorAll('#tv .tool')).toHaveLength(6);
+    expect(document.querySelectorAll('#tv .tool, #tv .tool2')).toHaveLength(TOOLS.length);
   });
 });
-
 describe('écran « Aujourd\'hui »', () => {
   it('montre 4 cases, cohérentes avec le stock', async () => {
     const { todayData, todayHTML } = await import('../src/modules/simple-mode.js');
