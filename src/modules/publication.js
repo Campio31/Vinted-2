@@ -62,6 +62,6 @@ function nextAction(){const st=app.P.filter(avail),u=st.filter(x=>!ok(x.pub)).le
  if(!hasGoal)return{txt:t('Fixe un objectif du mois pour suivre ta progression')};
  if(inc)return{txt:t('Complète {n} fiches en 2 minutes',{n:Math.min(10,inc)})};
  return{txt:t('Ton plan de la semaine en 30 secondes')}}
-function gamCardHTML(){const st=streakInfo(),done=badgeList().filter(b=>b.ok).length,u=app.P.filter(unpub).length;
+function gamCardHTML(){const st=streakInfo(),done=app.trophyTiers?app.trophyTiers():0,u=app.P.filter(unpub).length;
  const sub=st.today?t('Publié aujourd\'hui'):st.n?t('Publie une pièce pour continuer'):u?t('Publie {n} pièces pour démarrer ta série',{n:Math.min(5,u)}):t('Publie une pièce pour démarrer ta série');
- return`<button type="button" class="card minic" ${!st.n&&u?'data-topub="1"':'data-tool="trophees"'}><span class="l">${t('série de publication')}</span><b><span class="flm sm${st.n?' on':''}">${FLAME}</span> ${st.n} <small>${tn(st.n,'jour','jours')} · ${tn(done,'badge','badges')}</small></b><span class="mini-s">${sub}</span></button>`}
+ return`<button type="button" class="card minic" ${!st.n&&u?'data-topub="1"':'data-tool="trophees"'}><span class="l">${t('série de publication')}</span><b><span class="flm sm${st.n?' on':''}">${FLAME}</span> ${st.n} <small>${tn(st.n,'jour','jours')} · ${tn(done,'palier','paliers')}</small></b><span class="mini-s">${sub}</span></button>`}

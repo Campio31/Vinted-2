@@ -63,4 +63,4 @@ async function pushSync(force){if(!pushIsOn()||!app.user||app.importing||!app.lo
  const{error}=await app.sb.rpc('set_push_schedule',{items});if(error)throw error;LSs('pushLast',k);
  if(!sessionStorage.getItem('pushChk')){sessionStorage.setItem('pushChk','1');const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub)await pushSave(sub)}}
 async function pushTest(){if(!app.user)throw new Error(t('Connecte-toi d\'abord.'));const{error}=await app.sb.from('push_queue').insert({user_id:app.user.id,tag:'test:'+Date.now(),send_at:new Date().toISOString(),title:'Max',body:t('Test réussi : tu recevras tes rappels même appli fermée.')});if(error)throw error}
-let xT=null;function kickExtra(){clearTimeout(xT);xT=setTimeout(()=>{if(pushIsOn())pushSync().catch(()=>{});if(typeof app.amisPublish==='function')app.amisPublish().catch(()=>{})},4000)}
+let xT=null;function kickExtra(){clearTimeout(xT);xT=setTimeout(()=>{if(pushIsOn())pushSync().catch(()=>{});if(typeof app.amisPublish==='function')app.amisPublish().catch(()=>{});if(typeof app.rangPublish==='function')app.rangPublish().catch(()=>{})},4000)}

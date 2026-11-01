@@ -3,7 +3,7 @@ import { $, LSg, LSs, esc, today } from './core.js';
 import { cloud, errMsg } from './sync.js';
 import { sheetHead, showSheet } from './tools-index.js';
 import { MOIS } from './gamification.js';
-import { defiProg, openDefis } from './challenges.js';
+import { defiProg } from './challenges.js';
 
 app.amisPublish = amisPublish;
 app.amisInit = amisInit;
@@ -25,11 +25,11 @@ async function amisInit(){const b=$('am_in');if(!b)return;
   <div class="row2 fld"><div><label class="l" for="am_code">${t('Rejoindre avec un code')}</label><input type="text" id="am_code" maxlength="6" placeholder="ABC234" autocapitalize="characters"></div><div style="align-self:end"><button type="button" class="btn sec" data-am="join">${t('Rejoindre')}</button></div></div>
   <div class="hint">${t('Seuls ton pseudo, ton nombre de pièces publiées et de ventes du mois sont partagés, jamais tes prix ni ton stock.')}</div></div>`}
 async function amisClick(e){const t=e.target.closest('[data-am]'),a=t.dataset.am;
- if(a==='back')return openDefis();
+ if(a==='back')return app.openDefis();
  if(a==='view')return openClassement(t.dataset.g);
  if(a==='sort'){amisSort=t.dataset.s;return openClassement(t.dataset.g)}
  if(a==='copy'){try{await navigator.clipboard.writeText(t.dataset.t);app.toast(window.t('Code copié'))}catch(er){app.toast(t.dataset.t)}return}
- if(a==='leave'){if(!confirm(window.t('Quitter ce groupe ?')))return;try{const{error}=await app.sb.from('amis_membres').delete().eq('groupe_id',t.dataset.g).eq('user_id',app.user.id);if(error)throw error}catch(er){return app.toast(amisErr(er))}return openDefis()}
+ if(a==='leave'){if(!confirm(window.t('Quitter ce groupe ?')))return;try{const{error}=await app.sb.from('amis_membres').delete().eq('groupe_id',t.dataset.g).eq('user_id',app.user.id);if(error)throw error}catch(er){return app.toast(amisErr(er))}return app.openDefis()}
  const ps=($('am_ps').value||'').trim();if(!ps)return app.toast(window.t('Choisis un pseudo'));LSs('amisPseudo',ps);
  try{let r;if(a==='new'){const n=($('am_nom').value||'').trim();if(!n)return app.toast(window.t('Donne un nom au groupe'));r=await app.sb.rpc('creer_groupe',{p_nom:n,p_pseudo:ps})}
   else{const c=($('am_code').value||'').trim();if(!c)return app.toast(window.t('Entre le code reçu'));r=await app.sb.rpc('rejoindre_groupe',{p_code:c,p_pseudo:ps})}

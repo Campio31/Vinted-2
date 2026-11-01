@@ -11,7 +11,7 @@ export const TI=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 export const TOOLS=[
  {k:'coach',t:'Coach du lundi',d:'Ton plan de la semaine en 30 secondes',i:TI('<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m4 6 5-3 5 4 6-4"/>')},
  {k:'qr',t:'Scanner QR et étiquettes',d:'Scanne une pièce, imprime des étiquettes, range dans un bac',i:TI('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM19 17v3h-3"/>')},
- {k:'trophees',t:'Défis et trophées',d:'Niveau, défi du mois, série de publication, badges et classement entre amis',i:TI('<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8"/>')},
+ {k:'trophees',t:'Défis, cartes et trophées',d:'Défis de la semaine et du mois, cartes à collectionner, trophées à paliers et classement',i:TI('<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8"/>')},
  {k:'fisc',t:'Ligne fiscale',d:'Plafond micro-entrepreneur, alerte et déclaration URSSAF',i:TI('<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/>')},
  {k:'complete',t:'Compléter les fiches',d:'Fiches sans grade, état ou code, 10 à la suite',i:TI('<path d="M5 12l4.5 4.5L19 7"/>')},
  {k:'merge',t:'Nettoyer les doublons',d:'Fusionne Aucun et Aucune, Brooks Brother et Brooks Brothers',i:TI('<path d="M6 4v5a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4v3M6 20v-3M18 4v5"/>')},
