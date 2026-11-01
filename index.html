@@ -58,6 +58,7 @@
    <div class="card" id="lgc"></div>
    <div class="card" id="thc"></div>
    <div class="card" id="cfgc"></div>
+   <div class="card" id="cptc"></div>
    <h2 class="shd">Mes données</h2>
    <div class="card" id="bkc"></div>
    <div class="card" id="inst" hidden>
@@ -65,24 +66,25 @@
     <p class="sub" id="insth">Ajoute l'appli à ton écran d'accueil ou à ton bureau pour l'ouvrir comme une application, même sans connexion.</p>
     <div class="acts"><button class="btn" id="instb" type="button">Installer</button></div>
    </div>
-   <div class="card">
-    <h3>Exporter</h3>
-    <p class="sub">Un classeur Excel avec trois onglets : Stock, Ventes (bénéfice calculé par formule) et Résumé.</p>
-    <div class="acts"><button class="btn" id="xx" type="button">Télécharger l'Excel</button><button class="btn sec" id="xj" type="button">Sauvegarde complète avec photos (JSON)</button></div>
-    <div class="hint" id="xs"></div>
-   </div>
-   <div class="card">
-    <h3>Importer ou restaurer</h3>
-    <p class="sub">Choisis une sauvegarde JSON faite ici ou dans ton ancienne appli (liste « pieces »). Les pièces de même identifiant sont remplacées, les autres sont ajoutées. Les photos sont reprises quand la sauvegarde vient de cette appli.</p>
-    <label class="l" for="imp">Fichier de sauvegarde</label><input type="file" id="imp" accept=".json,application/json">
-    <label class="l" for="impt" style="margin-top:14px">Ou colle le JSON</label>
-    <textarea id="impt" placeholder='{"pieces":[{"id":"i0001","cat":"Short","marque":"Nike","achat":4.5,"statut":"Disponible"}]}' style="font-family:ui-monospace,Consolas,monospace;font-size:13px"></textarea>
-    <div class="acts two"><button class="btn" id="impb" type="button">Importer le texte</button><button class="btn sec" id="impm" type="button">Télécharger un modèle</button></div>
-    <div class="acts"><button class="btn sec" id="impo" type="button">Importer depuis Excel ou CSV…</button></div>
-    <div class="hint" id="is"></div>
-   </div>
-   <div class="card" id="exc"></div>
-   <h2 class="shd">Aide et informations</h2>
+   <div class="card xic" id="xic">
+    <h3>Exporter et importer</h3>
+    <p class="sub">Emporte tes données ou reprends-les depuis un fichier.</p>
+    <div class="xblk">
+     <div class="xh"><span class="tic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span><div><b>Exporter</b><small>Un classeur Excel (Stock, Ventes, Résumé) ou une sauvegarde complète avec les photos.</small></div></div>
+     <div class="acts two"><button class="btn" id="xx" type="button">Télécharger l'Excel</button><button class="btn sec" id="xj" type="button">Sauvegarde complète (JSON)</button></div>
+     <div class="hint" id="xs"></div>
+    </div>
+    <div class="xblk">
+     <div class="xh"><span class="tic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg></span><div><b>Importer</b><small>Une sauvegarde JSON faite ici ou dans ton ancienne appli, ou un fichier Excel ou CSV. Les pièces de même identifiant sont remplacées, les autres sont ajoutées.</small></div></div>
+     <div class="acts two"><label class="btn" for="imp">Choisir une sauvegarde</label><button class="btn sec" id="impo" type="button">Excel ou CSV…</button></div>
+     <input type="file" id="imp" accept=".json,application/json" hidden>
+     <details class="xdet"><summary>Coller du JSON à la place</summary>
+      <textarea id="impt" aria-label="JSON" placeholder='{"pieces":[{"id":"i0001","cat":"Short","marque":"Nike","achat":4.5,"statut":"Disponible"}]}' style="font-family:ui-monospace,Consolas,monospace;font-size:13px"></textarea>
+      <div class="acts two"><button class="btn" id="impb" type="button">Importer le texte</button><button class="btn sec" id="impm" type="button">Télécharger un modèle</button></div>
+     </details>
+     <div class="hint" id="is"></div>
+    </div>
+   </div>   <h2 class="shd">Aide et informations</h2>
    <div class="card" id="abo"></div>
   </section>
  </main>
