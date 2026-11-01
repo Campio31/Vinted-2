@@ -66,6 +66,7 @@ import './modules/vintage.js';
 import './modules/dash-custom.js';
 import './modules/rapports.js';
 import './modules/filters.js';
+import './modules/settings-extra.js';
 import './modules/settings-fold.js';
 import './modules/branding.js';
 import './modules/comfort.js';
