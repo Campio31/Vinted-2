@@ -2,7 +2,7 @@ import { app } from '../state.js';
 import { $, LSg, LSs, esc, eur, fd, ok, pad, title, today } from './core.js';
 import { TI, TOOLS, sheetHead, showSheet } from './tools-index.js';
 import { MOIS } from './gamification.js';
-import { lastDay } from './fiscal.js';
+import { lastDay, oldestDate, periodsList } from './fiscal.js';
 import { finDate, pendingSales } from './finalisation.js';
 
 /* ---------- Rapports PDF : ventes du mois et rapport fiscal ---------- */
@@ -16,25 +16,12 @@ const mark = '<svg viewBox="0 0 104 104" width="34" height="34"><rect width="104
 
 /* --- périodes proposées pour le rapport fiscal --- */
 export function fiscPeriods(kind) {
-  const d = new Date(), y = d.getFullYear(), m = d.getMonth() + 1, out = [];
   if (kind === 'Y') {
-    for (let i = 0; i < 3; i++) out.push({ key: 'Y' + (y - i), label: String(y - i), start: `${y - i}-01-01`, end: `${y - i}-12-31`, due: '' });
-  } else if (kind === 'T') {
-    let q = Math.ceil(m / 3), yy = y;
-    for (let i = 0; i < 6; i++) {
-      const sm = (q - 1) * 3 + 1, em = sm + 2;
-      out.push({ key: yy + '-T' + q, label: t('T') + q + ' ' + yy, start: `${yy}-${pad(sm, 2)}-01`, end: `${yy}-${pad(em, 2)}-${lastDay(yy, em)}`, due: q === 4 ? `${yy + 1}-01-31` : `${yy}-${pad(em + 1, 2)}-${lastDay(yy, em + 1)}` });
-      q--; if (q === 0) { q = 4; yy--; }
-    }
-  } else {
-    let mm = m, yy = y;
-    for (let i = 0; i < 12; i++) {
-      const nm = mm === 12 ? 1 : mm + 1, ny = mm === 12 ? yy + 1 : yy;
-      out.push({ key: yy + '-' + pad(mm, 2), label: MOIS[mm - 1] + ' ' + yy, start: `${yy}-${pad(mm, 2)}-01`, end: `${yy}-${pad(mm, 2)}-${lastDay(yy, mm)}`, due: `${ny}-${pad(nm, 2)}-${lastDay(ny, nm)}` });
-      mm--; if (mm === 0) { mm = 12; yy--; }
-    }
+    const y = new Date().getFullYear(), y0 = +oldestDate().slice(0, 4), out = [];
+    for (let yy = y; yy >= y0 && out.length < 12; yy--) out.push({ key: 'Y' + yy, label: String(yy), start: `-01-01`, end: `-12-31`, due: '' });
+    return out;
   }
-  return out;
+  return periodsList(kind === 'T' ? 'T' : 'M');
 }
 
 /** Ventes finalisées dans la période, séparées entre comptes pris en compte et comptes exclus. */

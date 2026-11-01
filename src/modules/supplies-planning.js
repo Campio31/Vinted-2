@@ -6,6 +6,7 @@ import { unpub } from './publication.js';
 import { ldate } from './proofs.js';
 import { hh } from './reminders.js';
 import { r2 } from './buyers.js';
+import { openWizard } from './wizard.js';
 
 app.suppliesUse = suppliesUse;
 
@@ -22,12 +23,12 @@ export function openFourn(sel){let rs=false;const draw=()=>{const L=fournList(),
  <div class="row2 fld"><div><label class="l" for="fo_c">${t('Prix à l\'unité')}</label><div class="price"><input type="text" inputmode="decimal" id="fo_c" value="${e&&e.c?e.c:''}"><span>€</span></div></div><div><label class="l" for="fo_u">${t('Utilisé par colis')}</label><input type="text" inputmode="decimal" id="fo_u" value="${e&&e.u?e.u:''}" placeholder="1"></div></div>
  <div class="hint">${t('Si « utilisé par colis » est rempli, le stock baisse tout seul à chaque vente et le coût réel du colis est calculé.')}</div></div>
  <div class="acts"><button type="button" class="btn mint" id="fo_ok">${t('Enregistrer')}</button>${e?`<button type="button" class="btn red" id="fo_del">${t('Supprimer')}</button>`:''}<button type="button" class="btn sec" id="fo_no">${t('Retour')}</button></div>`:
- `<div class="card"><div class="kpis two" style="margin:0"><div class="kpi"><b>${eur(cost)}</b><span>${t('coût réel d\'un colis')}</span></div><div class="kpi"><b>${eur(app.cfg.emb||0)}</b><span>${t('frais d\'emballage dans tes réglages')}</span></div></div>${cost>0&&Math.abs(cost-(app.cfg.emb||0))>.005?`<div class="acts"><button type="button" class="btn sm sec" id="fo_use">${t('Utiliser {c} comme frais d\'emballage',{c:eur(cost)})}</button></div>`:''}</div>
+ `<div class="acts" style="margin:0 0 10px"><button type="button" class="btn mint" id="fq_go">${t(L.length?'Refaire le questionnaire':'Répondre au questionnaire')}</button></div><div class="card"><div class="kpis two" style="margin:0"><div class="kpi"><b>${eur(cost)}</b><span>${t('coût réel d\'un colis')}</span></div><div class="kpi"><b>${eur(app.cfg.emb||0)}</b><span>${t('frais d\'emballage dans tes réglages')}</span></div></div>${cost>0&&Math.abs(cost-(app.cfg.emb||0))>.005?`<div class="acts"><button type="button" class="btn sm sec" id="fo_use">${t('Utiliser {c} comme frais d\'emballage',{c:eur(cost)})}</button></div>`:''}</div>
  ${fournLow().length?`<div class="cl cl-o" style="margin-bottom:12px"><i></i><div><b>${t('À racheter')}</b><span>${fournLow().map(f=>esc(f.n)+' ('+f.q+')').join(' · ')}</span></div></div>`:''}
  ${L.map(f=>`<div class="fxr"><button type="button" class="li" data-fe="${esc(f.id)}" style="margin:0;flex:1"><div class="m"><b>${esc(f.n)}</b><small>${f.c?eur(f.c)+' '+t('l\'unité'):''}${f.u?' · '+t('{u} par colis',{u:f.u}):''}${f.s?' · '+t('{x} utilisés',{x:f.s}):''}</small></div><div class="p ${fournLow().includes(f)?'b':''}">${f.q}<small>${t('en stock')}</small></div></button><button type="button" class="chip sm" data-fr="${esc(f.id)}">+ ${t('Racheté')}</button></div>`).join('')||`<div class="empty" style="padding:14px 8px">${t('Ajoute tes sachets, cartons, scotch et étiquettes.')}</div>`}
  <div class="acts"><button type="button" class="btn" id="fo_new">${t('Ajouter une fourniture')}</button></div>`));
  const go1=id=>{sel=id;draw()};
- $('shc').onclick=e=>{const b=e.target.closest('[data-fe]');if(b)return go1(b.dataset.fe);const r=e.target.closest('[data-fr]');if(r){sel=r.dataset.fr;rs=true;return draw()}
+ $('shc').onclick=e=>{if(e.target.closest('#fq_go'))return openFournQ();const b=e.target.closest('[data-fe]');if(b)return go1(b.dataset.fe);const r=e.target.closest('[data-fr]');if(r){sel=r.dataset.fr;rs=true;return draw()}
   if(e.target.closest('#fo_rok')){const f=fournList().find(x=>x.id===sel),n=num($('fo_rq').value),tot=num($('fo_rp').value);if(!f||isNaN(n)||n<=0)return app.toast(t('Indique la quantité'));const nf=Object.assign({},f,{q:r2((+f.q||0)+n)});if(!isNaN(tot)&&tot>0)nf.c=r2((((+f.q||0)*(+f.c||0))+tot)/((+f.q||0)+n));app.setCfg({fourn:fournList().map(x=>x.id===sel?nf:x)});sel=null;rs=false;app.toast(t('Stock mis à jour'));return draw()}
   if(e.target.closest('#fo_new'))return go1('new');if(e.target.closest('#fo_no')){sel=null;rs=false;return draw()}
   if(e.target.closest('#fo_use')){app.setCfg({emb:r2(colisCost())});app.toast(t('Frais d\'emballage mis à jour'));return draw()}
@@ -65,3 +66,15 @@ export function openPlanning(){let ed=null;const draw=()=>{const dn=planCounts()
   if(e.target.closest('#pl_del')){app.setCfg({plan:planList().filter(x=>x.id!==ed.id)});ed=null;return draw()}
   if(e.target.closest('#pl_ok')){const o=Object.assign({},ed,{h:$('pl_h').value,n:$('pl_n').value.trim()});if(!o.id)o.id='s'+Date.now().toString(36);app.setCfg({plan:ed.id?planList().map(x=>x.id===o.id?o:x):[...planList(),o]});ed=null;draw()}}};draw()}
 const rappelsList24=app.rappelsList;app.rappelsList=function(){const R=rappelsList24();try{const f=fournLow();if(f.length)R.push({k:'fourn',tone:'o',txt:t('Plus que {q} {n}',{q:f[0].q,n:f[0].n}),tool:'fourn'});const pc=planCounts();if(pc.n)R.push({k:'plan',tone:pc.d>=pc.n?'g':'o',txt:t('Planning du jour : {d} sur {n} faites',{d:pc.d,n:pc.n}),tool:'planning'})}catch(e){}return R};
+/* --- questionnaire des fournitures : choisis ce que tu utilises, puis règle le stock de chaque article (refaisable à tout moment) --- */
+const FQ_ITEMS=[['sachets','Sachets d\'expédition'],['cartons','Cartons'],['scotch','Rouleaux de scotch'],['etiq','Étiquettes d\'envoi'],['papier','Papier de soie ou kraft'],['zip','Sachets zip'],['cintres','Cintres'],['cartes','Cartes de remerciement']];
+export function openFournQ(){
+ const cur=fournList(),a0=Object.assign({},app.cfg.fournQ||{});
+ if(!a0.items)a0.items=FQ_ITEMS.filter(([k])=>cur.some(f=>f.id==='q-'+k)).map(([k])=>k);
+ a0.det=a0.det||{};cur.forEach(f=>{if(String(f.id).startsWith('q-'))a0.det[f.id.slice(2)]={q:f.q,c:f.c,u:f.u,seuil:f.seuil}});
+ openWizard({title:'Fournitures',intro:'Quelques questions sur ce que tu utilises pour tes colis. Max suit ensuite le stock, l\'alerte de rachat et le coût réel d\'un colis. Tu peux refaire le questionnaire à tout moment.',answers:a0,
+  steps:[{k:'items',type:'multi',q:'Quelles fournitures utilises-tu ?',h:'Choisis tout ce que tu utilises pour emballer.',o:FQ_ITEMS,need:a=>(a.items||[]).length>0,needMsg:'Choisis au moins une fourniture'},
+   {k:'det',type:'table',q:'Où en es-tu pour chacune ?',h:'Laisse vide ce que tu ne sais pas. « Utilisé par colis » fait baisser le stock tout seul à chaque vente.',items:a=>FQ_ITEMS.filter(([k])=>(a.items||[]).includes(k)).map(([k,l])=>({k,l})),cols:[{k:'q',l:'En stock'},{k:'c',l:'Prix à l\'unité',u:'€'},{k:'u',l:'Utilisé par colis'},{k:'seuil',l:'Alerte à partir de'}]}],
+  onDone:a=>{const chosen=a.items||[],keep=cur.filter(f=>!String(f.id).startsWith('q-')||chosen.includes(String(f.id).slice(2))),out=keep.filter(f=>!String(f.id).startsWith('q-'));
+   chosen.forEach(k=>{const l=FQ_ITEMS.find(x=>x[0]===k),d=(a.det||{})[k]||{},old=cur.find(f=>f.id==='q-'+k);out.push(Object.assign({},old||{},{id:'q-'+k,n:t(l[1]),q:+d.q||0,c:+d.c||0,u:+d.u||0,seuil:+d.seuil||0}))});
+   app.setCfg({fourn:out,fournQ:a});app.toast(t('Fournitures mises à jour'));app.renderAll();openFourn()}})}

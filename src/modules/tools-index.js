@@ -18,8 +18,7 @@ export const TOOLS=[
  {k:'depenses',t:'Dépenses',d:'Carburant, matériel, cintres, abonnements, avec photo du ticket',i:TI('<path d="M5 4h14v17l-3-2-2 2-2-2-2 2-2-2-3 2zM9 9h6M9 13h6"/>')},
  {k:'trash',t:'Corbeille',d:'Récupère une pièce supprimée par erreur (30 jours)',i:TI('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>')},
  {k:'wrapped',t:'Wrapped',d:'Ton récap du mois ou de l\'année, à partager en story',i:TI('<path d="M12 3l2.5 5.5 6 .7-4.5 4 1.3 6L12 16.3 6.7 19.2 8 13.2 3.5 9.2l6-.7z"/>')},
- {k:'rappels',t:'Rappels et notifications',d:'Colis à déposer, live prévu, temps forts',i:TI('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>')},
- {k:'aide',t:'Aide et raccourcis',d:'Réponses, raccourcis clavier, nouveautés et idées',i:TI('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"/>')}];
+ {k:'rappels',t:'Rappels et notifications',d:'Colis à déposer, live prévu, temps forts',i:TI('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>')}];
 /* L'onglet Outils (view v-tools). Le mode simple (simple-mode.js) fournit app.toolsView : outils à montrer, plus l'en-tête et le pied de la liste */
 export function renderTools(){const v=app.toolsView?app.toolsView():{list:TOOLS,head:'',foot:''};$('tv').innerHTML=v.head+`<div class="tools">${v.list.map(x=>`<button type="button" class="tool" data-tool="${x.k}"><span class="tic">${x.i}</span><span class="tx"><b>${t(x.t)}</b><small>${t(x.d)}</small></span></button>`).join('')}</div>`+v.foot}
 app.renderTools=renderTools;

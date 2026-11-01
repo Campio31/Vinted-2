@@ -1,5 +1,5 @@
 import { app } from '../state.js';
-import { $, LSg, LSs, esc, eur, sold, title, today } from './core.js';
+import { $, LSg, LSs, addDays, esc, eur, fd, ok, sold, title, today } from './core.js';
 import { sheetHead, showSheet } from './tools-index.js';
 
 app.openColis = openColis;
@@ -14,11 +14,19 @@ export function colisList() {
 }
 
 let mode = LSg('colisMode', 'bac');
+let day = ''; /* filtre par jour de vente ('' = tous les jours) */
+const dayOf = p => ok(p.dv) ? p.dv : today();
+/** Les colis à préparer du jour choisi. */
+export function colisDay() { const C = colisList(); return day ? C.filter(p => dayOf(p) === day) : C; }
+const dayLabel = d => d === today() ? t('Aujourd\'hui') : d === addDays(today(), -1) ? t('Hier') : new Date(d + 'T12:00:00').toLocaleDateString(app.LOC, { weekday: 'short' }) + ' ' + fd(d).slice(0, 5);
 
 /** Corps de l'outil : liste des colis, par bac ou par acheteur. */
 export function colisBody() {
-  const C = colisList();
-  const head = `<p class="sub" style="margin:0 0 10px">${t('Les pièces vendues dont le colis n\'est pas encore parti. Touche « Prêt » quand le colis est emballé.')}</p>` +
+  const all = colisList(), days = [...new Set(all.map(dayOf))].sort().reverse();
+  if (day && !days.includes(day)) day = '';
+  const C = colisDay();
+  const dayBar = days.length > 1 ? `<div class="chips colj" style="margin-bottom:10px"><button type="button" class="chip sm${day === '' ? ' on' : ''}" data-cd="">${t('Tous les jours')} · ${all.length}</button>${days.map(d => `<button type="button" class="chip sm${day === d ? ' on' : ''}" data-cd="${d}">${esc(dayLabel(d))} · ${all.filter(p => dayOf(p) === d).length}</button>`).join('')}</div>` : '';
+  const head = `<p class="sub" style="margin:0 0 10px">${t('Les pièces vendues dont le colis n\'est pas encore parti. Touche « Prêt » quand le colis est emballé.')}</p>` + dayBar +
     (C.length ? `<div class="chips" style="margin-bottom:10px"><button type="button" class="chip sm${mode === 'bac' ? ' on' : ''}" data-cm="bac">${t('Par bac')}</button><button type="button" class="chip sm${mode === 'buyer' ? ' on' : ''}" data-cm="buyer">${t('Par acheteur')}</button></div>` : '');
   if (!C.length) return head + '<div class="empty" style="padding:14px 8px">' + t('Rien à préparer. Les ventes faites dans l\'appli apparaissent ici.') + '</div>';
   if (mode === 'bac') {
@@ -35,6 +43,8 @@ export function openColis() {
   showSheet(sheetHead(t('Colis à préparer')) + '<div class="card" id="colb"></div>');
   draw();
   $('shc').onclick = e => {
+    const cd = e.target.closest('[data-cd]');
+    if (cd) { day = cd.dataset.cd; draw(); return; }
     const cm = e.target.closest('[data-cm]');
     if (cm) { mode = cm.dataset.cm; LSs('colisMode', mode); draw(); return; }
     const pr = e.target.closest('[data-prep]');
@@ -45,7 +55,7 @@ export function openColis() {
     }
     const col = e.target.closest('[data-col]');
     if (col) {
-      const k = col.dataset.col, L = colisList().filter(p => (p.acheteur || '') === k), old = L.map(p => Object.assign({}, p));
+      const k = col.dataset.col, L = colisDay().filter(p => (p.acheteur || '') === k), old = L.map(p => Object.assign({}, p));
       L.forEach(p => app.save(Object.assign({}, p, { exp: today() })));
       draw(); app.toast(k ? t('Colis prêt pour @{k}', { k }) : t('Colis prêt'), () => { old.forEach(p => app.save(p)); draw(); });
     }

@@ -22,8 +22,9 @@ function mergeSuggestions(f){const m=valCounts(f),vals=[...m.entries()],out=[],u
   if(ka===kb||vkey(a)===vkey(b)&&vkey(a).length>=4)why=t('même mot (casse ou pluriel)');else if(['marque','collab','prov'].includes(f)&&!/\d/.test(a+b)&&Math.min(ka.length,kb.length)>=6&&lev(ka,kb)<=(Math.min(ka.length,kb.length)>=9?2:1)&&Math.abs(ka.length-kb.length)<=2)why=t('orthographe proche');
   if(why){const [fr,to,fc,tc]=ca>=cb?[b,a,cb,ca]:[a,b,ca,cb];out.push({from:fr,to,fc,tc,why})}}
  return out.sort((a,b)=>b.fc+b.tc-(a.fc+a.tc))}
-function mergeValues(f,from,to){const L=app.P.filter(p=>p[f]===from);if(!L.length)return 0;const old=L.map(p=>Object.assign({},p));
- L.forEach(p=>{if(to==='')delete p[f];else p[f]=to});const ids=L.map(p=>p.id),al=JSON.parse(JSON.stringify(app.cfg.alias||{}));al[f]=al[f]||{};al[f][nrm(from)]=to;app.setCfg({alias:al});
+export function mergeValues(f,from,to){const L=app.P.filter(p=>p[f]===from);if(!L.length)return 0;const old=L.map(p=>Object.assign({},p));
+ /* le code d'une pièce ne change jamais à cause d'une fusion : on le garde tel quel, même si la marque ou la catégorie change d'orthographe */
+ L.forEach(p=>{const code=p.code;if(to==='')delete p[f];else p[f]=to;if(code===undefined)delete p.code;else p.code=code});const ids=L.map(p=>p.id),al=JSON.parse(JSON.stringify(app.cfg.alias||{}));al[f]=al[f]||{};al[f][nrm(from)]=to;app.setCfg({alias:al});
  app.renderAll();persist(async()=>{await tx('pieces','readwrite',s=>{L.forEach(p=>s.put(p))});await queueMany(ids,[])});
  app.toast(t('{n} : « {a} » devient {b}',{n:tn(L.length,'fiche','fiches'),a:from,b:to===''?t('vide'):'« '+to+' »'}),()=>{old.forEach(o=>{const i=app.P.findIndex(p=>p.id===o.id);if(i>=0)app.P[i]=o});app.renderAll();persist(async()=>{await tx('pieces','readwrite',s=>{old.forEach(p=>s.put(p))});await queueMany(ids,[])});const a2=JSON.parse(JSON.stringify(app.cfg.alias||{}));if(a2[f])delete a2[f][nrm(from)];app.setCfg({alias:a2})},7000);return L.length}
 function openMerge(){let f=LSg('mergeField','marque');

@@ -4,6 +4,10 @@ import { stats } from './dashboard.js';
 import { goalCalc, goalKinds } from './goals.js';
 import { sheetHead, showSheet } from './tools-index.js';
 import { pseudoKey } from './buyers.js';
+import { CFG0 } from './settings-core.js';
+import { openWizard } from './wizard.js';
+
+Object.assign(CFG0,{seuilQ:null,fournQ:null});
 
 /* ===== v24 b : analyses (live, cohortes, tranches, courbe, seuil) ===== */
 const pctF=v=>Math.round(v*100)+' %';
@@ -67,22 +71,31 @@ export function seuilCalc(){const F=fixesMois(),A=apportsMois(),Fn=Math.max(0,F-
  return{F,A,Fn,per,need,needSans,M,rate:S.n/90*30,reached:M.ben>=Fn,left:Math.max(0,Fn-M.ben)}}
 function seuilBody(){const c=seuilCalc();
  return`<div class="fxl">${fixesList().map((f,i)=>`<div class="fxr"><span>${esc(f.n)}<small>${f.p==='A'?t('par an'):t('par mois')}</small></span><b>${eur(f.v)}</b><button type="button" class="chip sm" data-fxd="${i}" aria-label="${t('Supprimer')}">✕</button></div>`).join('')||`<p class="sub" style="margin:0 0 8px">${t('Ajoute tes frais fixes : abonnements, matériel (photo, cintres), forfait téléphone.')}</p>`}</div>
- <div class="row2" style="margin-top:8px"><input type="text" id="fx_n" placeholder="${t('Nom (ex. abonnement)')}" autocomplete="off"><div class="price"><input type="text" inputmode="decimal" id="fx_v" placeholder="0"><span>€</span></div></div>
- <div class="chips" id="fx_p" style="margin:8px 0"><button type="button" class="chip sm on" data-fp="M">${t('par mois')}</button><button type="button" class="chip sm" data-fp="A">${t('par an')}</button><button type="button" class="btn sm sec" id="fx_add" style="width:auto;margin-left:auto;min-height:40px">${t('Ajouter')}</button></div>
+ <details class="xdet"><summary>${t('Ajouter ou ajuster à la main')}</summary><div class="row2" style="margin-top:8px"><input type="text" id="fx_n" placeholder="${t('Nom (ex. abonnement)')}" autocomplete="off"><div class="price"><input type="text" inputmode="decimal" id="fx_v" placeholder="0"><span>€</span></div></div>
+ <div class="chips" id="fx_p" style="margin:8px 0"><button type="button" class="chip sm on" data-fp="M">${t('par mois')}</button><button type="button" class="chip sm" data-fp="A">${t('par an')}</button><button type="button" class="btn sm sec" id="fx_add" style="width:auto;margin-left:auto;min-height:40px">${t('Ajouter')}</button></div></details>
  <h3 style="margin:18px 0 6px">${t('Apports')}</h3><p class="sub" style="margin:0 0 8px">${t('Aides ou versements qui couvrent une partie de tes frais fixes (par exemple une aide mensuelle). Ils font baisser le seuil.')}</p>
  <div class="fxl">${apportsList().map((x,i)=>`<div class="fxr"><span>${esc(x.n)}<small>${esc(apportTxt(x))}</small></span><b>${eur(x.v)}</b><button type="button" class="chip sm" data-apd="${i}" aria-label="${t('Supprimer')}">✕</button></div>`).join('')}</div>
- <div class="row2" style="margin-top:8px"><input type="text" id="ap_n" placeholder="${t('Nom (ex. aide mensuelle)')}" autocomplete="off"><div class="price"><input type="text" inputmode="decimal" id="ap_v" placeholder="0"><span>€</span></div></div>
+ <details class="xdet"><summary>${t('Ajouter ou ajuster à la main')}</summary><div class="row2" style="margin-top:8px"><input type="text" id="ap_n" placeholder="${t('Nom (ex. aide mensuelle)')}" autocomplete="off"><div class="price"><input type="text" inputmode="decimal" id="ap_v" placeholder="0"><span>€</span></div></div>
  <div class="chips" id="ap_k" style="margin:8px 0 4px"><button type="button" class="chip sm on" data-ak="M">${t('chaque mois')}</button><button type="button" class="chip sm" data-ak="U">${t('une fois')}</button></div>
  <div class="row2 fld"><div><label class="l" for="ap_d" id="ap_dl">${t('À partir de')}</label><input type="month" id="ap_d" value="${today().slice(0,7)}"></div><div id="ap_fw"><label class="l" for="ap_f">${t('Jusqu\'à (facultatif)')}</label><input type="month" id="ap_f"></div></div>
- <button type="button" class="btn sm sec" id="ap_add" style="margin-bottom:6px">${t('Ajouter l\'apport')}</button>
+ <button type="button" class="btn sm sec" id="ap_add" style="margin-bottom:6px">${t('Ajouter l\'apport')}</button></details>
  ${c.F?`<div class="kpis two" style="margin-top:12px"><div class="kpi"><b>${eurR(c.F)}</b><span>${t('frais fixes par mois')}</span></div><div class="kpi"><b>${c.need==null?'—':c.need}</b><span>${t('ventes pour couvrir')}</span></div></div>
  ${c.A?`<dl class="kv" style="margin:12px 0 0"><dt>${t('Apports ce mois-ci')}</dt><dd>− ${eur(c.A)}</dd><dt>${t('Reste à couvrir par tes ventes')}</dt><dd>${eur(c.Fn)}</dd>${c.needSans!=null&&c.needSans!==c.need?`<dt>${t('Seuil sans les apports')}</dt><dd>${tn(c.needSans,'vente','ventes')}</dd>`:''}</dl>`:''}
  <dl class="kv" style="margin:12px 0 0"><dt>${t('Bénéfice moyen par vente')}</dt><dd>${eur(c.per)}</dd><dt>${t('Ce mois-ci')}</dt><dd>${tn(c.M.n,'vente','ventes')} · ${eur(c.M.ben)}</dd><dt>${t('Ton rythme (90 jours)')}</dt><dd>${Math.round(c.rate)} ${t('ventes par mois')}</dd></dl>
  ${c.need==null?`<div class="hint">${t('Pas encore assez de ventes pour calculer un bénéfice moyen.')}</div>`:c.Fn===0?`<div class="cl cl-g" style="margin-top:12px"><i></i><div><b>${t('Tes apports couvrent déjà tes frais fixes')}</b><span>${t('Chaque vente est un bénéfice net pour toi ce mois-ci.')}</span></div></div>`:`<div class="cl cl-${c.reached?'g':'o'}" style="margin-top:12px"><i></i><div><b>${c.reached?t('Frais fixes couverts, tu gagnes de l\'argent'):t('À partir de la {n}e vente du mois, tu gagnes de l\'argent',{n:c.need})}</b><span>${c.reached?t('Marge de sécurité : {x}',{x:eur(c.M.ben-c.Fn)}):t('Il reste {x} à couvrir ce mois-ci, soit environ {n} ventes.',{x:eur(c.left),n:Math.ceil(c.left/c.per)})}</span></div></div><div class="hint" style="margin-top:8px">${c.rate<c.need?t('À ton rythme actuel ({r} ventes par mois), le seuil n\'est pas atteint.',{r:Math.round(c.rate)}):t('Ton rythme actuel couvre le seuil.')}</div>`}`:''}`}
-export function openSeuil(){const draw=()=>{showSheet(sheetHead(t('Seuil de rentabilité'))+`<div class="card" id="sl_b">${seuilBody()}</div>`);let per='M',ak='M';
- $('shc').onclick=e=>{const p=e.target.closest('[data-fp]');if(p){per=p.dataset.fp;$('fx_p').querySelectorAll('[data-fp]').forEach(x=>x.classList.toggle('on',x===p));return}const d=e.target.closest('[data-fxd]');if(d){app.setCfg({fixes:fixesList().filter((f,i)=>i!==+d.dataset.fxd)});return draw()}
+export function openSeuil(){const draw=()=>{showSheet(sheetHead(t('Seuil de rentabilité'))+`<div class="acts" style="margin:0 0 10px"><button type="button" class="btn mint" id="sq_go">${t(fixesList().length||apportsList().length?'Refaire le questionnaire':'Répondre au questionnaire')}</button></div><div class="card" id="sl_b">${seuilBody()}</div>`);let per='M',ak='M';
+ $('shc').onclick=e=>{if(e.target.closest('#sq_go'))return openSeuilQ();const p=e.target.closest('[data-fp]');if(p){per=p.dataset.fp;$('fx_p').querySelectorAll('[data-fp]').forEach(x=>x.classList.toggle('on',x===p));return}const d=e.target.closest('[data-fxd]');if(d){app.setCfg({fixes:fixesList().filter((f,i)=>i!==+d.dataset.fxd)});return draw()}
   const k=e.target.closest('[data-ak]');if(k){ak=k.dataset.ak;$('ap_k').querySelectorAll('[data-ak]').forEach(x=>x.classList.toggle('on',x===k));$('ap_fw').hidden=ak==='U';$('ap_dl').textContent=ak==='U'?t('Mois de l\'apport'):t('À partir de');return}
   const ad=e.target.closest('[data-apd]');if(ad){app.setCfg({apports:apportsList().filter((f,i)=>i!==+ad.dataset.apd)});return draw()}
   if(e.target.closest('#ap_add')){const n=$('ap_n').value.trim(),v=num($('ap_v').value),d=$('ap_d').value||today().slice(0,7),f=$('ap_f').value;if(!n||isNaN(v)||v<=0)return app.toast(t('Indique un nom et un montant'));if(ak==='M'&&f&&f<d)return app.toast(t('La fin doit être après le début'));const o={n,v,k:ak,d};if(ak==='M'&&f)o.f=f;app.setCfg({apports:[...apportsList(),o]});return draw()}
   if(e.target.closest('#fx_add')){const n=$('fx_n').value.trim(),v=num($('fx_v').value);if(!n||isNaN(v)||v<=0)return app.toast(t('Indique un nom et un montant'));app.setCfg({fixes:[...fixesList(),{n,v,p:per}]});draw()}}};draw()}
 export const seuilCardTxt=()=>{const c=seuilCalc();return c.F?(c.need==null?'':c.Fn===0?t('Frais fixes couverts par tes apports'):c.reached?t('Frais fixes couverts'):t('Seuil : {n} ventes',{n:c.need})):''};
+/* --- questionnaire du seuil : remplace les frais fixes par tes réponses (refaisable à tout moment) --- */
+const SQ_ROWS=[['abo','Abonnements (outils, comptabilité…)'],['tel','Téléphone et internet'],['loc','Local ou stockage'],['mat','Matériel (photo, cintres, balance), par mois'],['transp','Transport et carburant'],['assur','Assurance'],['banque','Frais bancaires'],['autre','Autres frais fixes']];
+export function openSeuilQ(){
+ openWizard({title:'Seuil de rentabilité',intro:'Quelques questions sur tes frais fixes. Tes réponses remplacent la liste actuelle, tu peux les refaire à tout moment.',answers:app.cfg.seuilQ||{},
+  steps:[{k:'rows',type:'rows',q:'Quels frais fixes paies-tu chaque mois ?',h:'Laisse vide ce que tu ne paies pas. Une dépense annuelle : divise-la par 12.',rows:SQ_ROWS.map(([k,l])=>({k,l,u:'€'}))},
+   {k:'apport',type:'num',u:'€',q:'Reçois-tu une aide ou un apport chaque mois ?',h:'Par exemple une aide d\'un proche. Laisse vide s\'il n\'y en a pas.'}],
+  onDone:a=>{const fixes=SQ_ROWS.filter(([k])=>(a.rows||{})[k]>0).map(([k,l])=>({n:t(l),v:a.rows[k],p:'M'})),ap=apportsList().filter(x=>!x.q);
+   if(a.apport>0)ap.push({n:t('Aide mensuelle'),v:a.apport,k:'M',d:today().slice(0,7),q:1});
+   app.setCfg({fixes,apports:ap,seuilQ:a});app.toast(t('Seuil mis à jour'));app.renderAll();openSeuil()}})}
