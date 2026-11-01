@@ -73,6 +73,7 @@ import './modules/comfort.js';
 import './modules/tools-register.js';
 import './modules/comptes.js';
 import './modules/usage.js';
+import './modules/autopilot.js';
 import './modules/simple-mode.js';
 import './modules/welcome.js';
 import './modules/progress.js';
