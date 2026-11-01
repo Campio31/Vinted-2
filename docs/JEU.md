@@ -21,3 +21,13 @@
 - Points du mois : publier 1, vendre 3, colis 1, défi réussi 5 (plafond 5 000). Les points sont calculés sur l'appareil : le serveur limite les valeurs mais ne peut pas empêcher de tricher.
 - Quitter le classement efface le profil public et les scores. Supprimer le compte efface tout (cascade).
 - Modération : les pseudos ne sont pas filtrés. À surveiller si l'appli grandit.
+## Cartes : Collection Hiver (v37)
+
+43 cartes (10 Communes, 10 Peu communes, 5 Rares, 5 Épiques, 5 Légendaires, 5 Mythiques, 3 Uniques). Données et logique dans src/modules/cartes.js, dessins SVG dans src/modules/cartes-art.js.
+
+- **Raretés et tirages** : Commune illimité, Peu commune 50 000, Rare 10 000, Épique 2 500, Légendaire 500, Mythique 100, Unique 3. Version Super (fond noir) de Rare à Mythique : 1 000, 250, 50, 10 (une chance sur dix par carte tirée). Les tirages sont affichés sur les cartes ; rien ne les limite réellement (voir ci-dessous).
+- **État** : 5 niveaux (Correct, Bon, Très bon, Excellent, Neuf), Neuf toujours le plus rare. Les marques d'usure du dessin suivent l'état. Les Uniques sont toujours Neuves.
+- **Packs** (hypothèses à valider) : Givre 3 cartes, Glacier 3 cartes + 1 Rare ou mieux, Aurore 3 cartes + 2 Épiques ou mieux. Chances d'un tirage ordinaire : 60 % Commune, 28 % Peu commune, 9 % Rare, 2,4 % Épique, 0,55 % Légendaire, 0,05 % Mythique. Après 4 packs Givre sans Rare, le 5e en contient une.
+- **Obtention** : défi de la semaine = Givre, défi du mois = Glacier, trophée Platine ou Diamant = Aurore. Collection complète = un pack Aurore.
+- **Uniques** : `LA PREMIÈRE` (première vente), `LE COLIS ZÉRO` (premier colis prêt), `LE CINTRE D'OR` (100 ventes). Choix provisoire : le brief ne dit pas comment rattacher une carte à un article réel.
+- **Limite** : les tirages sont locaux à chaque joueur. Pour qu'un tirage de 3 exemplaires soit vraiment rare, il faudrait un compteur central (serveur).
