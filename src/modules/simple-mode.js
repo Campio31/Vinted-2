@@ -55,6 +55,7 @@ export function todayData() {
   };
 }
 
+const exHTML = d => d.examples ? `<div class="tdx"><span>${t('{n} pièces d\'exemple dans ton stock.', { n: d.examples })}</span><button type="button" class="btn sec" data-td="delex">${t('Supprimer les exemples')}</button></div>` : '';
 export function todayHTML() {
   const d = todayData();
   const tile = (act, big, label, small, extra) => `<button type="button" class="tdt" data-td="${act}"><b>${big}</b><span>${label}</span>${extra || ''}<small>${small}</small></button>`;
@@ -65,7 +66,7 @@ export function todayHTML() {
     tile('month', eur(d.month), d.useCA ? t('de CA ce mois-ci') : t('de bénéfice ce mois-ci'), d.goal > 0 ? t('{p} % de ton objectif de {g}', { p: d.pct, g: eurR(d.goal) }) : t('Fixe un objectif dans Réglages'), d.goal > 0 ? `<div class="tdp"><i style="width:${d.pct}%"></i></div>` : ''),
   ].join('');
   const cta = d.empty ? `<div class="tdc"><button type="button" class="btn" data-td="add">${t('Ajouter ma première pièce')}</button><button type="button" class="btn sec" data-td="examples">${t('Charger des pièces d\'exemple')}</button></div>` : '';
-  const ex = d.examples ? `<div class="tdx"><span>${t('{n} pièces d\'exemple dans ton stock.', { n: d.examples })}</span><button type="button" class="btn sec" data-td="delex">${t('Supprimer les exemples')}</button></div>` : '';
+  const ex = exHTML(d);
   return `<div class="card tdy" data-ck="today" data-lb="${t('Aujourd\'hui')}"><h3 style="margin:0 0 10px">${t('Aujourd\'hui')}</h3><div class="tdg">${tiles}</div>${cta}${ex}</div>`;
 }
 
@@ -78,7 +79,10 @@ app.renderDash = function () {
   const compact = isSimple() && !showAll;
   [...box.children].forEach(el => { if (compact) el.style.display = 'none'; });
   box.querySelectorAll('.card.empty').forEach(el => { el.style.display = 'none'; });
-  box.insertAdjacentHTML('afterbegin', todayHTML());
+  let jr = app.journeeHTML && app.P.length ? app.journeeHTML() : '';
+  if (jr) jr = jr.replace(/<\/div>\s*$/, exHTML(todayData()) + '</div>');
+  box.insertAdjacentHTML('afterbegin', jr || todayHTML());
+  if (jr) { const ch = box.querySelector('.coachc'); if (ch) ch.remove(); }
   if (todayHidden() && !compact) box.firstElementChild.style.display = 'none';
   if (isSimple() && app.P.length) box.insertAdjacentHTML('beforeend', `<button type="button" class="btn sec" data-td="${showAll ? 'compact' : 'full'}" style="margin-top:4px">${showAll ? t('Revenir à l\'essentiel') : t('Voir le bilan complet')}</button>`);
   $('per').style.display = compact ? 'none' : '';

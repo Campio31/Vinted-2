@@ -48,7 +48,7 @@ export function periodsList(kind) {
   }
   return out;
 }
-function fiscStatus() {
+export function fiscStatus() {
   const y = new Date().getFullYear(), c = caBetween(y + '-01-01', y + '-12-31').ca, elapsed = Math.max(1, days(y + '-01-01', today()) + 1), yd = ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365, proj = c / elapsed * yd;
   const pl = prorata(+app.cfg.plafond || 0, y), pct = pl ? c / pl : 0;
   let cross = null; if (pl && c < pl && proj > pl && c > 0) cross = addDays(y + '-01-01', Math.round(pl / (c / elapsed)));
