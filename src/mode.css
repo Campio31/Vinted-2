@@ -116,3 +116,48 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 #colb .prepl .pre .pm{flex:1 1 calc(100% - 70px)}
 #colb .prepl .pre .pm b{white-space:normal}
 #colb .prepl .pre .btn{flex:1 1 40%}
+
+/* comptes de vente */
+#per .cpsep{display:inline-block;width:1px;height:24px;background:var(--line);margin:0 4px;vertical-align:middle}
+.cpr{padding:12px 0;border-top:1px solid var(--line)}
+.cpr:first-of-type{border-top:0}
+
+/* ===== v31 : filtres, indicateurs des ventes, Réglages repliés, objectifs et coûts, exporter et importer ===== */
+.fbtn{border-style:dashed}.fbtn.on{border-style:solid}
+.fact{align-items:center}
+#ssum .ssk{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:0;gap:6px}
+#ssum .ssk .kpi{padding:10px 8px;border-radius:16px}
+#ssum .ssk .kpi b{font-size:clamp(18px,6.4vw,28px);overflow-wrap:normal;white-space:nowrap}
+#ssum .ssk .kpi span{display:block;font-size:12px;line-height:1.2;margin-top:2px;overflow-wrap:anywhere}
+#ssum .tdx{flex-wrap:wrap}#ssum .tdx span{flex:1 1 180px;min-width:0}
+.fg{margin-bottom:14px}
+#v-set .sfold>h3.hd{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0;min-height:44px}
+#v-set .sfold>h3.hd::after{margin:0 4px 0 auto}
+#v-set .sfold:not(.shut)>h3.hd{margin-bottom:10px}
+#v-set .sfold>h3.hd:focus-visible{outline:2px solid var(--denim);outline-offset:3px;border-radius:8px}
+.cg{border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px;background:var(--card)}
+.cg>header{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.cg>header b{display:block;font-size:16px}.cg>header small{display:block;color:var(--mute);font-size:12px;line-height:1.25}
+.cgi{width:38px;height:38px;border-radius:12px;background:var(--denim);color:var(--on);display:grid;place-items:center;flex:none}
+.cgi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px;margin-bottom:12px;gap:2px}
+.seg button{flex:1;border:0;background:transparent;border-radius:999px;min-height:38px;padding:6px 8px;font-size:13px;font-weight:600;color:var(--mute);cursor:pointer}
+.seg button.on{background:var(--denim);color:var(--on)}
+.grow{margin-bottom:10px}.grow>b{display:block;font-size:13px;margin-bottom:6px}
+.cfld{min-width:0}.cfld .l{display:block;margin-bottom:4px}
+.uin{position:relative;display:block}.uin input{padding-right:34px;width:100%}
+.uin i{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--mute);font-size:14px;pointer-events:none}
+.pfr{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:10px;margin-bottom:10px}
+.cprev{display:grid;gap:4px;margin-top:2px}.cprev span{font-size:12px;color:var(--mute);background:var(--bg);border-radius:10px;padding:7px 10px}
+.xblk{border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px;background:var(--card)}
+.xh{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+.xh b{display:block;font-size:16px}.xh small{display:block;color:var(--mute);font-size:12px;line-height:1.3;margin-top:2px}
+.xh .tic{width:38px;height:38px;border-radius:12px;background:var(--denim);color:var(--on);display:grid;place-items:center;flex:none}
+.xh .tic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.xblk label.btn{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-align:center}
+.xdet{margin-top:12px}.xdet summary{cursor:pointer;color:var(--mute);font-size:13px;min-height:32px;display:flex;align-items:center}
+.xdet textarea{margin:8px 0}
+.rl2.lft td:nth-child(4),.rl2.lft th:nth-child(4){text-align:left}
+/* bandeaux du bas (mise à jour, sauvegarde, coach, Wrapped) : largeur du texte, jamais coupée à 50 % de l'écran */
+#upd,#bk,#cb{width:max-content;max-width:min(94vw,440px);border-radius:24px;line-height:1.3}
+.xblk .acts.two .btn{min-height:48px;padding:10px 8px;font-size:14px}
