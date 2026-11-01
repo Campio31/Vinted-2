@@ -2228,3 +2228,4 @@ K('En stock','In stock','In magazzino','En stock','Auf Lager');
 K('Prix à l\'unité','Unit price','Prezzo unitario','Precio unitario','Stückpreis');
 K('Utilisé par colis','Used per parcel','Usato per pacco','Usado por paquete','Pro Paket verbraucht');
 K('Alerte à partir de','Alert from','Avviso da','Alerta desde','Warnung ab');
+K('Tous les outils','All tools','Tutti gli strumenti','Todas las herramientas','Alle Werkzeuge');
