@@ -14,7 +14,7 @@ app.exportJSON = exportJSON;
 app.importText = importText;
 
 /* ---------- export / import ---------- */
-export function renderSet(){app.renderSync();app.renderAccount();app.renderLang();app.renderTheme();renderCfg();if(app.renderComptes)app.renderComptes();if(app.renderConfort)app.renderConfort();if(app.renderHelp)app.renderHelp();renderBk();const n=app.P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?t('{n} dans les fichiers.',{n:tn(n,'pièce','pièces')}):t('Aucune pièce à exporter pour le moment.'))+(lb?' '+t('Dernière sauvegarde JSON : {d}.',{d:fd(lb)}):' '+t('Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.'));}
+export function renderSet(){app.renderSync();app.renderAccount();app.renderLang();app.renderTheme();renderCfg();if(app.renderComptes)app.renderComptes();if(app.renderConfort)app.renderConfort();if(app.renderRules)app.renderRules();if(app.renderHelp)app.renderHelp();renderBk();const n=app.P.length,lb=LSg('lastBackup','');$('xs').textContent=(n?t('{n} dans les fichiers.',{n:tn(n,'pièce','pièces')}):t('Aucune pièce à exporter pour le moment.'))+(lb?' '+t('Dernière sauvegarde JSON : {d}.',{d:fd(lb)}):' '+t('Aucune sauvegarde JSON faite pour l\'instant : les données sont stockées uniquement sur cet appareil.'));}
 async function saveFile(name,data,type){
  const blob=data instanceof Blob?data:new Blob([data],{type:type||'application/octet-stream'});
  try{const f=new File([blob],name,{type:blob.type});if(matchMedia('(pointer:coarse)').matches&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return true}}catch(e){if(e&&e.name==='AbortError')return false}

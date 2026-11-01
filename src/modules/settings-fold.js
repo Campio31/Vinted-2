@@ -4,7 +4,7 @@ import { $, LSg, LSs } from './core.js';
 /* ---------- Réglages : chaque carte se replie, sauf celles du compte ---------- */
 /* Toutes les cartes de préférences, de données et d'aide sont repliées au départ ; on ouvre celle dont on a besoin.
    Les cartes sont réécrites par leur module à chaque affichage : un observateur remet le pli sur le titre. */
-const FOLD = ['lgc', 'thc', 'cfgc', 'cptc', 'cfc', 'bkc', 'inst', 'xic', 'hlp', 'abo'];
+const FOLD = ['lgc', 'thc', 'cfgc', 'cptc', 'rlc', 'cfc', 'bkc', 'inst', 'xic', 'hlp', 'abo'];
 let open = LSg('setOpen', []);
 if (!Array.isArray(open)) open = [];
 
