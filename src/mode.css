@@ -1,4 +1,4 @@
-/* Accueil, écran « Aujourd'hui » et mode simple */
+/* Accueil, Ã©cran Â« Aujourd'hui Â» et mode simple */
 #welcome{position:fixed;inset:0;z-index:90;background:var(--bg);overflow:auto;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
 #welcome[hidden]{display:none}
 #welcome .wbox{width:100%;max-width:460px;margin:auto 0}
@@ -51,38 +51,38 @@
  :root[data-theme="auto"] .nbg{background:#F0605F;color:#0E0F11}
 }
 
-/* Réglages : sections */
+/* RÃ©glages : sections */
 .shd{margin:22px 4px 8px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
 .shd:first-child{margin-top:4px}
 a.btn{display:flex;align-items:center;justify-content:center;text-decoration:none;box-sizing:border-box}
 .btn.red{background:var(--red);color:#fff}
 :root[data-theme="dark"] .btn.red{color:#0E0F11}
 
-/* Cibles tactiles d'au moins 44 px, et étiquettes qui passent à la ligne au lieu d'être coupées */
+/* Cibles tactiles d'au moins 44 px, et Ã©tiquettes qui passent Ã  la ligne au lieu d'Ãªtre coupÃ©es */
 summary,details>summary{min-height:44px;display:flex;align-items:center}
 input[type=time],input[type=datetime-local],input[type=email],input[type=password],input[type=tel],input[type=url]{min-height:44px}
 .li .m small,.tl .li .m small{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;white-space:normal;overflow:visible}
 .li .m small .ex,.li .m small .inc,.li .m small .tag{margin-left:0}
 
-/* point « hors ligne ou en attente d'envoi » (en haut, à côté de Réglages) */
+/* point Â« hors ligne ou en attente d'envoi Â» (en haut, Ã  cÃ´tÃ© de RÃ©glages) */
 #offdot[hidden]{display:none}
 #offdot i{display:block;width:12px;height:12px;border-radius:50%;background:var(--tag);box-shadow:0 0 0 3px rgba(224,165,38,.3)}
 
-/* cartes du Stock : le titre passe sur 2 lignes et la ligne de code à la ligne, pour que « exemple » et « à compléter » restent visibles */
+/* cartes du Stock : le titre passe sur 2 lignes et la ligne de code Ã  la ligne, pour que Â« exemple Â» et Â« Ã  complÃ©ter Â» restent visibles */
 .tl .ti b,.ti b{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:clip}
 .tl .cdm,.cdm{white-space:normal;overflow:visible;text-overflow:clip;display:flex;flex-wrap:wrap;gap:2px 6px;align-items:center}
 .cdm .inc,.cdm .ex,.ti b .ex{margin-left:0}
 .ti b .ex{margin-left:6px}
 .li .m b{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:clip}
 
-/* liste du Stock : le titre garde toute la largeur, le prix et les boutons passent sur la ligne du dessous (sinon le titre était écrasé sur téléphone) */
+/* liste du Stock : le titre garde toute la largeur, le prix et les boutons passent sur la ligne du dessous (sinon le titre Ã©tait Ã©crasÃ© sur tÃ©lÃ©phone) */
 .qtop{flex-wrap:wrap;row-gap:8px}
 .qtop .qm{flex:1 1 100%}
 .qtop .p{margin-right:auto;text-align:left}
 .qm .m small{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;white-space:normal;overflow:visible;text-overflow:clip}
 .qm .m small .inc,.qm .m small .ex{margin-left:0}
 
-/* datation vintage : schémas et règle des décennies */
+/* datation vintage : schÃ©mas et rÃ¨gle des dÃ©cennies */
 .illf{margin:4px 0 12px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .ill{display:block;width:100%;max-width:340px;height:auto;margin:0 auto}
 .ill .il-bg{fill:var(--card);stroke:var(--line);stroke-width:1.5}
@@ -105,13 +105,13 @@ input[type=time],input[type=datetime-local],input[type=email],input[type=passwor
 .era{display:flex;gap:2px;margin-top:5px}
 .era i{font:600 12px/1 var(--fm);font-style:normal;width:24px;padding:4px 0;text-align:center;border-radius:4px;background:var(--soft);color:var(--mute)}
 .era i.on{background:var(--tag);color:#111}
-/* l'étiquette « à préparer » / « Indispo » (.tag.x) héritait du style du bouton fermer (.x) : rond de 40 px */
+/* l'Ã©tiquette Â« Ã  prÃ©parer Â» / Â« Indispo Â» (.tag.x) hÃ©ritait du style du bouton fermer (.x) : rond de 40 px */
 .tag.x{width:auto;height:auto;border-radius:999px;font-size:12px;cursor:inherit}
 
-/* champ mois (apports) : même aspect que les champs date */
+/* champ mois (apports) : mÃªme aspect que les champs date */
 input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;min-height:44px;font-size:16px;color:var(--ink)}
 
-/* outil Colis : la pièce sur toute la largeur, les boutons dessous (le titre n'est plus coupé sur téléphone) */
+/* outil Colis : la piÃ¨ce sur toute la largeur, les boutons dessous (le titre n'est plus coupÃ© sur tÃ©lÃ©phone) */
 #colb .prepl .pre{flex-wrap:wrap;background:var(--bg)}
 #colb .prepl .pre .pm{flex:1 1 calc(100% - 70px)}
 #colb .prepl .pre .pm b{white-space:normal}
@@ -122,7 +122,7 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .cpr{padding:12px 0;border-top:1px solid var(--line)}
 .cpr:first-of-type{border-top:0}
 
-/* ===== v31 : filtres, indicateurs des ventes, Réglages repliés, objectifs et coûts, exporter et importer ===== */
+/* ===== v31 : filtres, indicateurs des ventes, RÃ©glages repliÃ©s, objectifs et coÃ»ts, exporter et importer ===== */
 .fbtn{border-style:dashed}.fbtn.on{border-style:solid}
 .fact{align-items:center}
 #ssum .ssk{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:0;gap:6px}
@@ -158,11 +158,11 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .xdet{margin-top:12px}.xdet summary{cursor:pointer;color:var(--mute);font-size:13px;min-height:32px;display:flex;align-items:center}
 .xdet textarea{margin:8px 0}
 .rl2.lft td:nth-child(4),.rl2.lft th:nth-child(4){text-align:left}
-/* bandeaux du bas (mise à jour, sauvegarde, coach, Wrapped) : largeur du texte, jamais coupée à 50 % de l'écran */
+/* bandeaux du bas (mise Ã  jour, sauvegarde, coach, Wrapped) : largeur du texte, jamais coupÃ©e Ã  50 % de l'Ã©cran */
 #upd,#bk,#cb{width:max-content;max-width:min(94vw,440px);border-radius:24px;line-height:1.3}
 .xblk .acts.two .btn{min-height:48px;padding:10px 8px;font-size:14px}
 
-/* ===== v32 : défis, cartes, trophées à paliers, classement ===== */
+/* ===== v32 : dÃ©fis, cartes, trophÃ©es Ã  paliers, classement ===== */
 .ptabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.ptabs .chip{flex:none}
 .dfi{padding:14px}.dfi.ok{border-color:var(--mint)}.dfs{font-size:12px;color:var(--mute);margin-top:2px}
 .tro{padding:14px}.th2{display:flex;gap:12px;align-items:center;margin-bottom:10px}.th2 b{display:block;font-size:15px}.th2 small{display:block;font-size:12px;color:var(--mute)}
@@ -175,7 +175,7 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .rgr .rk{width:32px;text-align:center}.rgr .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.rgr .nm small{display:block;font-size:12px;color:var(--mute);font-weight:400}
 .rgr.gap{border-top:2px dashed var(--line)}
 
-/* ===== v33 : graphique fiscal, fiches à compléter, colis par jour ===== */
+/* ===== v33 : graphique fiscal, fiches Ã  complÃ©ter, colis par jour ===== */
 .fcg{width:100%;height:auto;display:block}.fc-t{font-size:12px;fill:var(--mute)}
 .fc-a{fill:none;stroke:var(--denim);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.fc-f{fill:color-mix(in srgb,var(--denim) 14%,transparent)}
 .fc-p{stroke:var(--mint);stroke-width:2.5;stroke-dasharray:6 5}.fc-pd{fill:var(--mint)}
@@ -204,7 +204,7 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .tool2 .tic{width:34px;height:34px;border-radius:11px;background:var(--hero);color:var(--hero-on);display:flex;align-items:center;justify-content:center;flex:none}
 .tool2 .tic svg{width:18px;height:18px}.tool2 b{font-size:15px;font-weight:600}
 
-/* ===== v35 : Ma journée (Autopilot) ===== */
+/* ===== v35 : Ma journÃ©e (Autopilot) ===== */
 .apc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:10px}
 .apc>div{background:var(--bg);border-radius:14px;padding:10px 6px;text-align:center}
 .apc b{display:block;font-size:26px;line-height:1.1}.apc span{font-size:12px;color:var(--mute)}
@@ -223,13 +223,13 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .apj{margin-top:6px}.apj>div{display:flex;gap:8px;font-size:12px;padding:5px 0;border-top:1px solid var(--line);align-items:baseline}
 .apj span{color:var(--mute);flex:none}.apj b{flex:1;font-weight:600}.apj .un b{text-decoration:line-through;color:var(--mute)}.apj em{font-style:normal;color:var(--mute)}
 
-/* ===== v36 : règles de Max ===== */
+/* ===== v36 : rÃ¨gles de Max ===== */
 .apq{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px 0;font-size:12px;font-weight:700;color:var(--denim)}
 .apq.ign{color:var(--red);font-weight:500}.apq .lnk{font-size:12px;white-space:nowrap}
 .rur{border-top:1px solid var(--line);padding:8px 0}.rur:first-of-type{border-top:0}
 .rup{margin:4px 0 4px 36px;max-width:220px}
 
-/* ===== v37 : cartes « Papier Encré » (Collection Hiver) ===== */
+/* ===== v37 : cartes Â« Papier EncrÃ© Â» (Collection Hiver) ===== */
 .cgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
 .prow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0;animation:cdIn .5s 2.9s both}
 .prow.n4{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -278,7 +278,7 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 @keyframes cdIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes hlShift{0%{background-position:0 0}100%{background-position:300% 300%}}
 
-/* ===== v39 : ouverture des packs (repos, charge, ouverture, révélation) ===== */
+/* ===== v39 : ouverture des packs (repos, charge, ouverture, rÃ©vÃ©lation) ===== */
 .stg{position:relative;height:300px;overflow:hidden;border-radius:18px;margin:6px 0 10px;display:grid;place-items:center;background:var(--sb);animation:stgOut .4s 2.7s forwards}
 .stg.k-s{--sb:linear-gradient(#eef7ff,#b7d8f2)}.stg.k-p{--sb:linear-gradient(#10306e,#1f56c4)}.stg.k-a{--sb:radial-gradient(circle at 50% 40%,#2fd6a0,#10204f 72%)}
 .stg .pkw{position:relative;height:270px;aspect-ratio:300/500;animation:pkAll 2.7s ease-in-out forwards}
@@ -297,3 +297,57 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .cgbw{display:block;border:1.1cqw solid #16130f;border-radius:5.2cqw;background:var(--bk);overflow:hidden;aspect-ratio:360/504;position:relative}
 .cgbw .cgbk{display:block;width:100%;height:100%;border-radius:0}
 .stg{contain:paint}
+
+/* ===== v40 : dos sans carrÃ©, cartes cliquables, inclinaison 3D, reflets, Ã©tats ===== */
+.cdk:not(.down):not(.miss) .cgbw{display:none}
+.stg.skip{display:none}
+.prow{animation:cdIn .4s .15s both;grid-template-columns:repeat(2,minmax(0,1fr))}
+.prow.n4,.prow.n3{grid-template-columns:repeat(2,minmax(0,1fr))}
+.prow>.cdk{max-width:200px}
+.prow>.cdk:last-child:nth-child(odd){grid-column:1/-1;width:calc(50% - 4px)}
+.cdk.down{touch-action:manipulation}
+.cdk.fo .cdw{animation:cdFo .19s ease-in forwards}
+.cdk.fl .cdw{animation:cdFl .32s ease-out}
+@keyframes cdFo{to{transform:perspective(700px) rotateY(90deg)}}
+@keyframes cdFl{from{transform:perspective(700px) rotateY(-90deg)}to{transform:perspective(700px) rotateY(0)}}
+/* inclinaison : le dessus de la carte suit le doigt */
+.cdk.tilt .cdw{transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.cdk.tilt.tl .cdw{transition:transform .08s linear;filter:drop-shadow(0 12px 14px rgba(0,0,0,.35))}
+.cdk.big{touch-action:none;-webkit-user-select:none;user-select:none}
+.cdk.tilt .cdw{-webkit-tap-highlight-color:transparent}
+/* reflets : un voile de lumiÃ¨re + une feuille irisÃ©e qui glissent avec l'inclinaison */
+.gls{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:5;overflow:hidden;--fxo:1}
+.gls::before,.gls::after{content:'';position:absolute;inset:0;opacity:0;border-radius:inherit}
+.fx1 .gls::after,.fx2 .gls::after,.fx3 .gls::after{background:radial-gradient(circle at var(--mx,28%) var(--my,18%),rgba(255,255,255,.5),rgba(255,255,255,0) 46%);opacity:calc(.5*var(--fxo))}
+.fx2 .gls::before,.fx3 .gls::before{background:linear-gradient(115deg,transparent 18%,rgba(255,60,170,.55) 34%,rgba(60,220,255,.55) 48%,rgba(255,235,90,.5) 62%,transparent 80%);background-size:260% 260%;background-position:var(--mx,40%) var(--my,40%);mix-blend-mode:color-dodge;opacity:calc(.5*var(--fxo))}
+.fx3 .gls::before{opacity:calc(.85*var(--fxo))}
+.f-or .gls::after{background:radial-gradient(circle at var(--mx,28%) var(--my,18%),rgba(255,236,150,.75),rgba(255,236,150,0) 50%)!important;opacity:calc(.7*var(--fxo))!important}
+.cdn.fx3 .gls{background:repeating-linear-gradient(105deg,rgba(255,255,255,0) 0 2.4cqw,rgba(255,255,255,.12) 2.4cqw 3cqw)}
+.cdk.big .fx2 .gls::before,.cdk.fl .fx2 .gls::before,.cdk.big .fx3 .gls::before,.cdk.fl .fx3 .gls::before{animation:foilIdle 5s ease-in-out infinite alternate}
+.cdk.tl .gls::before{animation:none!important}
+@keyframes foilIdle{from{background-position:15% 20%}to{background-position:85% 80%}}
+/* Ã©tats : plus la carte est usÃ©e, plus elle se ternit, se plie et perd son brillant */
+.wr{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4}
+.cdn.e5 .wr{box-shadow:inset 0 0 3cqw rgba(255,255,255,.35)}
+.cdn.e4{filter:saturate(.97)}
+.cdn.e4 .wr{background:radial-gradient(circle at 0 0,rgba(255,255,255,.28),transparent 7%),radial-gradient(circle at 100% 100%,rgba(255,255,255,.22),transparent 6%)}
+.cdn.e3{filter:sepia(.1) saturate(.92)}
+.cdn.e3 .wr{--fold:linear-gradient(112deg,transparent 47.6%,rgba(22,19,15,.2) 48.2%,rgba(255,255,255,.4) 48.9%,transparent 49.6%);background:var(--fold),radial-gradient(circle at 0 0,rgba(255,255,255,.5),transparent 11%),radial-gradient(circle at 100% 0,rgba(255,255,255,.4),transparent 9%),radial-gradient(circle at 100% 100%,rgba(255,255,255,.5),transparent 12%),radial-gradient(circle at 0 100%,rgba(255,255,255,.35),transparent 8%)}
+.cdn.e2{filter:sepia(.22) saturate(.8) contrast(.96)}
+.cdn.e2 .wr{background:var(--scr) center/100% 100%,linear-gradient(112deg,transparent 47.4%,rgba(22,19,15,.2) 48.2%,rgba(255,255,255,.3) 49%,transparent 49.8%),radial-gradient(ellipse at 72% 64%,rgba(120,78,30,.28),transparent 17%),radial-gradient(circle at 0 0,rgba(255,255,255,.6),transparent 14%),radial-gradient(circle at 100% 0,rgba(255,255,255,.5),transparent 12%),radial-gradient(circle at 100% 100%,rgba(255,255,255,.6),transparent 15%),radial-gradient(circle at 0 100%,rgba(255,255,255,.5),transparent 11%)}
+.cdn.e1{filter:sepia(.4) saturate(.62) contrast(.9) brightness(.97);clip-path:polygon(0 0,100% 0,100% 90%,94% 92.5%,96% 95.5%,91% 100%,0 100%)}
+.cdn.e1 .wr{background:var(--scr) center/100% 100%,var(--scr) center/160% 160%,linear-gradient(112deg,transparent 46.8%,rgba(22,19,15,.28) 47.9%,rgba(255,255,255,.3) 49%,transparent 50.2%),linear-gradient(22deg,transparent 61%,rgba(22,19,15,.2) 61.8%,rgba(255,255,255,.28) 62.8%,transparent 63.6%),radial-gradient(ellipse at 72% 64%,rgba(110,68,24,.45),transparent 22%),radial-gradient(ellipse at 22% 78%,rgba(110,68,24,.3),transparent 15%),radial-gradient(circle at 0 0,rgba(255,255,255,.75),transparent 18%),radial-gradient(circle at 100% 0,rgba(255,255,255,.65),transparent 16%),radial-gradient(circle at 0 100%,rgba(255,255,255,.65),transparent 15%)}
+.cdn.e2 .gls,.cdn.e1 .gls{--fxo:.45}.cdn.e1 .gls{--fxo:.2}
+.cdn.e5{--scr:none}
+.cdn{--scr:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 140' preserveAspectRatio='none'%3E%3Cg stroke='%23fff' stroke-opacity='.55' stroke-width='.35' fill='none'%3E%3Cpath d='M8 20 L40 31'/%3E%3Cpath d='M62 12 L88 40'/%3E%3Cpath d='M14 88 L52 76'/%3E%3Cpath d='M70 100 L93 118'/%3E%3Cpath d='M30 120 L47 112'/%3E%3Cpath d='M76 58 L96 55'/%3E%3C/g%3E%3Cg stroke='%2316130f' stroke-opacity='.3' stroke-width='.25' fill='none'%3E%3Cpath d='M20 52 L35 60'/%3E%3Cpath d='M58 126 L80 131'/%3E%3Cpath d='M84 20 L92 30'/%3E%3C/g%3E%3C/svg%3E")}
+/* pastille d'Ã©tat sur la tuile */
+.cdet{position:absolute;left:5px;bottom:5px;z-index:6;font-size:12px;font-weight:800;letter-spacing:.02em;padding:2px 8px;border-radius:999px;background:#16130f;color:#f3ead7;border:1.5px solid #f3ead7;pointer-events:none}
+.cdet.e5{background:#2f9e5b}.cdet.e4{background:#1f3fbf}.cdet.e3{background:#6b5a2e}.cdet.e2{background:#8a4b1a}.cdet.e1{background:#5a2a2a}
+.cdk.miss .cdet{display:none}
+/* carte en grand par-dessus l'Ã©cran */
+.czm{position:fixed;inset:0;z-index:9999;background:rgba(10,10,18,.86);display:grid;place-items:center;padding:16px;overflow:auto}
+.czb{width:min(86vw,360px);display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;color:#f3ead7}
+.czb .cdk{max-width:none;width:100%}
+.czb p{margin:0;font-size:13px;opacity:.8}
+@media (prefers-reduced-motion:reduce){.cdk.big .gls::before,.cdk.fl .gls::before{animation:none!important}.cdk.fo .cdw,.cdk.fl .cdw{animation:none}}.cdk.down .cdet{display:none}
+.cdk.big .cdet{bottom:-11px;left:50%;transform:translateX(-50%);font-size:13px;padding:3px 12px}
