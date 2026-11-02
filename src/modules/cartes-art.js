@@ -70,8 +70,25 @@ const wear = e => {
   return w.join('');
 };
 
+/* ---- illustrations dessinées à la main (dossier cartes-svg, une par carte, viewBox 316 × 194) ---- */
+const FILES = import.meta.glob('./cartes-svg/*.svg', { query: '?raw', import: 'default', eager: true });
+const ART = {};
+Object.entries(FILES).forEach(([f, svg]) => { const m = /\/(\d\d)-[^/]*$/.exec(f); if (m) ART[+m[1]] = svg; });
+/* marques d'usure posées sur le dessin (autour du centre) : pli, tache, pelage, selon l'état */
+const wearC = e => {
+  const w = [];
+  if (e <= 3) w.push(`<path d="M120 92 Q158 102 196 90" fill="none" stroke="${INK}" stroke-width="1.6" stroke-dasharray="2 3" opacity=".4"/>`);
+  if (e <= 2) w.push(`<ellipse cx="178" cy="120" rx="10" ry="7" fill="${INK}" opacity=".16"/>`);
+  if (e <= 1) w.push([...Array(14)].map((_, i) => `<circle cx="${112 + (i * 37) % 92}" cy="${66 + (i * 53) % 78}" r="1.8" fill="${INK}" opacity=".3"/>`).join(''));
+  return w.join('');
+};
+function artSVG(num, e) {
+  const svg = ART[num].replace(/<rect width="316" height="194" fill="#f3ead7"\/>/, '').replace(/^<svg ([^>]*?)\s+width="\d+"\s+height="\d+">/, '<svg class="cga" aria-hidden="true" $1>');
+  return svg.replace(/<\/svg>\s*$/, wearC(e) + '</svg>');
+}
 /** Illustration d'un vêtement. card = { sil, col, pat, fin, opt } ; e = état (1 à 5). */
 export function garmentSVG(card, id, e = 5) {
+  if (card.num && ART[card.num]) return artSVG(card.num, e);
   const base = COL[card.col] || '#d9c3a0', trim = mix(base, INK, .22), pat = card.pat && card.pat !== 'uni' ? card.pat : '', fin = card.fin || '';
   const L = (SIL[card.sil] || SIL.pull)(card.opt || {}), body = [];
   const fill = fin === 'holo' || card.col === 'Irisé' ? `url(#hl${id})` : card.col === 'Or' ? `url(#gd${id})` : base;
