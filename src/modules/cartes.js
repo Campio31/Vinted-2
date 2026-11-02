@@ -17,8 +17,9 @@ export const ETATS = ['Correct', 'Bon', 'Très bon', 'Excellent', 'Neuf'];
 const ETAT_W = [34, 30, 20, 13, 3];                                 /* Neuf est l'état le plus rare, dans chaque rareté */
 const SUPER_P = 0.1;                                                /* 1 000 sur 10 000, 250 sur 2 500, 50 sur 500, 10 sur 100 */
 /* chances d'obtenir chaque rareté dans un pack (Commune, Peu commune, Rare, Épique, Légendaire, Mythique). Les Uniques ne sortent jamais d'un pack. */
-const ODDS = { base: [60, 28, 9, 2.4, 0.55, 0.05], rare: [0, 0, 78, 16, 5.2, 0.8], epic: [0, 0, 0, 70, 24, 6] };
-const PACK_N = { s: { n: 3, rare: 0, epic: 0 }, p: { n: 3, rare: 1, epic: 0 }, a: { n: 3, rare: 0, epic: 2 } };
+const ODDS = { base: [62, 28, 7.5, 2, 0.45, 0.05], rare: [0, 0, 78, 16, 5.2, 0.8], epic: [0, 0, 0, 70, 24, 6] };
+/* d'après les packs dessinés : Givre 4 cartes ; Glacier 5 cartes dont 1 Rare garantie ; Aurore 5 cartes dont 1 Épique garantie et plus de chances de carte Super */
+const PACK_N = { s: { n: 4, rare: 0, epic: 0, sup: SUPER_P }, p: { n: 4, rare: 1, epic: 0, sup: SUPER_P }, a: { n: 4, rare: 0, epic: 1, sup: 0.25 } };
 const PITY = 4;                                                     /* 4 packs Givre sans Rare : le 5e en contient une */
 export const SET_NAME = 'Collection Hiver';
 
@@ -71,7 +72,7 @@ const RAW = [
 export const CARDS = RAW.map((c, i) => Object.assign(c, { id: 'h' + String(i + 1).padStart(2, '0'), num: i + 1, tot: RAW.length, set: SET_NAME }));
 const byId = Object.fromEntries(CARDS.map(c => [c.id, c]));
 export const cardById = id => byId[id];
-export const RCOL = BACKC;
+export const RCOL = BACKC.slice(0, 7);
 
 /* ---- état ---- */
 const blank = () => ({ own: {}, s: 0, p: 0, a: 0, paid: [], pity: 0, sets: [] });
@@ -84,7 +85,7 @@ export const packsLeft = () => { const s = state(); return s.s + s.p + s.a; };
 function rnd() { const a = new Uint32Array(1); (window.crypto || globalThis.crypto).getRandomValues(a); return a[0] / 4294967296; }
 function pickIdx(w) { let x = rnd() * w.reduce((a, b) => a + b, 0); for (let i = 0; i < w.length; i++) { x -= w[i]; if (x < 0) return i; } return 0; }
 const cardOf = r => { const L = CARDS.filter(c => c.r === r); return L[Math.floor(rnd() * L.length)]; };
-const draw = odds => { const c = cardOf(pickIdx(odds)), e = c.e || pickIdx(ETAT_W) + 1, sup = c.r >= 2 && c.r <= 5 && rnd() < SUPER_P; return { c, e, sup }; };
+const draw = (odds, ps = SUPER_P) => { const c = cardOf(pickIdx(odds)), e = c.e || pickIdx(ETAT_W) + 1, sup = c.r >= 2 && c.r <= 5 && rnd() < ps; return { c, e, sup }; };
 
 /** Offre un pack (s : Givre, p : Glacier, a : Aurore). `id` évite de l'offrir deux fois pour le même défi ou palier. */
 export function grantPack(kind, id) {
@@ -100,10 +101,10 @@ export function openPack(kind) {
   if (!P || !(s[kind] > 0)) return null;
   s[kind]--;
   const L = [];
-  for (let i = 0; i < P.n; i++) L.push(draw(ODDS.base));
-  for (let i = 0; i < P.rare; i++) L.push(draw(ODDS.rare));
-  for (let i = 0; i < P.epic; i++) L.push(draw(ODDS.epic));
-  if (kind === 's') { if (L.some(x => x.c.r >= 2)) s.pity = 0; else if (s.pity >= PITY) { L[2] = draw(ODDS.rare); s.pity = 0; } else s.pity++; }
+  for (let i = 0; i < P.n; i++) L.push(draw(ODDS.base, P.sup));
+  for (let i = 0; i < P.rare; i++) L.push(draw(ODDS.rare, P.sup));
+  for (let i = 0; i < P.epic; i++) L.push(draw(ODDS.epic, P.sup));
+  if (kind === 's') { if (L.some(x => x.c.r >= 2)) s.pity = 0; else if (s.pity >= PITY) { L[2] = draw(ODDS.rare, P.sup); s.pity = 0; } else s.pity++; }
   L.sort((a, b) => a.c.r - b.c.r);                                  /* la plus rare en dernier : la révélation monte en puissance */
   const own = Object.assign({}, s.own), res = [];
   L.forEach(x => {
@@ -146,8 +147,10 @@ export function cardFront(c, e = 5, sup = false) {
 export function cardTile(c, o = {}) {
   const { e = 5, sup = false, n = 1, down = false, big = false, miss = false } = o;
   const uidb = ++uid;
-  return `<button type="button" class="cdk${big ? ' big' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? 'data-flip="1"' : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb) : ''}</span>`}${n > 1 ? `<em class="cdx">×${n}</em>` : ''}</button>`;
+  return `<button type="button" class="cdk${big ? ' big' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? 'data-flip="1"' : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb, sup) : ''}</span>`}${n > 1 ? `<em class="cdx">×${n}</em>` : ''}</button>`;
 }
+/* fissures dessinées pendant la charge du pack (jamais visibles au repos) */
+const CRACKS = '<svg class="crk" viewBox="0 0 300 500"><path d="M150 250 L126 204 L146 152 L120 96"/><path d="M150 250 L192 216 L216 160 L204 100"/><path d="M150 250 L108 286 L84 340 L104 396"/><path d="M150 250 L188 292 L176 344 L214 404"/><path d="M126 204 L84 190 L62 150"/><path d="M216 160 L252 150 L270 108"/><path d="M108 286 L64 272"/></svg>';
 let shown = null, sel = '';
 const PNAME = { s: ['Givre', 'Pack simple : 3 cartes'], p: ['Glacier', 'Pack rare : 4 cartes, une Rare ou mieux'], a: ['Aurore', 'Pack sublime : 5 cartes, deux Épiques ou mieux'] };
 export function cartesBody() {
@@ -155,7 +158,7 @@ export function cartesBody() {
   const bar = `<div class="gcard cartes-h"><div class="gh2"><span>${t(SET_NAME)}</span><span>${got} / ${CARDS.length}</span></div><div class="rl"><b class="gc-g" style="width:${(got / CARDS.length * 100).toFixed(1)}%"></b></div>
    <div class="packs">${['s', 'p', 'a'].map(k => `<div class="pkc"><div class="pkm">${packSVG(k, 'm' + k + (++uid))}</div><b>${s[k] || 0}</b><span>${t(PNAME[k][0])}</span><button type="button" class="btn sm${k === 'p' ? ' mint' : ''}" data-popen="${k}"${s[k] ? '' : ' disabled'}>${t('Ouvrir')}</button></div>`).join('')}</div>
    <div class="gl2">${t('Un défi de la semaine offre un pack Givre, un défi du mois un pack Glacier, un trophée Platine ou Diamant un pack Aurore. Les Uniques se gagnent par un geste, jamais dans un pack.')}</div></div>`;
-  const open = shown ? `<div class="card popen"><h3>${shown.bonus.length ? t('Collection complète : un pack Aurore en cadeau') : t('Ton pack {n}', { n: t(PNAME[shown.kind][0]) })}</h3><div class="pkw k-${shown.kind}">${packSVG(shown.kind, 'o' + (++uid))}</div><div class="prow n${shown.res.length}">${shown.res.map(x => cardTile(x.c, { e: x.e, sup: x.sup, down: true })).join('')}</div><div class="acts two"><button type="button" class="btn sec" data-pflip="1">${t('Tout révéler')}</button><button type="button" class="btn" data-pclose="1">${t('Ranger dans ma collection')}</button></div></div>` : '';
+  const open = shown ? `<div class="card popen"><h3>${shown.bonus.length ? t('Collection complète : un pack Aurore en cadeau') : t('Ton pack {n}', { n: t(PNAME[shown.kind][0]) })}</h3><div class="stg k-${shown.kind}" aria-hidden="true"><i class="rays"></i><div class="pkw">${packSVG(shown.kind, 'o' + (++uid))}${CRACKS}</div><i class="flash"></i></div><div class="prow n${shown.res.length}">${shown.res.map(x => cardTile(x.c, { e: x.e, sup: x.sup, down: true })).join('')}</div><div class="acts two"><button type="button" class="btn sec" data-pflip="1">${t('Tout révéler')}</button><button type="button" class="btn" data-pclose="1">${t('Ranger dans ma collection')}</button></div></div>` : '';
   const one = sel && byId[sel] ? (() => { const c = byId[sel], o = typeof s.own[c.id] === 'object' ? s.own[c.id] : null; return `<div class="card csel">${o ? cardTile(c, { e: o.e || 5, sup: !!o.s, n: o.n, big: true }) : `<div class="prow">${cardTile(c, { miss: true, big: true })}</div>`}<p class="sub" style="margin:8px 0 0">${o ? t('Tu as cette carte') + (o.n > 1 ? ' ×' + o.n : '') + (o.s ? ' · ' + t('version Super') : '') + ' · ' + t('meilleur état : {e}', { e: t(ETATS[(o.e || 5) - 1]) }) : c.unique ? t('Carte Unique : elle se gagne par un geste, jamais dans un pack.') : t('Il te manque cette carte.')}</p></div>`; })() : '';
   const groups = RARETES.map((rn, r) => { const L = CARDS.filter(c => c.r === r); if (!L.length) return ''; const k = L.filter(c => has(s, c.id)).length; return `<div class="card cset"><div class="gh2"><b>${t(rn)}</b><span>${k} / ${L.length}${k === L.length ? ' ✓' : ''}</span></div><div class="cgrid">${L.map(c => { const o = typeof s.own[c.id] === 'object' ? s.own[c.id] : null; return o ? cardTile(c, { e: o.e || 5, sup: !!o.s, n: o.n }) : cardTile(c, { miss: true }); }).join('')}</div></div>`; }).join('');
   return bar + open + one + groups;

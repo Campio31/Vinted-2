@@ -109,28 +109,34 @@ export function garmentSVG(card, id, e = 5) {
   return `<svg class="cga" viewBox="0 0 316 194" aria-hidden="true">${defs(id, base, pat, fin)}<ellipse cx="158" cy="180" rx="84" ry="6" fill="${INK}" opacity=".18"/><g transform="translate(58 10)">${body.join('')}${wear(e)}</g></svg>`;
 }
 
-/* ---- logo : le mouton à l'étiquette jaune (n°18) ---- */
-export const SHEEP = `<svg viewBox="0 0 100 100" class="cgl" aria-hidden="true"><g stroke="${INK}" stroke-width="3" stroke-linejoin="round"><rect x="31" y="74" width="6" height="16" rx="2" fill="${INK}"/><rect x="55" y="74" width="6" height="16" rx="2" fill="${INK}"/><circle cx="30" cy="62" r="14" fill="${CREAM}"/><circle cx="40" cy="50" r="18" fill="${CREAM}"/><circle cx="58" cy="46" r="20" fill="${CREAM}"/><circle cx="50" cy="64" r="18" fill="${CREAM}"/><circle cx="68" cy="60" r="14" fill="${CREAM}"/><ellipse cx="82" cy="58" rx="11" ry="13" fill="${INK}"/><ellipse cx="72" cy="47" rx="7" ry="4.5" transform="rotate(-30 72 47)" fill="${INK}"/><rect x="66" y="50" width="9" height="13" rx="2" transform="rotate(14 70 56)" fill="${YEL}"/></g><circle cx="70.5" cy="53.5" r="1.4" fill="${INK}"/><circle cx="86" cy="55" r="2" fill="${CREAM}"/></svg>`;
-
-/* ---- dos des cartes : motif « Flocons » en papier découpé, une couleur par rareté ---- */
-export const BACKC = ['#8a8070', '#2f9e5b', '#1f3fbf', '#7a45c9', '#e0a410', '#e0407a', '#16130f'];
-export function backSVG(r, id) {
-  const c = BACKC[r] || BACKC[0], flake = `<g stroke="${CREAM}" stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M0 -12 V12 M-10.4 -6 L10.4 6 M-10.4 6 L10.4 -6"/><path d="M0 -8 L-3.5 -12 M0 -8 L3.5 -12 M0 8 L-3.5 12 M0 8 L3.5 12"/></g>`;
-  return `<svg class="cgbk" viewBox="0 0 360 504" aria-hidden="true"><defs><pattern id="fk${id}" width="64" height="64" patternUnits="userSpaceOnUse"><g transform="translate(16 16)">${flake}</g><g transform="translate(48 48) scale(.8)">${flake}</g></pattern>
-   ${r === 6 ? `<linearGradient id="bk${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2218"/><stop offset=".5" stop-color="#7a5a14"/><stop offset="1" stop-color="#16130f"/></linearGradient>` : r === 5 ? `<linearGradient id="bk${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0407a"/><stop offset=".5" stop-color="#6a3fb5"/><stop offset="1" stop-color="#1f8fbf"/></linearGradient>` : ''}</defs>
-   <rect width="360" height="504" rx="26" fill="${r >= 5 ? `url(#bk${id})` : c}"/><rect width="360" height="504" rx="26" fill="url(#fk${id})" opacity=".35"/><rect x="14" y="14" width="332" height="476" rx="18" fill="none" stroke="${CREAM}" stroke-width="3"/>
-   <circle cx="180" cy="252" r="86" fill="${c === '#16130f' ? '#2a2218' : c}" stroke="${CREAM}" stroke-width="5"/><circle cx="180" cy="252" r="70" fill="${INK}" opacity=".18"/><g transform="translate(116 188) scale(1.28)">${SHEEP.replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g></svg>`;
+/* ---- logo, dos et packs : fichiers fournis (dossier cartes-assets) ---- */
+const AS = import.meta.glob('./cartes-assets/*.svg', { query: '?raw', import: 'default', eager: true });
+const asset = re => { const k = Object.keys(AS).find(f => re.test(f)); return k ? AS[k] : ''; };
+/* chaque affichage reçoit ses propres identifiants (dégradés, filtres) : plusieurs exemplaires d'un même dessin peuvent coexister dans la page */
+function uniq(svg, id) {
+  let s = svg;
+  [...svg.matchAll(/\sid="([^"]+)"/g)].map(m => m[1]).forEach(i => {
+    const e = i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    s = s.replace(new RegExp(`id="${e}"`, 'g'), `id="${i}-${id}"`).replace(new RegExp(`url\\(#${e}\\)`, 'g'), `url(#${i}-${id})`).replace(new RegExp(`href="#${e}"`, 'g'), `href="#${i}-${id}"`);
+  });
+  return s;
 }
+const fonts = s => s.replace(/'Archivo Black',sans-serif/g, "'Archivo Black',Archivo,'Arial Black',sans-serif").replace(/'DM Sans',sans-serif/g, "'DM Sans',system-ui,sans-serif");
+const withClass = (s, c) => s.replace(/^<svg\b/, `<svg class="${c}" aria-hidden="true"`);
 
+/** Logo : le mouton à l'étiquette jaune (n°18). */
+export const SHEEP = withClass(asset(/\/logo\.svg$/), 'cgl');
+/** Dos « Flocons » : r de 0 (Commune) à 6 (Unique) ; sup : le dos noir des cartes Super. */
+export const BACKC = ['#2447c9', '#2f9e5b', '#1f3fbf', '#ff5a36', '#e0b020', '#a78bfa', '#d4a017', '#16130f'];
+/* fond du papier de chaque dos : le dessin fourni est posé sur une feuille de cette couleur */
+const BACKBG = ['#2a4fd6', '#2f9e5b', '#1f3fbf', '#ff5a36', '#f3e6c4', '#ece7ff', '#fffaf0', '#07070c'];
+export function backSVG(r, id, sup = false) {
+  const k = sup ? 7 : Math.min(6, Math.max(0, r)), s = asset(new RegExp(`/dos-${k}-`));
+  return `<span class="cgbw" style="--bk:${BACKBG[k]}">${uniq(withClass(s, 'cgbk'), id)}</span>`;
+}
 /* ---- packs « Cristal » : Givre (simple), Glacier (rare), Aurore (sublime) ---- */
-export const PACKS = { s: { n: 'Givre', c: ['#e7f3ff', '#9cc8f0', '#4d87c4'] }, p: { n: 'Glacier', c: ['#cfe6ff', '#3f78d6', '#1b3f9a'] }, a: { n: 'Aurore', c: ['#ffd1ea', '#8a7bff', '#25b8b0'] } };
+export const PACKS = { s: { n: 'Givre' }, p: { n: 'Glacier' }, a: { n: 'Aurore' } };
 export function packSVG(kind, id) {
-  const P = PACKS[kind] || PACKS.s, [c1, c2, c3] = P.c;
-  return `<svg class="pks" viewBox="0 0 200 280" aria-hidden="true"><defs><linearGradient id="pk${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset=".55" stop-color="${c2}"/><stop offset="1" stop-color="${c3}"/></linearGradient></defs>
-   <path d="M20 14 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 V266 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 l-8 6 l-8 -6 Z" fill="url(#pk${id})" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
-   <g class="pk-f" fill="#fff" opacity=".28"><path d="M20 14 L100 60 L20 130 Z"/><path d="M180 14 L120 90 L180 150 Z"/><path d="M30 266 L90 190 L170 266 Z"/></g>
-   <g fill="none" stroke="${INK}" stroke-width="2" opacity=".5"><path d="M20 130 L100 60 L180 150"/><path d="M90 190 L100 60 M90 190 L170 266"/></g>
-   <circle cx="100" cy="130" r="48" fill="${INK}" opacity=".2"/><circle cx="100" cy="130" r="44" fill="${CREAM}" stroke="${INK}" stroke-width="4"/><g transform="translate(66 96) scale(.68)">${SHEEP.replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g>
-   <rect x="38" y="204" width="124" height="28" rx="6" fill="${INK}"/><text x="100" y="224" text-anchor="middle" font-family="Archivo, Arial Black, sans-serif" font-weight="800" font-size="19" fill="${CREAM}" letter-spacing="2">${P.n.toUpperCase()}</text>
-   <g class="pk-cr" fill="none" stroke="${CREAM}" stroke-width="3" stroke-linecap="round"><path d="M100 82 L92 112 L108 130 L94 160 L104 190"/><path d="M92 112 L70 122 M108 130 L134 124 M94 160 L76 176"/></g></svg>`;
+  const s = asset(new RegExp(`/pack-${kind}-`));
+  return uniq(fonts(withClass(s, 'pks')), id);
 }
