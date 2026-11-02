@@ -31,3 +31,5 @@
 - **Obtention** : défi de la semaine = Givre, défi du mois = Glacier, trophée Platine ou Diamant = Aurore. Collection complète = un pack Aurore.
 - **Uniques** : `LA PREMIÈRE` (première vente), `LE COLIS ZÉRO` (premier colis prêt), `LE CINTRE D'OR` (100 ventes). Choix provisoire : le brief ne dit pas comment rattacher une carte à un article réel.
 - **Limite** : les tirages sont locaux à chaque joueur. Pour qu'un tirage de 3 exemplaires soit vraiment rare, il faudrait un compteur central (serveur).
+
+**Illustrations (v38)** : les 43 dessins fournis sont dans `src/modules/cartes-svg/NN-nom.svg` (viewBox 316 × 194). Pour en remplacer un, remplace le fichier du même numéro : le rectangle de fond crème est retiré automatiquement et les marques d'usure sont ajoutées par-dessus selon l'état. Les silhouettes dessinées par code (`SIL` dans `cartes-art.js`) ne servent plus que de secours.
