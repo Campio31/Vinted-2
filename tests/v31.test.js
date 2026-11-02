@@ -174,7 +174,8 @@ describe('Rapports PDF : ventes du mois et rapport fiscal', () => {
     const html = rap.fiscalReportHTML({ key: '2026-09', label: 'septembre 2026', start: '2026-09-01', end: '2026-09-30', due: '2026-10-31' });
     expect(html).toContain('septembre 2026');
     const attendu = r.inc.reduce((a, p) => a + (p.pv || 0), 0);
-    expect(html.replace(/\s/g, '')).toContain(String(attendu).replace('.', ','));
+    /* le séparateur décimal dépend de la langue : on compare les chiffres seuls, en centimes */
+    expect(html.replace(/<[^>]+>/g, '').replace(/\D/g, '')).toContain(String(Math.round(attendu * 100)));
     expect(fin.finDate(app.P.find(p => p.id === 'v31-a'))).toBe('2026-09-15');
     app.P = app.P.filter(p => !p.id.startsWith('v31-'));
   });

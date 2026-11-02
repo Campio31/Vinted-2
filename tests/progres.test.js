@@ -178,6 +178,18 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     expect(front.textContent).not.toMatch(/€/);
   });
 
+  it('chaque carte a son illustration dessinée (43 fichiers), sans fond qui cacherait le disque, avec marques d\'usure selon l\'état', async () => {
+    const K = await import('../src/modules/cartes.js'), A = await import('../src/modules/cartes-art.js');
+    for (const c of K.CARDS) {
+      const svg = A.garmentSVG(c, 1, 5);
+      expect(svg, c.name).toContain('class="cga"');
+      expect(svg, c.name).toContain('viewBox="0 0 316 194"');
+      expect(svg, c.name).not.toContain('<rect width="316" height="194" fill="#f3ead7"/>');
+      expect(svg, c.name).not.toContain('translate(58 10)');
+    }
+    const neuf = A.garmentSVG(K.CARDS[0], 1, 5), use = A.garmentSVG(K.CARDS[0], 1, 1);
+    expect(use.length).toBeGreaterThan(neuf.length);
+  });
   it('les Uniques se gagnent par un geste : première vente, colis expédié', async () => {
     const K = await import('../src/modules/cartes.js');
     app.setCfg({ cartes: null });
