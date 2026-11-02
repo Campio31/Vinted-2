@@ -122,7 +122,7 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     expect(fort[0].target).toBeGreaterThan(faible[0].target);
   });
 
-  it('un défi réussi offre un pack, une seule fois, et le pack s\'ouvre en 3 cartes', async () => {
+  it('un défi réussi offre un pack, une seule fois, et le pack Givre s\'ouvre en 4 cartes', async () => {
     const D = await import('../src/modules/challenges.js'), K = await import('../src/modules/cartes.js');
     const m = new Date().toISOString().slice(0, 7);
     app.P.push({ id: 'prg-add', cat: 'Tshirt', marque: 'Test', statut: 'Disponible', entree: new Date().toISOString().slice(0, 10) });
@@ -136,19 +136,19 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     expect(app.cfg.defis.find(q => q.id === 'test:add').done).toBeTruthy();
     expect(x).toBeGreaterThanOrEqual(5);
     const r = K.openPack('s');
-    expect(r.res).toHaveLength(3);
+    expect(r.res).toHaveLength(4);
     expect(K.state().s).toBe(0);
     expect(K.owned()).toBeGreaterThan(0);
     expect(K.openPack('s')).toBeNull();
     app.P = app.P.filter(p => p.id !== 'prg-add');
   });
 
-  it('Glacier donne 4 cartes dont une Rare ou mieux, Aurore 5 dont deux Épiques ou mieux, et les Uniques ne sortent jamais d\'un pack', async () => {
+  it('Givre donne 4 cartes, Glacier 5 dont une Rare ou mieux, Aurore 5 dont une Épique ou mieux, et les Uniques ne sortent jamais d\'un pack', async () => {
     const K = await import('../src/modules/cartes.js');
     app.setCfg({ cartes: { own: {}, s: 0, p: 40, a: 40, paid: [], pity: 0, sets: [] } });
     for (let i = 0; i < 40; i++) {
-      const g = K.openPack('p'); expect(g.res).toHaveLength(4); expect(g.res.some(x => x.c.r >= 2)).toBe(true);
-      const a = K.openPack('a'); expect(a.res).toHaveLength(5); expect(a.res.filter(x => x.c.r >= 3).length).toBeGreaterThanOrEqual(2);
+      const g = K.openPack('p'); expect(g.res).toHaveLength(5); expect(g.res.some(x => x.c.r >= 2)).toBe(true);
+      const a = K.openPack('a'); expect(a.res).toHaveLength(5); expect(a.res.filter(x => x.c.r >= 3).length).toBeGreaterThanOrEqual(1);
       expect([...g.res, ...a.res].every(x => x.c.r < 6)).toBe(true);
     }
     app.setCfg({ cartes: null });
@@ -178,6 +178,14 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     expect(front.textContent).not.toMatch(/€/);
   });
 
+  it('le logo, les huit dos et les trois packs fournis sont utilisés, avec des identifiants propres à chaque affichage', async () => {
+    const A = await import('../src/modules/cartes-art.js');
+    expect(A.SHEEP).toContain('class="cgl"');
+    expect(A.SHEEP).toContain('Logo Max');
+    for (let r = 0; r <= 6; r++) { const b = A.backSVG(r, 'x' + r); expect(b, 'dos ' + r).toContain('class="cgbk"'); expect(b).toContain('viewBox="0 0 352 496"'); }
+    expect(A.backSVG(3, 'a', true)).not.toBe(A.backSVG(3, 'a', false));
+    for (const k of ['s', 'p', 'a']) { const s = A.packSVG(k, 'p1'), s2 = A.packSVG(k, 'p2'); expect(s).toContain('class="pks"'); expect(s).toContain('viewBox="0 0 300 500"'); expect(s).not.toBe(s2); const ids = [...s.matchAll(/\sid="([^"]+)"/g)].map(m => m[1]); ids.forEach(i => { expect(i.endsWith('-p1')).toBe(true); expect(s).not.toContain('url(#' + i.replace(/-p1$/, '') + ')'); }); }
+  });
   it('chaque carte a son illustration dessinée (43 fichiers), sans fond qui cacherait le disque, avec marques d\'usure selon l\'état', async () => {
     const K = await import('../src/modules/cartes.js'), A = await import('../src/modules/cartes-art.js');
     for (const c of K.CARDS) {
@@ -207,7 +215,7 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     app.setCfg({ cartes: { own: {}, dust: 0, s: 1, p: 0, paid: [], pity: 0, sets: [] } });
     P.openProgress('cartes');
     $('shc').querySelector('[data-popen="s"]').click();
-    expect($('shc').querySelectorAll('.popen .cdk.down')).toHaveLength(3);
+    expect($('shc').querySelectorAll('.popen .cdk.down')).toHaveLength(4);
     $('shc').querySelector('[data-pflip]').click();
     expect($('shc').querySelectorAll('.popen .cdk.down')).toHaveLength(0);
     $('shc').querySelector('[data-pclose]').click();
