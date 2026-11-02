@@ -138,7 +138,8 @@ const spark = '<svg class="cgs" viewBox="0 0 24 24" aria-hidden="true"><path d="
 /** Recto d'une carte (360 × 504, tout se met à l'échelle de sa largeur). */
 export function cardFront(c, e = 5, sup = false) {
   const id = ++uid, dots = [1, 2, 3, 4, 5].map(i => `<i class="pt${i <= e ? ' on' : ''}"></i>`).join('');
-  return `<div class="cdn r${c.r}${sup ? ' sup' : ''}${c.fin ? ' f-' + c.fin : ''}" style="--rc:${RCOL[c.r]}"><div class="cdh"><span class="cdr">${esc(t(RARETES[c.r]).toUpperCase())} · ${POINTS[c.r]} ${t('pts')}</span><b class="cdt">${esc(c.name)}</b><small>${esc(c.type)} · ${esc(c.mat)}</small><span class="cdnn">${nn(c.num)} / ${c.tot}</span></div>
+  const fx = sup || c.r >= 5 || c.fin === 'holo' ? 3 : c.r >= 3 ? 2 : c.r >= 2 ? 1 : 0;      /* intensité des reflets */
+  return `<div class="cdn r${c.r}${sup ? ' sup' : ''}${c.fin ? ' f-' + c.fin : ''} e${e} fx${fx}" style="--rc:${RCOL[c.r]}"><i class="gls"></i><i class="wr"></i><div class="cdh"><span class="cdr">${esc(t(RARETES[c.r]).toUpperCase())} · ${POINTS[c.r]} ${t('pts')}</span><b class="cdt">${esc(c.name)}</b><small>${esc(c.type)} · ${esc(c.mat)}</small><span class="cdnn">${nn(c.num)} / ${c.tot}</span></div>
    <div class="cdd">${spark}${spark}${spark}${garmentSVG(c, id, e)}</div>
    <div class="cdf"><div><span>${t('ÉPOQUE')}</span><b>${c.epoque}</b></div><div><span>${t('TAILLE')}</span><b>${esc(c.taille)}</b></div><div><span>${t('COULEUR')}</span><b><i class="sw" style="background:${COL[c.coul] || '#ccc'}" title="${esc(c.coul)}"></i></b></div><div><span>${t('ÉTAT')}</span><b class="pts" title="${esc(t(ETATS[e - 1]))}">${dots}</b></div></div>
    <div class="cdi"><span>${t('SON HISTOIRE')}</span><em>${esc(c.hist)}</em></div><div class="cdb"><span>${t('COLLECTION HIVER').toUpperCase()}</span><span>${t('TIRAGE')} ${tir(c, sup)}</span></div>${sup ? `<span class="cdsup">${t('SUPER')}</span>` : ''}</div>`;
@@ -147,7 +148,8 @@ export function cardFront(c, e = 5, sup = false) {
 export function cardTile(c, o = {}) {
   const { e = 5, sup = false, n = 1, down = false, big = false, miss = false } = o;
   const uidb = ++uid;
-  return `<button type="button" class="cdk${big ? ' big' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? 'data-flip="1"' : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb, sup) : ''}</span>`}${n > 1 ? `<em class="cdx">×${n}</em>` : ''}</button>`;
+  const chip = miss ? '' : `<span class="cdet e${e}">${esc(t(ETATS[e - 1]))}</span>`;
+  return `<button type="button" class="cdk${big ? ' big tilt' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? `data-flip="1" data-pz="${esc(c.id)},${e},${sup ? 1 : 0}"` : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb, sup) : ''}</span>`}${chip}${n > 1 ? `<em class="cdx">×${n}</em>` : ''}</button>`;
 }
 /* fissures dessinées pendant la charge du pack (jamais visibles au repos) */
 const CRACKS = '<svg class="crk" viewBox="0 0 300 500"><path d="M150 250 L126 204 L146 152 L120 96"/><path d="M150 250 L192 216 L216 160 L204 100"/><path d="M150 250 L108 286 L84 340 L104 396"/><path d="M150 250 L188 292 L176 344 L214 404"/><path d="M126 204 L84 190 L62 150"/><path d="M216 160 L252 150 L270 108"/><path d="M108 286 L64 272"/></svg>';
@@ -158,18 +160,55 @@ export function cartesBody() {
   const bar = `<div class="gcard cartes-h"><div class="gh2"><span>${t(SET_NAME)}</span><span>${got} / ${CARDS.length}</span></div><div class="rl"><b class="gc-g" style="width:${(got / CARDS.length * 100).toFixed(1)}%"></b></div>
    <div class="packs">${['s', 'p', 'a'].map(k => `<div class="pkc"><div class="pkm">${packSVG(k, 'm' + k + (++uid))}</div><b>${s[k] || 0}</b><span>${t(PNAME[k][0])}</span><button type="button" class="btn sm${k === 'p' ? ' mint' : ''}" data-popen="${k}"${s[k] ? '' : ' disabled'}>${t('Ouvrir')}</button></div>`).join('')}</div>
    <div class="gl2">${t('Un défi de la semaine offre un pack Givre, un défi du mois un pack Glacier, un trophée Platine ou Diamant un pack Aurore. Les Uniques se gagnent par un geste, jamais dans un pack.')}</div></div>`;
-  const open = shown ? `<div class="card popen"><h3>${shown.bonus.length ? t('Collection complète : un pack Aurore en cadeau') : t('Ton pack {n}', { n: t(PNAME[shown.kind][0]) })}</h3><div class="stg k-${shown.kind}" aria-hidden="true"><i class="rays"></i><div class="pkw">${packSVG(shown.kind, 'o' + (++uid))}${CRACKS}</div><i class="flash"></i></div><div class="prow n${shown.res.length}">${shown.res.map(x => cardTile(x.c, { e: x.e, sup: x.sup, down: true })).join('')}</div><div class="acts two"><button type="button" class="btn sec" data-pflip="1">${t('Tout révéler')}</button><button type="button" class="btn" data-pclose="1">${t('Ranger dans ma collection')}</button></div></div>` : '';
+  const open = shown ? `<div class="card popen"><h3>${shown.bonus.length ? t('Collection complète : un pack Aurore en cadeau') : t('Ton pack {n}', { n: t(PNAME[shown.kind][0]) })}</h3><div class="stg k-${shown.kind}" aria-hidden="true"><i class="rays"></i><div class="pkw">${packSVG(shown.kind, 'o' + (++uid))}${CRACKS}</div><i class="flash"></i></div><p class="sub" style="margin:4px 0 0">${t('Touche une carte pour la retourner, puis touche-la encore pour la voir en grand.')}</p><div class="prow n${shown.res.length}">${shown.res.map(x => cardTile(x.c, { e: x.e, sup: x.sup, down: true })).join('')}</div><div class="acts two"><button type="button" class="btn sec" data-pflip="1">${t('Tout révéler')}</button><button type="button" class="btn" data-pclose="1">${t('Ranger dans ma collection')}</button></div></div>` : '';
   const one = sel && byId[sel] ? (() => { const c = byId[sel], o = typeof s.own[c.id] === 'object' ? s.own[c.id] : null; return `<div class="card csel">${o ? cardTile(c, { e: o.e || 5, sup: !!o.s, n: o.n, big: true }) : `<div class="prow">${cardTile(c, { miss: true, big: true })}</div>`}<p class="sub" style="margin:8px 0 0">${o ? t('Tu as cette carte') + (o.n > 1 ? ' ×' + o.n : '') + (o.s ? ' · ' + t('version Super') : '') + ' · ' + t('meilleur état : {e}', { e: t(ETATS[(o.e || 5) - 1]) }) : c.unique ? t('Carte Unique : elle se gagne par un geste, jamais dans un pack.') : t('Il te manque cette carte.')}</p></div>`; })() : '';
   const groups = RARETES.map((rn, r) => { const L = CARDS.filter(c => c.r === r); if (!L.length) return ''; const k = L.filter(c => has(s, c.id)).length; return `<div class="card cset"><div class="gh2"><b>${t(rn)}</b><span>${k} / ${L.length}${k === L.length ? ' ✓' : ''}</span></div><div class="cgrid">${L.map(c => { const o = typeof s.own[c.id] === 'object' ? s.own[c.id] : null; return o ? cardTile(c, { e: o.e || 5, sup: !!o.s, n: o.n }) : cardTile(c, { miss: true }); }).join('')}</div></div>`; }).join('');
   return bar + open + one + groups;
 }
+/* retourne une carte du pack : le dos se met de chant, puis le recto se déplie */
+function flip(k) {
+  if (k.classList.contains('fo')) return;
+  document.querySelectorAll('.popen .stg').forEach(x => x.classList.add('skip'));
+  k.classList.add('fo');
+  setTimeout(() => { k.classList.remove('down', 'fo'); k.classList.add('fl', 'tilt'); }, 190);
+}
+/* carte en grand, par-dessus l'écran : on la fait bouger du doigt */
+function zoom(v) {
+  const [id, e, s] = String(v || '').split(','), c = byId[id]; if (!c) return;
+  const z = document.createElement('div'); z.className = 'czm';
+  z.innerHTML = `<div class="czb">${cardTile(c, { e: +e || 5, sup: s === '1', big: true })}<p>${t('Fais bouger la carte du doigt pour voir les reflets.')}</p><button type="button" class="btn sec" data-cz="1">${t('Fermer')}</button></div>`;
+  z.onclick = ev => { if (dragged) { dragged = false; return; } if (ev.target.closest('[data-cz]') || ev.target === z) z.remove(); };
+  document.body.appendChild(z); cartesTilt(z);
+}
+let dragged = false;
+/** Inclinaison en 3D : la carte suit le doigt (ou la souris), les reflets suivent l'inclinaison. */
+export function cartesTilt(root) {
+  if (!root || root._tilt) return; root._tilt = 1;
+  let cur = null, x0 = 0, y0 = 0, down = false;
+  const aim = (k, ev) => {
+    const r = k.getBoundingClientRect(), px = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width)), py = Math.min(1, Math.max(0, (ev.clientY - r.top) / r.height)), w = k.querySelector('.cdw'); if (!w) return;
+    w.style.setProperty('--rx', ((.5 - py) * 34).toFixed(1) + 'deg'); w.style.setProperty('--ry', ((px - .5) * 34).toFixed(1) + 'deg');
+    w.style.setProperty('--mx', (px * 100).toFixed(0) + '%'); w.style.setProperty('--my', (py * 100).toFixed(0) + '%');
+    k.classList.add('tl');
+  };
+  const rest = k => { const w = k && k.querySelector('.cdw'); if (!w) return; ['--rx', '--ry', '--mx', '--my'].forEach(p => w.style.removeProperty(p)); k.classList.remove('tl'); };
+  root.addEventListener('pointerdown', ev => { const k = ev.target.closest('.cdk.tilt:not(.down)'); if (!k) return; cur = k; down = true; x0 = ev.clientX; y0 = ev.clientY; aim(k, ev); });
+  root.addEventListener('pointermove', ev => {
+    const k = ev.target.closest('.cdk.tilt:not(.down)');
+    if (down && cur) { if (Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 8) dragged = true; aim(cur, ev); }
+    else if (ev.pointerType === 'mouse' && k) { if (cur && cur !== k) rest(cur); cur = k; aim(k, ev); }
+  });
+  const end = () => { down = false; if (cur) rest(cur); cur = null; if (dragged) setTimeout(() => { dragged = false; }, 60); };
+  root.addEventListener('pointerup', end); root.addEventListener('pointercancel', end); root.addEventListener('pointerleave', end);
+}
 /** Gère les touches de l'onglet Cartes ; renvoie true si l'écran doit être redessiné, false si non, null si ce n'est pas pour nous. */
 export function cartesClick(e) {
+  if (dragged) { dragged = false; return false; }                   /* un glissé n'est pas une touche */
   const o = e.target.closest('[data-popen]');
   if (o) { const r = openPack(o.dataset.popen); if (r) { shown = r; sel = ''; return true; } return false; }
   const f = e.target.closest('[data-flip]');
-  if (f) { f.classList.remove('down'); return false; }
-  if (e.target.closest('[data-pflip]')) { document.querySelectorAll('.popen .cdk.down').forEach(x => x.classList.remove('down')); return false; }
+  if (f) { if (f.classList.contains('down')) flip(f); else zoom(f.dataset.pz); return false; }
+  if (e.target.closest('[data-pflip]')) { [...document.querySelectorAll('.popen .cdk.down')].forEach((x, i) => setTimeout(() => flip(x), i * 140)); return false; }
   if (e.target.closest('[data-pclose]')) { shown = null; return true; }
   const c = e.target.closest('[data-card]');
   if (c) { sel = sel === c.dataset.card ? '' : c.dataset.card; return true; }

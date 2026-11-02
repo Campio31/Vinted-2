@@ -3,7 +3,7 @@ import { $, LSg, LSs, esc, eur, ok, sold, today } from './core.js';
 import { sheetHead, showSheet } from './tools-index.js';
 import { FLAME, MOIS, streakInfo } from './gamification.js';
 import { defiDone, defiProg, defiTxt, defisOf } from './challenges.js';
-import { cartesBody, cartesClick, checkUniques, packsLeft } from './cartes.js';
+import { cartesBody, cartesClick, cartesTilt, checkUniques, packsLeft } from './cartes.js';
 import { CATS, TIERS, checkTrophies, trophyData } from './trophees.js';
 import { rangBody, rangClick, rangInit } from './rang.js';
 
@@ -63,6 +63,7 @@ function draw() {
     if (tab === 'classement') { const r = await rangClick(e); if (r) draw(); }
   };
   if (tab === 'classement') rangInit();
+  if (tab === 'cartes') cartesTilt($('shc'));
 }
 
 /* message quand tu montes de niveau (le premier calcul ne dit rien : on ne félicite pas pour l'existant) */
