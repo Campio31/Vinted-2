@@ -216,7 +216,15 @@ describe('Défis, cartes, trophées et classement : un seul écran', () => {
     P.openProgress('cartes');
     $('shc').querySelector('[data-popen="s"]').click();
     expect($('shc').querySelectorAll('.popen .cdk.down')).toHaveLength(4);
+    const one = $('shc').querySelector('.popen .cdk.down'); one.click();
+    await new Promise(r => setTimeout(r, 300));
+    expect(one.classList.contains('down')).toBe(false);
+    expect(one.classList.contains('tilt')).toBe(true);
+    expect($('shc').querySelectorAll('.popen .cdk.down')).toHaveLength(3);
+    expect($('shc').querySelector('.popen .cdn .gls')).not.toBeNull();
+    expect($('shc').querySelector('.popen .cdn.e1, .popen .cdn.e2, .popen .cdn.e3, .popen .cdn.e4, .popen .cdn.e5')).not.toBeNull();
     $('shc').querySelector('[data-pflip]').click();
+    await new Promise(r => setTimeout(r, 900));
     expect($('shc').querySelectorAll('.popen .cdk.down')).toHaveLength(0);
     $('shc').querySelector('[data-pclose]').click();
     expect($('shc').querySelector('.popen')).toBeNull();
