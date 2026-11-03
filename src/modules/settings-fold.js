@@ -2,11 +2,12 @@ import { app } from '../state.js';
 import { $, LSg, LSs } from './core.js';
 
 /* ---------- Réglages : chaque carte se replie, sauf celles du compte ---------- */
-/* Toutes les cartes de préférences, de données et d'aide sont repliées au départ ; on ouvre celle dont on a besoin.
+/* Une seule carte reste ouverte : en ouvrir une referme la précédente.
+   Toutes les cartes de préférences, de données et d'aide sont repliées au départ ; on ouvre celle dont on a besoin.
    Les cartes sont réécrites par leur module à chaque affichage : un observateur remet le pli sur le titre. */
 const FOLD = ['lgc', 'thc', 'cfgc', 'cptc', 'rlc', 'cfc', 'bkc', 'inst', 'xic', 'hlp', 'abo'];
 let open = LSg('setOpen', []);
-if (!Array.isArray(open)) open = [];
+open = Array.isArray(open) ? open.slice(0, 1) : [];
 
 function apply() {
   FOLD.forEach(id => {
@@ -24,13 +25,13 @@ function apply() {
 }
 
 function toggle(id) {
-  open = open.includes(id) ? open.filter(x => x !== id) : [...open, id];
+  open = open.includes(id) ? [] : [id];          /* une seule carte ouverte à la fois : ouvrir l'une ferme l'autre */
   LSs('setOpen', open);
   apply();
 }
 
 /** Ouvre une carte des Réglages (pour les liens qui y renvoient). */
-app.openSetCard = id => { if (!open.includes(id)) { open = [...open, id]; LSs('setOpen', open); apply(); } };
+app.openSetCard = id => { if (!open.includes(id)) { open = [id]; LSs('setOpen', open); apply(); } };
 
 const host = $('v-set');
 host.addEventListener('click', e => {

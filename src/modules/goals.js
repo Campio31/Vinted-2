@@ -16,8 +16,12 @@ export function goalCalc(kind,per){const g=+app.cfg[GKEY[kind][per]]||0;if(!g)re
  const total=per==='m'?new Date(y,d.getMonth()+1,0).getDate():((y%4===0&&y%100!==0)||y%400===0?366:365);
  const elapsed=per==='m'?d.getDate():Math.round((Date.UTC(y,d.getMonth(),d.getDate())-Date.UTC(y,0,0))/864e5);
  const left=total-elapsed,reste=Math.max(0,g-cur);
- return{kind,per,g,cur,pct:cur/g,exp:g*elapsed/total,left,reste,rate:per==='m'?reste/Math.max(1,left):reste/Math.max(1,left/30.44)}}
+ /* projection : ce qui sera atteint à la fin de la période si le rythme actuel continue */
+ const proj=cur/Math.max(1,elapsed)*total;
+ return{kind,per,g,cur,pct:cur/g,exp:g*elapsed/total,left,reste,proj,projPct:proj/g,rate:per==='m'?reste/Math.max(1,left):reste/Math.max(1,left/30.44)}}
 const goalColor=d=>d.cur>=d.g?'g':'o';
+/** Ligne « au rythme actuel » : estimation de fin de période et écart avec l'objectif. */
+export const projHTML=d=>{const ok=d.proj>=d.g;return `<div class="gl2 gpj"><b class="gc-${ok?'g':'o'}">${t(d.per==='m'?'Au rythme actuel : {p} à la fin du mois':'Au rythme actuel : {p} à la fin de l\'année',{p:eur(d.proj)})}</b> · ${ok?t('{n} % de l\'objectif, tu devrais l\'atteindre',{n:Math.round(d.projPct*100)}):t('{n} % de l\'objectif, il manquerait {m}',{n:Math.round(d.projPct*100),m:eur(d.g-d.proj)})}</div>`};
 export const bigEur=v=>{const s=Math.abs(v).toFixed(2).split('.');return(v<0?'−':'')+Number(s[0]).toLocaleString(app.LOC)+'<small>'+app.DS+s[1]+' €</small>'};
 const ruler=d=>`<div class="rl"><b class="gc-${goalColor(d)}" style="width:${Math.min(100,Math.max(0,d.pct*100)).toFixed(1)}%"></b></div>`;
 function goalHTML(){const kinds=goalKinds(),out=[],now=new Date(),mois=now.toLocaleDateString(app.LOC,{month:'long'});
@@ -25,7 +29,7 @@ function goalHTML(){const kinds=goalKinds(),out=[],now=new Date(),mois=now.toLoc
   const main=ds[0];
   out.push(`<div class="gcard"><div class="gh2"><span>${esc(title)} · ${lc(glab(main.kind))}</span><button type="button" data-goalset>${t('Modifier')}</button></div>
   <div class="gbig cd">${bigEur(main.cur)}</div>
-  ${ds.map(d=>`<div class="gr"><span>${t('{k} · objectif {g}',{k:lc(glab(d.kind)),g:eurR(d.g)})}</span><b class="gp gc-${goalColor(d)}">${Math.round(d.pct*100)} %</b></div>${ruler(d)}<div class="gl2">${d.kind!==main.kind?eur(d.cur)+' · ':''}${d.cur>=d.g?t('Objectif atteint, bravo !'):t('Reste {r}',{r:eur(d.reste)})+' · '+t(d.per==='m'?'{x} par jour':'{x} par mois',{x:eur(d.rate)})+' · '+t(d.cur>=d.exp?'en avance sur le rythme':'en retard sur le rythme')}</div>`).join('')}</div>`)});
+  ${ds.map(d=>`<div class="gr"><span>${t('{k} · objectif {g}',{k:lc(glab(d.kind)),g:eurR(d.g)})}</span><b class="gp gc-${goalColor(d)}">${Math.round(d.pct*100)} %</b></div>${ruler(d)}<div class="gl2">${d.kind!==main.kind?eur(d.cur)+' · ':''}${d.cur>=d.g?t('Objectif atteint, bravo !'):t('Reste {r}',{r:eur(d.reste)})+' · '+t(d.per==='m'?'{x} par jour':'{x} par mois',{x:eur(d.rate)})+' · '+t(d.cur>=d.exp?'en avance sur le rythme':'en retard sur le rythme')}</div>${d.cur>=d.g?'':projHTML(d)}`).join('')}</div>`)});
  return out.length?out.join(''):'<div class="card goal"><h3>'+t('Objectifs')+'</h3><p class="sub">'+t('Fixe un objectif mensuel ou annuel (bénéfice net, chiffre d\'affaires ou les deux) pour suivre ta progression.')+'</p><button type="button" class="btn sm" data-goalset>'+t('Définir mes objectifs')+'</button></div>'}
 export function goalMini(){let ds=goalKinds().map(k=>goalCalc(k,'m')).filter(Boolean);if(!ds.length)ds=goalKinds().map(k=>goalCalc(k,'y')).filter(Boolean);
  return ds.map(d=>`<button type="button" class="gmini" data-goalset><div class="gr"><span>${t(d.kind==='net'?(d.per==='m'?'bénéfice du mois':'bénéfice de l\'année'):(d.per==='m'?'chiffre d\'affaires du mois':'chiffre d\'affaires de l\'année'))}</span><b class="gp gc-${goalColor(d)}">${Math.round(d.pct*100)} %</b></div>${ruler(d)}<small>${t('{a} sur {b}',{a:eur(d.cur),b:eur(d.g)})}</small></button>`).join('')}

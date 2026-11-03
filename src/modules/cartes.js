@@ -139,7 +139,7 @@ const spark = '<svg class="cgs" viewBox="0 0 24 24" aria-hidden="true"><path d="
 export function cardFront(c, e = 5, sup = false) {
   const id = ++uid, dots = [1, 2, 3, 4, 5].map(i => `<i class="pt${i <= e ? ' on' : ''}"></i>`).join('');
   const fx = sup || c.r >= 5 || c.fin === 'holo' ? 3 : c.r >= 3 ? 2 : c.r >= 2 ? 1 : 0;      /* intensité des reflets */
-  return `<div class="cdn r${c.r}${sup ? ' sup' : ''}${c.fin ? ' f-' + c.fin : ''} e${e} fx${fx}" style="--rc:${RCOL[c.r]}"><i class="gls"></i><i class="wr"></i><div class="cdh"><span class="cdr">${esc(t(RARETES[c.r]).toUpperCase())} · ${POINTS[c.r]} ${t('pts')}</span><b class="cdt">${esc(c.name)}</b><small>${esc(c.type)} · ${esc(c.mat)}</small><span class="cdnn">${nn(c.num)} / ${c.tot}</span></div>
+  return `<div class="cdn r${c.r}${sup ? ' sup' : ''}${c.fin ? ' f-' + c.fin : ''} e${e} fx${fx}" style="--rc:${RCOL[c.r]}"><i class="gls"></i><i class="wr"></i><div class="cdh"><span class="crr">${esc(t(RARETES[c.r]).toUpperCase())} · ${POINTS[c.r]} ${t('pts')}</span><b class="cdt">${esc(c.name)}</b><small>${esc(c.type)} · ${esc(c.mat)}</small><span class="cdnn">${nn(c.num)} / ${c.tot}</span></div>
    <div class="cdd">${spark}${spark}${spark}${garmentSVG(c, id, e)}</div>
    <div class="cdf"><div><span>${t('ÉPOQUE')}</span><b>${c.epoque}</b></div><div><span>${t('TAILLE')}</span><b>${esc(c.taille)}</b></div><div><span>${t('COULEUR')}</span><b><i class="sw" style="background:${COL[c.coul] || '#ccc'}" title="${esc(c.coul)}"></i></b></div><div><span>${t('ÉTAT')}</span><b class="pts" title="${esc(t(ETATS[e - 1]))}">${dots}</b></div></div>
    <div class="cdi"><span>${t('SON HISTOIRE')}</span><em>${esc(c.hist)}</em></div><div class="cdb"><span>${t('COLLECTION HIVER').toUpperCase()}</span><span>${t('TIRAGE')} ${tir(c, sup)}</span></div>${sup ? `<span class="cdsup">${t('SUPER')}</span>` : ''}</div>`;
@@ -148,8 +148,8 @@ export function cardFront(c, e = 5, sup = false) {
 export function cardTile(c, o = {}) {
   const { e = 5, sup = false, n = 1, down = false, big = false, miss = false } = o;
   const uidb = ++uid;
-  const chip = miss ? '' : `<span class="cdet e${e}">${esc(t(ETATS[e - 1]))}</span>`;
-  return `<button type="button" class="cdk${big ? ' big tilt' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? `data-flip="1" data-pz="${esc(c.id)},${e},${sup ? 1 : 0}"` : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb, sup) : ''}</span>`}${chip}${n > 1 ? `<em class="cdx">×${n}</em>` : ''}</button>`;
+  const chip = miss ? '' : `<span class="ces e${e}">${esc(t(ETATS[e - 1]))}</span>`;
+  return `<button type="button" class="cdk${big ? ' big tilt' : ''}${down ? ' down' : ''}${miss ? ' miss' : ''}" ${down ? `data-flip="1" data-pz="${esc(c.id)},${e},${sup ? 1 : 0}"` : `data-card="${esc(c.id)}"`} aria-label="${esc(c.name + ' · ' + t(RARETES[c.r]))}">${miss ? `<span class="cdw">${backSVG(c.r, uidb)}<span class="cdnum">${nn(c.num)}</span></span>` : `<span class="cdw">${cardFront(c, e, sup)}${down ? backSVG(c.r, uidb, sup) : ''}</span>`}${chip}${n > 1 ? `<em class="cnx">×${n}</em>` : ''}</button>`;
 }
 /* fissures dessinées pendant la charge du pack (jamais visibles au repos) */
 const CRACKS = '<svg class="crk" viewBox="0 0 300 500"><path d="M150 250 L126 204 L146 152 L120 96"/><path d="M150 250 L192 216 L216 160 L204 100"/><path d="M150 250 L108 286 L84 340 L104 396"/><path d="M150 250 L188 292 L176 344 L214 404"/><path d="M126 204 L84 190 L62 150"/><path d="M216 160 L252 150 L270 108"/><path d="M108 286 L64 272"/></svg>';

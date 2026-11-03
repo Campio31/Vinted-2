@@ -16,7 +16,7 @@ let flt = LSg('salesFlt', 'all');
 let lim = 60;
 let cf = ''; /* filtre par compte de vente ('' = tous) */
 const host = $('v-sales');
-host.innerHTML = '<div class="srch"><input type="search" id="sq" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="chips" id="sflt" style="margin-bottom:12px"></div><div class="chips" id="scf" style="margin:-4px 0 12px"></div><div id="ssum"></div><div id="slst"></div>';
+host.innerHTML = '<div class="srch"><input type="search" id="sq" autocomplete="off" autocapitalize="none" spellcheck="false"></div><div class="chips" id="sflt" style="margin-bottom:12px"></div><div id="ssum"></div><div id="slst"></div>';
 
 app.salesFilter = k => { flt = k; LSs('salesFlt', k); lim = 60; };
 const isPrep = p => sold(p) && !p.exp && p.vt;
@@ -70,16 +70,17 @@ function renderSales() {
   const F = salesLists(), q = $('sq').value.trim().toLowerCase();
   $('sq').placeholder = t('Rechercher une vente (pièce, @pseudo, code…)');
   if (!(flt in F)) flt = 'all';
-  const nAdv = activeCount(adv, ADVS);
-  $('sflt').innerHTML = [['all', 'Toutes'], ['month', 'Ce mois-ci'], ['prep', 'À préparer'], ['fin', 'À finaliser']].map(([k, l]) => `<button type="button" class="chip sm${flt === k ? ' on' : ''}" data-sf="${k}">${t(l)} · ${F[k].length}</button>`).join('') + `<button type="button" class="chip sm fbtn${nAdv ? ' on' : ''}" data-sfadv="1">${filterLabel(nAdv)}</button>`;
   const CP = app.hasComptes() ? app.comptes() : [];
   if (cf && !CP.some(c => c.id === cf)) cf = '';
-  $('scf').innerHTML = CP.length > 1 ? [['', t('Tous les comptes'), F[flt].length], ...CP.map(c => [c.id, c.n, F[flt].filter(p => (app.compteOf(p) || {}).id === c.id).length])].map(([k, l, n]) => `<button type="button" class="chip sm${cf === k ? ' on' : ''}" data-cf="${esc(k)}">${esc(l)} · ${n}</button>`).join('') : '';
+  /* seuls « Toutes » et « Filtres » restent à l'écran : statut, compte, période, plateforme… sont dans la fenêtre Filtres */
+  const nAdv = activeCount(adv, ADVS) + (flt !== 'all' ? 1 : 0) + (cf ? 1 : 0);
+  $('sflt').innerHTML = `<button type="button" class="chip sm${nAdv ? '' : ' on'}" data-sf="all">${t('Toutes')} · ${F.all.length}</button><button type="button" class="chip sm fbtn${nAdv ? ' on' : ''}" data-sfadv="1">${filterLabel(nAdv)}</button>`;
   const toks = app.searchToks(q), pseudo = q.replace(/^@/, '');
   const TRI = { benD: (a, b) => profit(b) - profit(a), benA: (a, b) => profit(a) - profit(b), prixD: (a, b) => (b.pv || 0) - (a.pv || 0), old: (a, b) => (a.dv || '').localeCompare(b.dv || '') }[adv.tri];
   const L = F[flt].filter(p => !cf || (app.compteOf(p) || {}).id === cf).filter(advOk).filter(p => !q || (toks.length && app.searchScore(p, toks) >= 0) || (p.acheteur || '').toLowerCase().includes(pseudo) || (p.code || '').toLowerCase().includes(q))
     .sort((a, b) => (TRI ? TRI(a, b) : 0) || (b.dv || '').localeCompare(a.dv || '') || (b.vt || 0) - (a.vt || 0));
-  const act = activeChips(adv, ADVS, { pf: v => tv(v), cat: v => tv(v), per: v => ({ 7: t('7 derniers jours'), 30: t('30 derniers jours'), mo: t('Ce mois-ci'), yr: t('Cette année') })[v] });
+  const STN = { month: t('Ce mois-ci'), prep: t('À préparer'), fin: t('À finaliser') };
+  const act = activeChips(Object.assign({}, adv, { st: flt !== 'all' ? flt : '', cf }), ['st', 'cf', ...ADVS], { st: v => STN[v], cf: v => (CP.find(c => c.id === v) || {}).n || v, pf: v => tv(v), cat: v => tv(v), per: v => ({ 7: t('7 derniers jours'), 30: t('30 derniers jours'), mo: t('Ce mois-ci'), yr: t('Cette année') })[v] });
   const ca = L.reduce((a, p) => a + (p.pv || 0), 0), ben = L.reduce((a, p) => a + profit(p), 0), prep = F.prep.length;
   $('ssum').innerHTML = `<div class="card"><div class="kpis ssk"><div class="kpi"><b>${L.length}</b><span>${t(L.length > 1 ? 'ventes' : 'vente')}</span></div><div class="kpi"><b>${eurR(ca)}</b><span>${t('encaissés')}</span></div><div class="kpi"><b>${eurR(ben)}</b><span>${t('de bénéfice')}</span></div></div>${prep && flt !== 'prep' ? `<div class="tdx"><span>${t('{n} à préparer pour l\'envoi', { n: prep })}</span><button type="button" class="btn sec" data-sprep="1">${t('Préparer')}</button></div>` : ''}${flt === 'fin' ? `<div class="tdx"><span>${F.fin.length ? t('Une vente est finalisée quand l\'argent est reçu. Elle compte alors dans ton chiffre d\'affaires à déclarer.') : t('Aucune vente en attente de finalisation.')}</span>${F.fin.length ? `<button type="button" class="btn sec" data-sfin="1">${t('Tout finaliser ({n})', { n: F.fin.length })}</button>` : ''}</div>` : ''}</div>`;
   const page = L.slice(0, lim);
@@ -89,15 +90,15 @@ function renderSales() {
 }
 
 $('sq').addEventListener('input', () => { lim = 60; renderSales(); });
-$('scf').onclick = e => { const b = e.target.closest('[data-cf]'); if (b) { cf = b.dataset.cf; lim = 60; renderSales(); } };
 $('slst').addEventListener('click', e => {
   const fc = e.target.closest('[data-fclr]');
   if (!fc) return;
   e.stopPropagation();
-  if (fc.dataset.fclr === '*') ADVS.forEach(k => { adv[k] = ''; }); else adv[fc.dataset.fclr] = '';
-  advSave(); lim = 60; renderSales();
+  const k = fc.dataset.fclr;
+  if (k === '*') { ADVS.forEach(x => { adv[x] = ''; }); flt = 'all'; cf = ''; } else if (k === 'st') flt = 'all'; else if (k === 'cf') cf = ''; else adv[k] = '';
+  LSs('salesFlt', flt); advSave(); lim = 60; renderSales();
 });
-$('sflt').onclick = e => { if (e.target.closest('[data-sfadv]')) return openSalesFilters(); const b = e.target.closest('[data-sf]'); if (b) { flt = b.dataset.sf; LSs('salesFlt', flt); lim = 60; renderSales(); } };
+$('sflt').onclick = e => { if (e.target.closest('[data-sfadv]')) return openSalesFilters(); const b = e.target.closest('[data-sf]'); if (b) { flt = b.dataset.sf; if (flt === 'all') { ADVS.concat('tri').forEach(x => { adv[x] = ''; }); cf = ''; advSave(); } LSs('salesFlt', flt); lim = 60; renderSales(); } };
 host.addEventListener('click', e => {
   if (e.target.closest('#smore')) { lim += 60; renderSales(); return; }
   if (e.target.closest('[data-sprep]')) { app.openColis(); return; }

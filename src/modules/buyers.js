@@ -30,7 +30,16 @@ function buyersData(){const o={};app.P.filter(p=>sold(p)&&p.acheteur).forEach(p=
 export function buyerLine(ps){const b=buyersData()[pseudoKey(ps)],bl=isBlack(ps);let h='';
  if(bl)h+=`<span class="bw bad">⚠ ${t('Acheteur en liste noire')}${bl.m?' : '+esc(bl.m):''}</span>`;
  if(b)h+=`<span class="bw">${t('{n} commandes, {c} déjà achetés',{n:b.cmd.size,c:eur(b.ca)})}${b.cmd.size>=2?' · '+t('acheteur fidèle'):''}${b.ret?' · '+tn(b.ret,'retour','retours'):''}</span>`;return h}
-document.addEventListener('input',e=>{const el=e.target;if(!el||!/^(qb|lb|e_ps|s_ps|gs_ps)$/.test(el.id))return;let w=$(el.id+'_w');if(!w){w=document.createElement('div');w.id=el.id+'_w';w.className='bwr';el.insertAdjacentElement('afterend',w)}w.innerHTML=buyerLine(el.value)});
+/* acheteurs qui ont déjà acheté, proposés pendant la saisie du pseudo (les plus récents d'abord quand le champ est vide) */
+const BF=/^(qb|lb|e_ps|s_ps|gs_ps)$/;
+export function buyerSuggest(q){const k=pseudoKey(q),all=Object.values(buyersData()).sort((a,b)=>(b.last||'').localeCompare(a.last||''));if(!k)return all.slice(0,4);
+ return[...all.filter(b=>b.k.startsWith(k)),...all.filter(b=>!b.k.startsWith(k)&&b.k.includes(k))].filter(b=>b.k!==k).slice(0,5)}
+function buyerBox(el){let w=$(el.id+'_w');if(!w){w=document.createElement('div');w.id=el.id+'_w';w.className='bwr';el.insertAdjacentElement('afterend',w)}
+ const sg=buyerSuggest(el.value),bl=k=>isBlack(k)?'⚠ ':'';
+ w.innerHTML=(sg.length?`<div class="bsg">${sg.map(b=>`<button type="button" class="chip sm" data-bsug="${esc(b.nom)}" data-bf="${el.id}">${bl(b.nom)}@${esc(String(b.nom).replace(/^@+/,''))} · ${b.cmd.size}</button>`).join('')}</div>`:'')+buyerLine(el.value)}
+document.addEventListener('input',e=>{const el=e.target;if(el&&BF.test(el.id))buyerBox(el)});
+document.addEventListener('focusin',e=>{const el=e.target;if(el&&BF.test(el.id)&&!el.value)buyerBox(el)});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-bsug]');if(!b)return;const el=$(b.dataset.bf);if(!el)return;el.value='@'+String(b.dataset.bsug).replace(/^@+/,'');el.dispatchEvent(new Event('input',{bubbles:true}));if(el.focus)el.focus()});
 let bTab='fid',bQ='';
 export function openBuyers(){const D=buyersData(),all=Object.values(D).sort((a,b)=>b.last.localeCompare(a.last)),nk=Object.keys(noirs());
  const q=pseudoKey(bQ),L=(bTab==='fid'?all.filter(b=>b.cmd.size>=2).sort((a,b)=>b.ca-a.ca):bTab==='tous'?all:nk.map(k=>D[k]||{k,nom:noirs()[k].nom,cmd:new Set(),pieces:[],ca:0,last:'',ret:0})).filter(b=>!q||b.k.includes(q));
