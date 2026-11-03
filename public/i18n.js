@@ -2363,3 +2363,11 @@ K('Carte Unique : elle se gagne par un geste, jamais dans un pack.','Unique card
 K('Il te manque cette carte.','You are missing this card.','Ti manca questa carta.','Te falta esta carta.','Diese Karte fehlt dir.');
 K('Fais bouger la carte du doigt pour voir les reflets.','Move the card with your finger to see the shine.','Muovi la carta con il dito per vedere i riflessi.','Mueve la carta con el dedo para ver los reflejos.','Bewege die Karte mit dem Finger, um die Reflexe zu sehen.');
 K('Touche une carte pour la retourner, puis touche-la encore pour la voir en grand.','Tap a card to turn it over, then tap it again to see it large.','Tocca una carta per girarla, poi toccala ancora per vederla grande.','Toca una carta para darle la vuelta y vuelve a tocarla para verla grande.','Tippe eine Karte an, um sie umzudrehen, und noch einmal, um sie groß zu sehen.');
+K('90 derniers jours','Last 90 days','Ultimi 90 giorni','Últimos 90 días','Letzte 90 Tage');
+K('Mois dernier','Last month','Mese scorso','Mes pasado','Letzter Monat');
+K('le mois dernier','last month','il mese scorso','el mes pasado','im letzten Monat');
+K('Filtres du bilan','Report filters','Filtri del bilancio','Filtros del balance','Bilanzfilter');
+K('Au rythme actuel : {p} à la fin du mois','At the current pace: {p} by the end of the month','Al ritmo attuale: {p} a fine mese','Al ritmo actual: {p} a fin de mes','Im aktuellen Tempo: {p} bis Monatsende');
+K('Au rythme actuel : {p} à la fin de l\'année','At the current pace: {p} by the end of the year','Al ritmo attuale: {p} a fine anno','Al ritmo actual: {p} a fin de año','Im aktuellen Tempo: {p} bis Jahresende');
+K('{n} % de l\'objectif, tu devrais l\'atteindre','{n} % of the goal, you should reach it','{n} % dell\'obiettivo, dovresti raggiungerlo','{n} % del objetivo, deberías alcanzarlo','{n} % des Ziels, du solltest es erreichen');
+K('{n} % de l\'objectif, il manquerait {m}','{n} % of the goal, {m} short','{n} % dell\'obiettivo, mancherebbero {m}','{n} % del objetivo, faltarían {m}','{n} % des Ziels, es fehlen {m}');
