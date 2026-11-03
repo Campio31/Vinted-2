@@ -125,7 +125,9 @@ describe('Bilan : bénéfice cumulé et objectif', () => {
     const c = $('dsh').querySelector('[data-ck="courbe"]');
     expect(c).toBeTruthy();
     expect(c.style.display).not.toBe('none');
-    expect(c.previousElementSibling.className).toMatch(/goal|gcard/);
+    /* depuis la v45 le bénéfice net s'intercale entre l'objectif et la courbe */
+    expect(c.previousElementSibling.className).toMatch(/hero/);
+    expect(c.previousElementSibling.previousElementSibling.className).toMatch(/goal|gcard/);
     /* sans objectif : toujours juste après la carte Objectifs, pas tout en bas */
     app.setCfg({ goal: 0, goalCA: 0, goalY: 0, goalYCA: 0 }, true);
     nav.go('dash'); app.renderDash(); await tick(40);

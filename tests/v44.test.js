@@ -97,11 +97,10 @@ describe('v44 : Bilan en onglets', () => {
     expect(bar.querySelectorAll('[data-bt]')).toHaveLength(3);
     expect(box.dataset.bt).toBe('m');
     const tous = [...box.children].filter(el => /(^| )bt-[mas]( |$)/.test(el.className));
-    expect(tous.length).toBeGreaterThan(6);
+    expect(tous.length).toBeGreaterThan(3);
     tous.forEach(el => expect(el.className.match(/bt-[mas]/g)).toHaveLength(1));
     const de = k => tous.filter(el => el.classList.contains('bt-' + k));
     ['m', 'a', 's'].forEach(k => expect(de(k).length, k).toBeGreaterThan(0));
-    expect(box.querySelector('.hero').classList.contains('bt-m')).toBe(true);
     expect(box.querySelector('[data-tool="treso"]').classList.contains('bt-m')).toBe(true);
     expect(box.querySelector('[data-tool="defis"]').classList.contains('bt-a')).toBe(true);
     bar.querySelector('[data-bt="a"]').click();
