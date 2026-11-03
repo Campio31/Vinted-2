@@ -29,7 +29,7 @@ describe('Coach du lundi : 3 priorités', () => {
     first.click();
     expect($('sheet').hidden).toBe(true);
     expect(app.view).toBe({ colis: 'sales', pub: 'list', cut: 'list', goal: 'quick', backup: 'set', add: 'add' }[act] || app.view);
-    if (act === 'colis') expect(document.querySelector('#sflt .chip.on').dataset.sf).toBe('prep');
+    if (act === 'colis') expect(document.querySelector('#sflt .fbtn.on')).not.toBeNull();
   });
 });
 

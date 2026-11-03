@@ -37,7 +37,9 @@ describe('onglet Vente', () => {
     expect(rows.length).toBeGreaterThan(0);
     expect(rows.every(r => app.P.find(p => p.id === r.dataset.id).acheteur === 'lea_m')).toBe(true);
     $('sq').value = ''; $('sq').dispatchEvent(new Event('input'));
-    document.querySelector('[data-sf="prep"]').click();
+    document.querySelector('[data-sfadv]').click();
+    document.querySelector('[data-fg="st"][data-fv="prep"]').click();
+    document.getElementById('fl_ok').click();
     const prep = app.colisList();
     expect(document.querySelectorAll('#slst .li').length).toBe(Math.min(60, prep.length));
     document.querySelector('[data-sf="all"]').click();

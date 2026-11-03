@@ -126,22 +126,25 @@ describe('comptes de vente : Vente et Bilan', () => {
   it('l\'onglet Vente se filtre par compte', async () => {
     avecComptes();
     nav.go('sales'); app.salesFilter('all'); await tick(30);
-    expect($('scf').querySelectorAll('[data-cf]').length).toBe(3);
+    $('sflt').querySelector('[data-sfadv]').click();
+    expect($('shc').querySelectorAll('[data-fg="cf"]').length).toBe(2);
     const tout = $('slst').querySelectorAll('.li').length;
-    $('scf').querySelector('[data-cf="cperso"]').click(); await tick(20);
+    $('shc').querySelector('[data-fg="cf"][data-fv="cperso"]').click(); await tick(20); document.getElementById('fl_ok').click();
     const n = $('slst').querySelectorAll('.li').length;
     expect(n).toBeGreaterThan(0);
     expect(n).toBeLessThan(tout);
-    $('scf').querySelector('[data-cf=""]').click(); await tick(20);
+    $('sflt').querySelector('[data-sf="all"]').click(); await tick(20);
   });
   it('le Bilan se filtre par compte et affiche la carte Par compte', async () => {
     avecComptes();
     nav.go('dash'); app.period = 0; app.cptFilt = ''; app.renderDash(); await tick(30);
-    expect($('per').querySelectorAll('[data-cf]').length).toBe(3);
+    $('per').querySelector('[data-badv]').click();
+    expect($('shc').querySelectorAll('[data-fg="cf"]').length).toBe(2);
+    document.getElementById('fl_ok').click();
     expect($('dsh').textContent).toMatch(/Par compte|By account/);
     const hero = () => $('dsh').querySelector('.hero .s').textContent;
     const tout = hero();
-    $('per').querySelector('[data-cf="cperso"]').click(); await tick(20);
+    $('per').querySelector('[data-badv]').click(); $('shc').querySelector('[data-fg="cf"][data-fv="cperso"]').click(); await tick(20); document.getElementById('fl_ok').click();
     expect(hero()).not.toBe(tout);
     app.cptFilt = ''; app.renderDash();
   });

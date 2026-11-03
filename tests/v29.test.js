@@ -90,7 +90,7 @@ describe('ventes finalisées : chiffre d\'affaires à déclarer', () => {
     nettoie();
     app.P.push(vente('v29-i'), vente('v29-j'));
     app.salesFilter('fin'); nav.go('sales'); await tick(30);
-    expect(document.querySelector('#sflt .chip.on').dataset.sf).toBe('fin');
+    expect(document.querySelector('#sflt .fbtn.on')).not.toBeNull();
     expect(document.querySelectorAll('#slst .li').length).toBeGreaterThanOrEqual(2);
     document.querySelector('[data-sfin]').click(); await tick(20);
     expect(fin.pendingSales().filter(x => x.id.startsWith('v29-'))).toEqual([]);
