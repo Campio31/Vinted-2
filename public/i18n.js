@@ -2427,3 +2427,11 @@ K('{n} tâche reportée à demain.','{n} task postponed to tomorrow.','{n} attiv
 K('{n} tâches reportées à demain.','{n} tasks postponed to tomorrow.','{n} attività rimandate a domani.','{n} tareas aplazadas a mañana.','{n} Aufgaben auf morgen verschoben.');
 K('Les remettre','Put them back','Rimettile','Volver a ponerlas','Zurückholen');
 K('Flèches : évolution par rapport à la période précédente de même durée.','Arrows: change compared with the previous period of the same length.','Frecce: variazione rispetto al periodo precedente della stessa durata.','Flechas: evolución respecto al periodo anterior de la misma duración.','Pfeile: Veränderung gegenüber dem vorherigen Zeitraum gleicher Länge.');
+K('Activité','Activity','Attività','Actividad','Aktivität');
+K('Prix de vente conseillé','Suggested selling price','Prezzo di vendita consigliato','Precio de venta recomendado','Empfohlener Verkaufspreis');
+K('Finances','Finances','Finanze','Finanzas','Finanzen');
+K('Sans compte','No account','Senza account','Sin cuenta','Ohne Konto');
+K('Organiser','Organise','Organizza','Organizar','Ordnen');
+K('Regrouper par compte','Group by account','Raggruppa per account','Agrupar por cuenta','Nach Konto gruppieren');
+K('Regroupé par compte','Grouped by account','Raggruppato per account','Agrupado por cuenta','Nach Konto gruppiert');
+K('Le compte où tu comptes vendre cette pièce : tu pourras ranger ton stock par compte.','The account where you plan to sell this item: you will be able to organise your stock by account.','L\'account su cui pensi di vendere questo capo: potrai organizzare lo stock per account.','La cuenta donde piensas vender esta prenda: podrás organizar tu stock por cuenta.','Das Konto, auf dem du dieses Teil verkaufen willst: So kannst du deinen Bestand nach Konto ordnen.');
