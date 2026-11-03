@@ -145,7 +145,9 @@ export function applyBatch(kind, ids, rule) {
 }
 
 /* ---- écran : carte « Ma journée » en haut du Bilan ---- */
-let openId = '', excl = new Set(), showLog = false, showSet = false;
+let openId = '', excl = new Set(), showLog = false, showSet = false, jOpen = false;
+/* Ma journée est aussi un outil : il ouvre la carte même quand elle est repliée (tout est fait) */
+app.openJournee = () => { jOpen = true; go('dash'); };
 const KIND_LABEL = { fin: 'Ventes finalisées', colis: 'Colis prêts', pub: 'Pièces publiées', prix: 'Prix mis à jour' };
 function taskHTML(x) {
   const mode = apMode(), batch = x.kind && mode === 'assist', isOpen = openId === x.id && batch;
@@ -175,7 +177,9 @@ export function journeeHTML() {
   const hi = new Date().getHours(), hello = hi < 12 ? t('Bonjour') : hi < 18 ? t('Bon après-midi') : t('Bonsoir');
   const d0 = new Date(); d0.setHours(0, 0, 0, 0);
   const done = log.filter(e => e.k !== 'rule' && !e.undone && e.t >= d0.getTime()).length, total = done + T.length, sr = streakInfo().n;
-  return `<div class="card tdy ap" data-ck="today" data-lb="${esc(t('Ma journée'))}"><div class="aph0">${ringHTML(done, total)}<div><h3 style="margin:0 0 2px">${t('Ma journée')}</h3><p class="sub" style="margin:0">${hello} ! ${T.length ? t(T.length > 1 ? 'Voici tes {n} priorités.' : 'Voici ta priorité.', { n: T.length }) : t('Tout est à jour : rien d\'urgent aujourd\'hui.')}</p>${sr > 1 ? `<p class="sub" style="margin:2px 0 0">${t('{n} jours de suite', { n: sr })}</p>` : ''}</div></div>
+  /* tout est fait : la carte se replie en une ligne (on la rouvre d'un appui, ou depuis Outils) */
+  if (!T.length && !jOpen) return `<div class="card tdy ap apdone" data-ck="today" data-lb="${esc(t('Ma journée'))}"><button type="button" class="apx0" data-ap="jopen"><span class="apok" aria-hidden="true">✓</span><span class="apx"><b>${t('Ma journée est terminée')}</b><small>${t('Tout est à jour : rien d\'urgent aujourd\'hui.')}</small></span><span class="apb">${t('Ouvrir')}</span></button></div>`;
+  return `<div class="card tdy ap" data-ck="today" data-lb="${esc(t('Ma journée'))}"><div class="aph0">${ringHTML(done, total)}<div><h3 style="margin:0 0 2px">${t('Ma journée')}</h3><p class="sub" style="margin:0">${hello} ! ${T.length ? t(T.length > 1 ? 'Voici tes {n} priorités.' : 'Voici ta priorité.', { n: T.length }) : t('Tout est à jour : rien d\'urgent aujourd\'hui.')}${T.length ? '' : `<button type="button" class="lnk" data-ap="jclose">${t('Réduire')}</button>`}</p>${sr > 1 ? `<p class="sub" style="margin:2px 0 0">${t('{n} jours de suite', { n: sr })}</p>` : ''}</div></div>
    <div class="apc">${TILES.map(x => tileHTML(x, T, mode)).join('')}</div>
    ${T.length ? `<div class="hint apsw">${t('Glisse une tâche vers la droite pour la faire, vers la gauche pour la reporter à demain.')}</div>` : ''}
    ${T.map(x => `<div class="apw" data-tid="${esc(x.id)}"><div class="apbg" aria-hidden="true"><span>${t('Faire')}</span><span>${t('Reporter')}</span></div>${taskHTML(x)}</div>`).join('')}
@@ -234,6 +238,8 @@ $('dsh').addEventListener('click', e => { if (swallow) { e.stopPropagation(); e.
 $('dsh').addEventListener('click', e => {
   const b = e.target.closest('[data-ap]'); if (!b) return;
   const [a, v] = [b.dataset.ap.split(':')[0], b.dataset.ap.split(':').slice(1).join(':')];
+  if (a === 'jopen') { jOpen = true; return app.renderDash(); }
+  if (a === 'jclose') { jOpen = false; return app.renderDash(); }
   if (a === 'snooze') return snoozeTask(v);
   if (a === 'unsnooze') { app.setCfg({ apSnooze: {} }); return app.renderAll(); }
   if (a === 'open') { openId = openId === v ? '' : v; excl = new Set(); return app.renderDash(); }

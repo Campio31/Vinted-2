@@ -40,16 +40,36 @@ app.renderDash = function () {
   /* rien à classer, ou bilan réduit du mode simple : pas d'onglets */
   if (!items.length || items.every(el => el.style.display === 'none')) { box.querySelectorAll('.btabs').forEach(b => b.remove()); delete box.dataset.bt; return; }
   items.forEach(el => { el.classList.remove('bt-m', 'bt-a', 'bt-s'); el.classList.add('bt-' + tabOf(el)); });
-  /* indicateurs (cartes compactes et chiffres clés) : un bandeau qui défile sur le côté, un par onglet */
+  /* Finances : la trésorerie est un menu déroulant, les chiffres clés sont réunis sur une seule carte.
+     Les autres onglets gardent leurs indicateurs en bandeau qui défile sur le côté. */
   TABS.forEach(([k]) => {
     const c = items.filter(el => tabOf(el) === k && el.matches('button.minic, .kpis'));
     if (!c.length) return;
+    if (k === 'm') {
+      const tr = c.find(el => el.dataset.tool === 'treso'), ks = c.filter(el => el.classList.contains('kpis')), first = c[0];
+      if (ks.length) {
+        const card = document.createElement('div');
+        card.className = 'card bkp bt-m'; card.dataset.ck = 'chiffres'; card.dataset.lb = t('Chiffres clés');
+        card.innerHTML = `<h3>${t('Chiffres clés')}</h3>`;
+        ks.forEach(el => card.appendChild(el));
+        first.before(card);
+      }
+      if (tr) {
+        const lab = tr.querySelector('.l'), big = tr.querySelector('b'), d = document.createElement('details');
+        d.className = 'card bdrop bt-m'; d.dataset.ck = 'treso'; d.dataset.lb = t('Trésorerie');
+        const sm = document.createElement('summary');
+        sm.innerHTML = `<span class="bdl">${lab ? lab.textContent : t('Trésorerie')}</span><b>${big ? big.childNodes[0].textContent.trim() : ''}</b>`;
+        const body = document.createElement('div'); body.className = 'bdb';
+        d.append(sm, body);
+        tr.before(d); body.appendChild(tr);
+      }
+      return;
+    }
     const strip = document.createElement('div');
     strip.className = 'bstrip bt-' + k;
     c[0].before(strip);
     c.forEach(el => strip.appendChild(el));
-  });
-  /* la barre se place juste avant la première carte classée */
+  });  /* la barre se place juste avant la première carte classée */
   box.querySelectorAll('.btabs').forEach(b => b.remove());
   kids(box)[0].insertAdjacentHTML('beforebegin', barHTML());
   box.dataset.bt = tab;

@@ -69,10 +69,10 @@ export function mkForm(host,S,o){
   /* prix de vente conseillé : l'appli le propose, on ne le saisit plus */
   const ra=S.cat?app.advice(S):null,recoRow=ra&&ra.ok&&ra.reco>0?`<div class="pr2 reco"><span>${t('Prix de vente conseillé')}</span><b>${eur(ra.reco)}</b></div>`:'';
   return`<div class="pot pot-${lvl}${p.stock>=3?' sat':''}" id="pot"><div class="pt"><span class="mono">${t('potentiel de vente')}${tag?' · '+esc(tag):''}</span><b>${esc(tt)}</b></div>${rows}${recoRow}<div class="ps">${esc(note)}</div>${l2?`<div class="ps w">${esc(l2)}</div>`:''}</div>`} function updatePot(){const e=host.querySelector('#pot');if(!e)return;const t=document.createElement('div');t.innerHTML=potHTML();e.replaceWith(t.firstChild)}
- function progHTML(){const L=['cat','sub','marque','taille','genre','grade','achat','prov'].filter(k=>k!=='sub'||hasSub());
-  const filled=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='marque'?!!(S.marque||'').trim():!!S[k];
-  const n=L.length,d=L.filter(filled).length;
-  return`<div class="prog"><div class="mono">${t('étape {a} sur {b}',{a:Math.min(d+1,n),b:n})}</div><div class="pg">${L.map((k,i)=>`<i class="${filled(k)?'f':i===d?'c':''}"></i>`).join('')}</div></div>`}
+ /* les étapes suivent les onglets de saisie, dans l'ordre : l'étape en cours est le premier onglet ouvert, les précédents sont faits ou passés */
+ function progHTML(){const L=ORDER.filter(k=>k!=='det'&&(k!=='sub'||hasSub())&&(k!=='stk'||app.hasComptes()));
+  const n=L.length,i0=L.findIndex(k=>G.has(k)),c=i0<0?n:i0;
+  return`<div class="prog"><div class="mono">${t('étape {a} sur {b}',{a:Math.min(c+1,n),b:n})}</div><div class="pg">${L.map((k,i)=>`<i class="${i<c?'f':i===c?'c':''}"></i>`).join('')}</div></div>`}
  function updateRenta(){const el=host.querySelector('#rp');if(!el)return;const a=num(S.achat),v=num(S.pvise);
   if(isNaN(a)||isNaN(v)||v<=0){el.innerHTML='<div class="hint">'+t('Saisis le prix d\'achat et le prix de vente visé pour voir la marge.')+'</div>';return}
   const fr=app.defFrais(v,'Vinted'),r=app.renta(a,v,fr,app.estDelai(S,v));el.innerHTML=`<div class="pv">${app.rentaHTML(r)}<div class="hint" style="margin-top:6px">${esc(t('Frais comptés : {f} (emballage, envoi et commission d\'après tes réglages)',{f:eur(fr)}))}</div></div>`}

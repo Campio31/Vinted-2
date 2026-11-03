@@ -59,6 +59,8 @@ function finish(skip) {
   close();
   if (!skip && wantEx && !app.P.length) app.loadExamples();
   go('dash');
+  /* premier lancement : les questionnaires des indicateurs s'ouvrent une fois */
+  if (!app.cfg.setupDone) setTimeout(() => { if (!app.cfg.setupDone && app.openSetup) app.openSetup(); }, 500);
 }
 
 export function openWelcome() {
