@@ -436,3 +436,20 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .bstrip>.minic{flex:0 0 74%;max-width:270px;margin:0;scroll-snap-align:start;min-height:0}
 .bstrip>.kpis{flex:0 0 auto;display:flex;gap:10px;margin:0;scroll-snap-align:start}
 .bstrip>.kpis .kpi{flex:0 0 auto;min-width:118px}
+/* ===== v46 ===== */
+.bdrop summary{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;list-style:none;min-height:44px}
+.bdrop summary::-webkit-details-marker{display:none}
+.bdrop summary:after{content:"";width:9px;height:9px;border-right:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(45deg);margin:-4px 4px 0 6px;flex:none;transition:transform .15s}
+.bdrop[open] summary:after{transform:rotate(-135deg);margin-top:4px}
+.bdrop summary .bdl{font-family:var(--fm);font-size:13px;color:var(--mute);flex:1;min-width:0}
+.bdrop summary b{font-size:22px;font-variant-numeric:tabular-nums}
+.bdb{margin-top:8px}.bdb .minic{box-shadow:none;background:var(--soft);margin:0;width:100%}
+.bkp .kpis{margin:0 0 8px}.bkp .kpis:last-child{margin-bottom:0}
+/* Ma journée repliée : une seule ligne */
+.apdone{padding:0}
+.apx0{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:12px 14px;background:transparent;border:0;text-align:left;color:var(--ink);cursor:pointer;font:inherit}
+.apx0 .apx{flex:1;min-width:0}.apx0 small{display:block;color:var(--mute);font-size:12px}
+.apok{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--mint);color:#fff;font-weight:800;flex:none}
+.apx0 .apb{font-size:13px;font-weight:700;color:var(--mute)}
+/* configuration des indicateurs au premier lancement */
+.su-c{font-size:22px;font-weight:800;color:var(--mute)}.su-ok .su-c{color:var(--mint)}
