@@ -124,10 +124,11 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     app.cfg = Object.assign({}, app.cfg, { cash: null, cashDate: '' });
   });
 
-  it('le bilan mensuel est une carte du Bilan qui ouvre le rapport', async () => {
+  it('le rapport PDF est un bouton en haut du Bilan, à côté des Réglages', async () => {
     nav.go('dash'); app.renderDash();
-    const card = document.querySelector('#dsh [data-tool="rapport"]');
-    expect(card).toBeTruthy();
+    expect(document.querySelector('#dsh [data-tool="rapport"]')).toBeNull();
+    expect(document.getElementById('rpt').hidden).toBe(false);
+    expect(document.getElementById('rpt').nextElementSibling.id).toBe('tl');
     await app.openTool('rapport');
     expect($('shc').textContent).toContain(t('Bilan mensuel'));
     $('sheet').hidden = true;

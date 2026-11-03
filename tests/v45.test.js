@@ -32,17 +32,22 @@ describe('v45 : Bilan', () => {
     expect(hero.className).not.toMatch(/bt-[mas]/);
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
   });
-  it('les indicateurs de Finances sont dans un bandeau qui défile', async () => {
+  it('Finances : trésorerie en menu déroulant, chiffres clés sur une seule carte, pas de plafond ; Activité en bandeau', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
-    const strip = $('dsh').querySelector('.bstrip.bt-m');
-    expect(strip).not.toBeNull();
-    expect(strip.querySelector('[data-tool="treso"]')).not.toBeNull();
-    expect(strip.querySelector('.kpis')).not.toBeNull();
-    expect($('dsh').querySelector(':scope > [data-tool="treso"]')).toBeNull();
-    expect($('dsh').querySelector('.bstrip.bt-a [data-tool="defis"]')).not.toBeNull();
-    /* « Personnaliser » retrouve toujours chaque carte, même rangée dans un bandeau */
-    $('dsh').querySelector('[data-dcust]').click(); await tick(20);
-    expect($('shc').querySelectorAll('.dcr').length).toBeGreaterThan(8);
+    const box = $('dsh');
+    expect(box.querySelector('[data-tool="fisc"]')).toBeNull();
+    const d = box.querySelector('details.bdrop.bt-m');
+    expect(d).not.toBeNull();
+    expect(d.querySelector('summary b')).not.toBeNull();
+    expect(d.querySelector('[data-tool="treso"]')).not.toBeNull();
+    const k = box.querySelector('.card.bkp.bt-m');
+    expect(k).not.toBeNull();
+    expect(k.querySelector('.kpis')).not.toBeNull();
+    expect(box.querySelectorAll(':scope > .kpis')).toHaveLength(0);
+    expect(box.querySelector('.bstrip.bt-a [data-tool="defis"]')).not.toBeNull();
+    /* « Personnaliser » retrouve toujours chaque carte */
+    box.querySelector('[data-dcust]').click(); await tick(20);
+    expect($('shc').querySelectorAll('.dcr').length).toBeGreaterThan(6);
     $('sheet').hidden = true;
   });
 });

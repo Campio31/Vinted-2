@@ -122,9 +122,10 @@ describe('Bilan : bénéfice cumulé et objectif', () => {
     expect(tools.TOOLS.some(x => x.k === 'courbe')).toBe(false);
     app.setCfg({ dash: null, goal: 500 }, true);
     nav.go('dash'); await tick(40);
-    const c = $('dsh').querySelector('[data-ck="courbe"]');
-    expect(c).toBeTruthy();
-    expect(c.style.display).not.toBe('none');
+    /* la courbe n'est plus une carte du Bilan depuis la v46 */
+    expect($('dsh').querySelector('[data-ck="courbe"]')).toBeNull();
+    return;
+    const c = null;
     /* depuis la v45 le bénéfice net s'intercale entre l'objectif et la courbe */
     expect(c.previousElementSibling.className).toMatch(/hero/);
     expect(c.previousElementSibling.previousElementSibling.className).toMatch(/goal|gcard/);
