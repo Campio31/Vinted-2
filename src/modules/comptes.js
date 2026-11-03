@@ -49,7 +49,7 @@ const save0 = app.save;
 app.save = function (p, ...rest) {
   if (p && hasComptes()) {
     const o = app.P.find(x => x.id === p.id);
-    if (sold(p) && !p.cpt && !(o && sold(o))) { const c = compteDef(p.canal || 'Vinted'); if (c) p = Object.assign({}, p, { cpt: c.id }); }
+    if (sold(p) && !p.cpt && !(o && sold(o))) { const c = compteById(p.stk) || compteDef(p.canal || 'Vinted'); if (c) p = Object.assign({}, p, { cpt: c.id }); }
     else if (!sold(p) && p.cpt) { p = Object.assign({}, p); delete p.cpt; }
   }
   return save0.call(this, p, ...rest);

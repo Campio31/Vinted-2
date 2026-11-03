@@ -41,7 +41,7 @@ globalThis.MADEIN0 = MADEIN0;
 export const mrg=(a,b)=>[...new Set([...(a||[]),...(b||[])])];
 const dimsFor=cat=>HAUT.includes(cat)?DH:BAS.includes(cat)?DB:[...DH,...DB];
 /* Groupes dans l'ordre de saisie : un seul est ouvert au départ (la catégorie), le suivant s'ouvre quand le précédent est rempli. */
-const ORDER=['cat','sub','marque','taille','genre','grade','achat','renta','prov','coul','mat','photo','dim','etat','ballot','madein','dates','det'];
+const ORDER=['cat','sub','marque','taille','genre','grade','achat','prov','stk','coul','mat','photo','dim','etat','ballot','madein','dates','det'];
 const isNeuf=e=>/^neuf/i.test(e||'');
 export const COLORS={Bleu:['#2F6FDE','#fff'],Noir:['#1A1A1A','#fff'],Blanc:['#FFFFFF','#17233B'],Gris:['#8A8F98','#fff'],Rouge:['#D32F2F','#fff'],Vert:['#2E9E5B','#fff'],Beige:['#D8C3A5','#17233B'],Violet:['#7E57C2','#fff'],Marron:['#7B4A2D','#fff'],Rose:['#F48FB1','#17233B'],Jaune:['#F5C518','#17233B'],Orange:['#F57C00','#17233B'],'Bleu marine':['#1B2A57','#fff'],Kaki:['#7A7A3A','#fff'],Bordeaux:['#6E1A2C','#fff'],Moutarde:['#D9A21B','#17233B'],Corail:['#F26B5B','#17233B'],Turquoise:['#1BB5B0','#17233B'],Multicolore:['conic-gradient(#D32F2F,#F5C518,#2E9E5B,#2F6FDE,#7E57C2,#D32F2F)','#17233B']};
 export const abc=a=>[...a].sort((x,y)=>String(tv(x)).localeCompare(String(tv(y)),app.LOC,{sensitivity:'base',numeric:true}));
@@ -55,7 +55,7 @@ export function mkForm(host,S,o){
  const group=(f,vals,multi,allowNew)=>{const cur=multi?(S[f]||[]):[S[f]];const set=[...vals];cur.forEach(c=>{if(c&&!set.includes(c))set.unshift(c)});
   return`<div class="chips" data-g="${f}" ${multi?'data-multi="1"':''}>${set.map(v=>chip(f,v,cur.includes(v))).join('')}${allowNew?(newField===f?`<input type="text" class="newin" data-n="${f}" placeholder="${t('Nouveau…')}" style="width:150px">`:`<button type="button" class="chip add" data-new="${f}">${t('+ autre')}</button>`):''}</div>`};
  const hasSub=()=>!!(S.cat&&(mrg(SUBS0[S.cat],subsOf(S.cat)).length||S.sub));
- function advance(k){if(edit||ORDER.indexOf(k)<0)return;G.delete(k);let i=ORDER.indexOf(k)+1;if(ORDER[i]==='sub'&&!hasSub())i++;const n=ORDER[i];if(n){G.add(n);focusKey=n}}
+ function advance(k){if(edit||ORDER.indexOf(k)<0)return;G.delete(k);let i=ORDER.indexOf(k)+1;if(ORDER[i]==='sub'&&!hasSub())i++;if(ORDER[i]==='stk'&&!app.hasComptes())i++;const n=ORDER[i];if(n){G.add(n);focusKey=n}}
  function potHTML(){const p=app.potential(S),mq=(S.marque||'').trim();let lvl='n',tt=t('Choisis une catégorie'),tag='',rows='',note=t('Le potentiel de vente apparaît d\'après tes ventes passées.'),l2='';
   const row=(lab,s)=>`<div class="pr2"><span>${esc(lab)}</span><b>${s.n?tn(s.n,'vente','ventes')+(s.dm!==null?' · '+dj(s.dm):'')+(s.pm!==null?' · '+eur(s.pm):''):t('aucune vente')}</b></div>`;
   if(S.cat){
@@ -66,9 +66,11 @@ export function mkForm(host,S,o){
    if(p.stock>0){const cr=[t('catégorie')];if(mq)cr.unshift(t('marque'));if(S.taille)cr.push(t('taille'));
     l2=(p.stock>=3?t('Attention : '):'')+t('déjà {n} en stock (même {c})',{n:p.stock,c:andJoin(cr)})}}
   setPotBg(lvl);
-  return`<div class="pot pot-${lvl}${p.stock>=3?' sat':''}" id="pot"><div class="pt"><span class="mono">${t('potentiel de vente')}${tag?' · '+esc(tag):''}</span><b>${esc(tt)}</b></div>${rows}<div class="ps">${esc(note)}</div>${l2?`<div class="ps w">${esc(l2)}</div>`:''}</div>`} function updatePot(){const e=host.querySelector('#pot');if(!e)return;const t=document.createElement('div');t.innerHTML=potHTML();e.replaceWith(t.firstChild)}
- function progHTML(){const L=['cat','sub','marque','taille','genre','grade','achat','renta','prov'].filter(k=>k!=='sub'||hasSub());
-  const filled=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='renta'?num(S.pvise)>0:k==='marque'?!!(S.marque||'').trim():!!S[k];
+  /* prix de vente conseillé : l'appli le propose, on ne le saisit plus */
+  const ra=S.cat?app.advice(S):null,recoRow=ra&&ra.ok&&ra.reco>0?`<div class="pr2 reco"><span>${t('Prix de vente conseillé')}</span><b>${eur(ra.reco)}</b></div>`:'';
+  return`<div class="pot pot-${lvl}${p.stock>=3?' sat':''}" id="pot"><div class="pt"><span class="mono">${t('potentiel de vente')}${tag?' · '+esc(tag):''}</span><b>${esc(tt)}</b></div>${rows}${recoRow}<div class="ps">${esc(note)}</div>${l2?`<div class="ps w">${esc(l2)}</div>`:''}</div>`} function updatePot(){const e=host.querySelector('#pot');if(!e)return;const t=document.createElement('div');t.innerHTML=potHTML();e.replaceWith(t.firstChild)}
+ function progHTML(){const L=['cat','sub','marque','taille','genre','grade','achat','prov'].filter(k=>k!=='sub'||hasSub());
+  const filled=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='marque'?!!(S.marque||'').trim():!!S[k];
   const n=L.length,d=L.filter(filled).length;
   return`<div class="prog"><div class="mono">${t('étape {a} sur {b}',{a:Math.min(d+1,n),b:n})}</div><div class="pg">${L.map((k,i)=>`<i class="${filled(k)?'f':i===d?'c':''}"></i>`).join('')}</div></div>`}
  function updateRenta(){const el=host.querySelector('#rp');if(!el)return;const a=num(S.achat),v=num(S.pvise);
@@ -80,8 +82,6 @@ export function mkForm(host,S,o){
   const cats=mrg(CATS0,freq('cat')),subs=S.cat?mrg(SUBS0[S.cat],subsOf(S.cat)):[],sizes=sizesFor(S.cat),provs=[...new Set([...PROV0,...freq('prov')])];
   const sizesSorted=sizes.sort((a,b)=>{const ia=SIZES.indexOf(a),ib=SIZES.indexOf(b);if(ia>=0&&ib>=0)return ia-ib;if(ia>=0)return-1;if(ib>=0)return 1;return String(a).localeCompare(String(b),'fr',{numeric:true})});
   const rb=recentBrands(),sug=suggestBrand(S.marque);
-  const vv=num(S.pvise),aa=num(S.achat);let rsum='';if(vv>0&&aa>=0){const r0=app.renta(aa,vv,app.defFrais(vv,'Vinted'),app.estDelai(S,vv));rsum=`${esc(eur(vv))}<i class="dot f-${r0.c}"></i>`}
-  const recoA=app.advice(S);
   const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['modele','collab','bac','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length,nDef=isNeuf(S.etat)?0:(S.defauts||[]).length,nDates=[S.entree,S.pub].filter(Boolean).length;
   const sums={cat:tv(S.cat),sub:tv(S.sub),marque:S.marque,taille:S.taille,genre:tv(S.genre),achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:tv(S.prov),coul:(S.coul||[]).map(x=>tv(x)).join(', '),mat:(S.mat||[]).map(x=>tv(x)).join(', '),photo:S.photo?t('Ajoutée'):'',dim:dimN?tn(dimN,'valeur','valeurs'):'',etat:[S.etat&&tv(S.etat),nDef?tn(nDef,'défaut','défauts'):''].filter(Boolean).join(' · '),ballot:S.ballot||'',madein:S.madein?cn(S.madein):'',dates:nDates?tn(nDates,'date','dates'):'',det:detN?tn(detN,'renseigné','renseignés'):''};
   const sec=(k,label,body,opt)=>{opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
@@ -96,8 +96,8 @@ export function mkForm(host,S,o){
    sec('genre','Genre',group('genre',GEN,false,false))+
    sec('grade','Grade',group('grade',GRADES,false,false),{sumHtml:S.grade?`<span class="pill g-${esc(S.grade)}">${esc(S.grade)}</span>`:''})+
    sec('achat',"Prix d'achat",`<div class="price"><input type="text" inputmode="decimal" id="fa" placeholder="0${app.DS}00" value="${S.achat!=null&&S.achat!==''?esc(String(S.achat).replace('.',app.DS)):''}"><span>€</span></div>`,{next:'Suivant'})+
-   sec('renta','Marge et rentabilité',`<div class="l">${t('Prix de vente visé')}</div><div class="price"><input type="text" inputmode="decimal" id="fv" placeholder="0${app.DS}00" value="${S.pvise!=null&&S.pvise!==''?esc(String(S.pvise).replace('.',app.DS)):''}"><span>€</span></div>${recoA.ok&&recoA.reco!==num(S.pvise)?`<button type="button" class="chip sm" style="margin-top:8px" data-usereco="${recoA.reco}">${esc(t('Prix conseillé : {p}',{p:eur(recoA.reco)}))}</button>`:''}<div id="rp" style="margin-top:12px"></div>`,{next:'Suivant',sumHtml:rsum})+
    sec('prov','Provenance',group('prov',provs,false,true))+
+   (app.hasComptes()?sec('stk','Compte',`<div class="chips" data-g="stk">${app.comptes().map(c=>`<button type="button" class="chip${S.stk===c.id?' on':''}" data-f="stk" data-v="${esc(c.id)}">${esc(c.n)}</button>`).join('')}</div><div class="hint">${t('Le compte où tu comptes vendre cette pièce : tu pourras ranger ton stock par compte.')}</div>`,{next:'Passer',sumHtml:esc((app.comptes().find(c=>c.id===S.stk)||{}).n||'')}):'')+
    sec('coul','Couleur',group('coul',mrg(COUL0,freq('coul',1)),true,true),{next:'Passer'})+
    sec('mat','Matière',group('mat',mrg(MAT0,freq('mat',1)),true,true),{next:'Passer'})+
    sec('photo','Photo (facultatif)',`<div class="photo">${S.photo?phImg(S.photo):''}<span class="btn sec sm filebtn">${t('Prendre une photo')}<input type="file" accept="image/*" capture="environment" class="fph" aria-label="${t('Prendre une photo')}"></span><span class="btn sec sm filebtn">${t('Choisir une image')}<input type="file" accept="image/*" class="fph" aria-label="${t('Choisir une image')}"></span>${S.photo?'<button type="button" class="btn sec sm" data-rmph="1">'+t('Retirer')+'</button>':''}</div><div class="hint" id="phs"></div>`,{next:'Passer'})+
@@ -142,7 +142,7 @@ export function mkForm(host,S,o){
  host.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('newin'))addNew(e.target)});
  host.addEventListener('input',e=>{const t=e.target;
   if(t.id==='fm'){S.marque=t.value;delete errs.marque;updatePot();const s=suggestBrand(t.value);$('sg').innerHTML=s?`<button type="button" class="chip sm" data-sug="${esc(s)}">Tu voulais dire ${esc(s)} ?</button>`:''}
-  else if(t.id==='fa'){const v=t.value.replace(',','.');S.achat=v===''?'':v;delete errs.achat;updateRenta()}
+  else if(t.id==='fa'){const v=t.value.replace(',','.');S.achat=v===''?'':v;delete errs.achat;updatePot()}
   else if(t.id==='fv'){const v=t.value.replace(',','.');S.pvise=v;S._vt=1;updateRenta()}
   else if(t.dataset.d){S[t.dataset.d]=t.value.replace(',','.')}
   else if(t.dataset.k){S[t.dataset.k]=t.dataset.k==='madein'?cnFr(t.value):t.value}
@@ -153,7 +153,7 @@ export function mkForm(host,S,o){
   if(t.dataset.k==='etat'||t.dataset.k==='entree'||t.dataset.k==='pub')S[t.dataset.k]=t.value;
   cprev();if(o.onChange)o.onChange(S)});
  /* première étape pas encore remplie : c'est là que s'ouvre un brouillon repris */
- function emptyFirst(){const L=['cat','sub','marque','taille','genre','grade','achat','renta','prov'].filter(k=>k!=='sub'||hasSub());const f=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='renta'?num(S.pvise)>0:k==='marque'?!!(S.marque||'').trim():!!S[k];return L.find(k=>!f(k))||'photo'}
+ function emptyFirst(){const L=['cat','sub','marque','taille','genre','grade','achat','prov'].filter(k=>k!=='sub'||hasSub());const f=k=>k==='achat'?(S.achat!==''&&S.achat!=null&&num(S.achat)>=0):k==='marque'?!!(S.marque||'').trim():!!S[k];return L.find(k=>!f(k))||'photo'}
  /* vrai dès qu'un champ est rempli (la date d'entrée par défaut ne compte pas) : le bouton Annuler la saisie s'active */
  function dirty(){return Object.keys(S).some(k=>k!=='entree'&&k[0]!=='_'&&(Array.isArray(S[k])?S[k].length>0:S[k]!==''&&S[k]!=null&&S[k]!==false))}
  function submit(dup){
