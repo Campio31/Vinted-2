@@ -30,7 +30,7 @@ describe('onglet Vente', () => {
     expect($('sflt').textContent).toContain(t('Toutes') + ' · ' + sold.length);
   });
 
-  it('cherche par @pseudo et filtre « À préparer »', () => {
+  it('cherche par @pseudo, sans indicateur colis dans Vente', () => {
     nav.go('sales');
     $('sq').value = 'lea_m'; $('sq').dispatchEvent(new Event('input'));
     const rows = [...document.querySelectorAll('#slst .li')];
@@ -38,10 +38,9 @@ describe('onglet Vente', () => {
     expect(rows.every(r => app.P.find(p => p.id === r.dataset.id).acheteur === 'lea_m')).toBe(true);
     $('sq').value = ''; $('sq').dispatchEvent(new Event('input'));
     document.querySelector('[data-sfadv]').click();
-    document.querySelector('[data-fg="st"][data-fv="prep"]').click();
+    expect(document.querySelector('[data-fg="st"][data-fv="prep"]')).toBeNull();
+    expect(document.querySelector('[data-sprep]')).toBeNull();
     document.getElementById('fl_ok').click();
-    const prep = app.colisList();
-    expect(document.querySelectorAll('#slst .li').length).toBe(Math.min(60, prep.length));
     document.querySelector('[data-sf="all"]').click();
   });
 
