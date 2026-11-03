@@ -18,7 +18,7 @@ describe('onglets', () => {
 
 describe('fenêtres des outils', () => {
   it('liste tous les outils', () => { expect(tools.TOOLS.length).toBeGreaterThan(10); });
-  for (const k of ['coach', 'qr', 'trophees', 'fisc', 'complete', 'merge', 'depenses', 'treso', 'rapport', 'trash', 'wrapped', 'calcom', 'rappels', 'defis', 'importo', 'aide', 'help', 'news', 'idee', 'planning', 'vintage', 'buyers', 'lives', 'cohortes', 'tranches', 'courbe', 'seuil', 'fourn', 'boutique', 'confort']) {
+  for (const k of ['qr', 'trophees', 'fisc', 'complete', 'merge', 'depenses', 'treso', 'rapport', 'trash', 'wrapped', 'calcom', 'rappels', 'defis', 'importo', 'aide', 'help', 'news', 'idee', 'planning', 'vintage', 'buyers', 'lives', 'cohortes', 'tranches', 'courbe', 'seuil', 'fourn', 'boutique', 'confort']) {
     it('outil ' + k, async () => { expect(NE_PAS_OUVRIR).not.toContain(k); await app.openTool(k); expect(document.getElementById('sheet').hidden).toBe(false); expect(document.getElementById('shc').innerHTML.length).toBeGreaterThan(50); });
   }
 });

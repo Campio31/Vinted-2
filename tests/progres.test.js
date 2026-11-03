@@ -3,33 +3,17 @@ import { demarrer } from './helpers.js';
 import { app } from '../src/state.js';
 
 const $ = id => document.getElementById(id);
-let tools, P, C;
+let tools, P;
 beforeAll(async () => {
   await demarrer(150);
   tools = await import('../src/modules/tools-index.js');
   P = await import('../src/modules/progress.js');
-  C = await import('../src/modules/coach.js');
 });
 
-describe('Coach du lundi : 3 priorités', () => {
-  it('donne au plus 3 priorités, chacune avec une action', () => {
-    const c = C.coachData();
-    expect(c.top.length).toBeGreaterThan(0);
-    expect(c.top.length).toBeLessThanOrEqual(3);
-    for (const l of c.top) expect(['pub', 'cut', 'colis', 'goal', 'backup', 'add']).toContain(l.act);
-    expect(c.head.length).toBeGreaterThan(10);
-  });
-
-  it('la fenêtre montre un bouton par priorité, et il mène à l\'écran concerné', async () => {
-    await app.openTool('coach');
-    const btns = [...document.querySelectorAll('#shc [data-coact]')];
-    expect(btns.length).toBe(C.coachData().top.length);
-    const first = btns[0];
-    const act = first.dataset.coact;
-    first.click();
-    expect($('sheet').hidden).toBe(true);
-    expect(app.view).toBe({ colis: 'sales', pub: 'list', cut: 'list', goal: 'quick', backup: 'set', add: 'add' }[act] || app.view);
-    if (act === 'colis') expect(document.querySelector('#sflt .fbtn.on')).not.toBeNull();
+describe('Coach du lundi retiré', () => {
+  it('n\'est plus dans la liste des outils', () => {
+    expect(tools.TOOLS.some(x => x.k === 'coach')).toBe(false);
+    expect(tools.TOOLS.some(x => x.k === 'trash')).toBe(false);
   });
 });
 

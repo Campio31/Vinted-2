@@ -24,7 +24,7 @@ describe('M2 : fenêtres accessibles', () => {
   it('ouverture : titre, focus dans la fenêtre, reste de la page inactif', async () => {
     nav.go('tools'); await tick(10);
     const ouvreur = $('tl'); ouvreur.focus();
-    await app.openTool('coach'); await tick(20);
+    await app.openTool('treso'); await tick(20);
     expect($('sheet').hidden).toBe(false);
     expect($('app').hasAttribute('inert')).toBe(true);
     expect($('app').getAttribute('aria-hidden')).toBe('true');

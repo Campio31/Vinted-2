@@ -48,7 +48,7 @@ describe('Stock : fenêtre de filtres', () => {
 describe('Vente : fenêtre de filtres et indicateurs', () => {
   it('filtre par plateforme et période', async () => {
     nav.go('sales'); app.salesFilter('all'); await tick(30);
-    expect($('ssum').querySelector('.ssk')).toBeTruthy();
+    expect($('ssum').querySelector('.sgt')).toBeTruthy();
     const tout = $('slst').querySelectorAll('.li').length;
     $('sflt').querySelector('[data-sfadv]').click(); await tick(10);
     const pf = [...$('shc').querySelectorAll('[data-fg="pf"]')];

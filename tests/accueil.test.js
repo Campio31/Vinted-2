@@ -14,21 +14,14 @@ describe('mode simple et avancé', () => {
     expect(app.toolsView().list).toHaveLength(TOOLS.length);
   });
 
-  it('mode simple : 6 outils choisis sans doublon, tous les outils restent dans la liste', async () => {
+  it('les 6 outils majeurs sont fixes, dans les deux modes', async () => {
     const { TOOLS } = await import('../src/modules/tools-index.js');
+    const ATTENDU = ['colis', 'trophees', 'qr', 'vintage', 'buyers', 'rapport'];
     cfg({ mode: 'simple', onb: { statut: 'part', canal: 'vinted', obj: 'comp' } });
-    const E = app.essentials();
-    expect(E).toHaveLength(6);
-    expect(new Set(E).size).toBe(6);
-    expect(app.toolsView().list).toHaveLength(TOOLS.length);
-    expect(E).not.toContain('live');
-    expect(E).not.toContain('fisc');
-  });
-
-  it('le profil choisit les outils : micro-entrepreneur et TikTok', async () => {
+    expect(app.essentials()).toEqual(ATTENDU);
     cfg({ mode: 'simple', onb: { statut: 'micro', canal: 'both', obj: 'vivre' } });
-    expect(app.essentials()).toEqual(expect.arrayContaining(['fisc', 'live']));
-    expect(app.essentials()).toHaveLength(6);
+    expect(app.essentials()).toEqual(ATTENDU);
+    expect(app.toolsView().list).toHaveLength(TOOLS.length);
   });
 
   it('l\'onglet Outils : 6 grandes tuiles, puis tous les autres en liste compacte, dans les deux modes', async () => {

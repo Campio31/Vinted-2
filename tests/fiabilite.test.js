@@ -19,7 +19,7 @@ describe('bouton Retour', () => {
   it('une fenêtre ouverte s\'ajoute à l\'historique, et Retour la ferme sans changer d\'onglet', async () => {
     nav.go('list'); nav.go('dash'); await tick(20);
     expect(history.state).toMatchObject({ max: 'view', v: 'dash' });
-    await app.openTool('coach'); await tick(20);
+    await app.openTool('trash'); await tick(20);
     expect($('sheet').hidden).toBe(false);
     expect(history.state.max).toBe('sheet');
     history.back(); await tick(60);
@@ -39,11 +39,11 @@ describe('bouton Retour', () => {
   it('fermer une fenêtre avec la croix ne laisse pas d\'entrée en trop', async () => {
     nav.go('dash'); await tick(20);
     const avant = history.length;
-    await app.openTool('coach'); await tick(20);
+    await app.openTool('trash'); await tick(20);
     $('sheet').querySelector('[data-x]').click(); await tick(60);
     expect($('sheet').hidden).toBe(true);
     expect(history.state).toMatchObject({ max: 'view', v: 'dash' });
-    await app.openTool('coach'); await tick(20);
+    await app.openTool('trash'); await tick(20);
     history.back(); await tick(60);
     expect(app.view).toBe('dash');
     expect(history.length).toBeGreaterThanOrEqual(avant);

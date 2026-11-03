@@ -18,11 +18,11 @@ const base = () => app.P.find(p => p.statut === 'Disponible');
 const mk = (id, o) => { const p = Object.assign({}, base(), { id }, o); app.P.push(p); return p; };
 
 describe('Règles de Max : définition et réglages', () => {
-  it('dix règles prêtes, toutes actives au départ, réglables dans Réglages', async () => {
-    expect(A.RULES).toHaveLength(10);
+  it('neuf règles prêtes, toutes actives au départ, réglables dans Réglages', async () => {
+    expect(A.RULES).toHaveLength(9);
     expect(A.RULES.every(r => A.ruleOn(r.id))).toBe(true);
     nav.go('set'); app.renderSet(); await tick(30);
-    expect($('rlc').querySelectorAll('[data-ru]')).toHaveLength(10);
+    expect($('rlc').querySelectorAll('[data-ru]')).toHaveLength(9);
     expect($('rlc').classList.contains('shut')).toBe(true);
     $('rlc').querySelector('[data-ru="colis"]').checked = false;
     $('rlc').querySelector('[data-ru="colis"]').dispatchEvent(new Event('change', { bubbles: true }));
@@ -57,10 +57,10 @@ describe('Règles de Max : effet sur « Ma journée »', () => {
     mk('ru-c', { statut: 'Vendu', pv: 10, dv: addDays(today(), -3), vt: Date.now() - 3 * 864e5, frais: 1, canal: 'Vinted' });
     expect(A.tasksToday().find(x => x.id === 'colis').rule).toBe('colis');
   });
-  it('le lundi, le bilan de la semaine s\'ajoute ; un autre jour, non', () => {
+  it('le coach du lundi n\'existe plus : aucune tâche de bilan, même un lundi', () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-11-02T10:00:00'));
-    expect(A.tasksToday().some(x => x.id === 'r-lundi')).toBe(true);
+    expect(A.tasksToday().some(x => x.id === 'r-lundi')).toBe(false);
     vi.setSystemTime(new Date('2026-11-04T10:00:00'));
     expect(A.tasksToday().some(x => x.id === 'r-lundi')).toBe(false);
   });
