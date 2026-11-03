@@ -10,14 +10,13 @@ import { goalCalc, goalKinds } from './goals.js';
 import { bulkMod, bulkUndo } from './buyers.js';
 import { fiscStatus } from './fiscal.js';
 import { go } from './nav.js';
-import { coachData } from './coach.js';
 import { streakInfo } from './gamification.js';
 
 /* ---------- Max Autopilot, phase 1 : « Ma journée » ---------- */
 /* Un moteur de tâches calcule ce qu'il y a à faire d'après tes données (des règles, pas d'IA) et propose des lots à valider.
    Niveaux : Manuel (Max liste, tu fais), Assisté (Max prépare un lot, tu valides : par défaut), Automatique encadré (pas encore disponible).
    Chaque lot appliqué est inscrit dans le journal, et peut être annulé. */
-Object.assign(CFG0, { apMode: 'assist', apLog: [], apStats: { lots: 0, items: 0, min: 0 }, rules: {}, ruleSnooze: {} });
+Object.assign(CFG0, { apMode: 'assist', apLog: [], apStats: { lots: 0, items: 0, min: 0 }, rules: {}, ruleSnooze: {}, apSnooze: {} });
 
 export const AP_MODES = [['manual', 'Manuel', 'Max liste les tâches, tu fais tout'], ['assist', 'Assisté', 'Max prépare, tu valides'], ['auto', 'Automatique encadré', 'Bientôt']];
 const MIN = { fin: .3, colis: .5, pub: 1, prix: 1.5 };   /* minutes économisées par pièce, estimation */
@@ -53,7 +52,15 @@ function baseTasks() {
   const lb = LSg('lastBackup', ''); if (app.P.length && (!lb || days(lb, td) >= 7)) mk('backup', 'n', 0, t('Fais une sauvegarde'), lb ? t('Dernière sauvegarde il y a {n} jours.', { n: days(lb, td) }) : t('Aucune sauvegarde JSON faite pour l\'instant.'), { go: 'set', btn: t('Sauvegarder') });
   return T;
 }
-export const tasksToday = () => applyRules(baseTasks());
+/* tâches reportées à demain (glisser vers la gauche) : elles reviennent le lendemain */
+const taskSnoozed = id => { const d = (app.cfg.apSnooze || {})[id]; return !!d && d > today(); };
+const allTasks = () => applyRules(baseTasks());
+export const tasksToday = () => allTasks().filter(x => !taskSnoozed(x.id));
+function snoozeTask(id) {
+  app.setCfg({ apSnooze: Object.assign({}, app.cfg.apSnooze, { [id]: addDays(today(), 1) }) });
+  app.toast(t('Reportée à demain'), () => { const q = Object.assign({}, app.cfg.apSnooze); delete q[id]; app.setCfg({ apSnooze: q }); app.renderAll(); }, 6000);
+  app.renderAll();
+}
 
 
 /* ---------- phase 2 : règles planifiées ---------- */
@@ -63,7 +70,6 @@ export const tasksToday = () => applyRules(baseTasks());
 const lastDayOfMonth = () => { const d = new Date(); return d.getDate() === new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); };
 const lateColis = () => colisList().some(p => ok(p.dv) && days(p.dv, today()) >= 2);
 export const RULES = [
-  { id: 'lundi', name: 'Priorités du lundi', d: 'Chaque lundi, Max ouvre ta journée avec le bilan de la semaine.', make: () => { if (new Date().getDay() !== 1) return null; const c = coachData(); return { id: 'r-lundi', tone: 'n', n: 0, title: t('Bilan de la semaine'), why: c.head, go: 'coach', btn: t('Ouvrir le coach') }; } },
   { id: 'dormant', name: 'Stock dormant', d: 'Quand une pièce reste en ligne sans se vendre, Max prépare une baisse de prix à valider.', task: 'prix', param: { k: 'jours', def: 45, min: 14, max: 180, u: 'jours' }, due: () => true },
   { id: 'colis', name: 'Colis en retard', d: 'Un colis qui attend depuis 2 jours ou plus passe en haut de ta journée.', task: 'colis', due: lateColis },
   { id: 'finalise', name: 'Ventes à finaliser en fin de mois', d: 'Le dernier jour du mois, Max prépare le lot « finaliser » avant ta déclaration.', task: 'fin', due: lastDayOfMonth },
@@ -149,7 +155,7 @@ function taskHTML(x) {
       <div class="acts two"><button type="button" class="btn" data-ap="do:${x.kind}"${nSel ? '' : ' disabled'}>${t('Appliquer à {n}', { n: nSel })}</button><button type="button" class="btn sec" data-ap="close">${t('Fermer')}</button></div>`;
   })() : '';
   const rl = x.rule ? `<div class="apq"><span>${t('Règle : {r}', { r: t(x.ruleName) })}</span><button type="button" class="lnk" data-ap="later:${x.rule}">${t('Pas maintenant')}</button></div>${x.ignored ? `<div class="apq ign"><span>${t('Tu as ignoré cette règle 3 fois de suite.')}</span><button type="button" class="lnk" data-ap="off:${x.rule}">${t('La désactiver')}</button></div>` : ''}` : '';
-  return `<div class="apt t-${x.tone}${isOpen ? ' open' : ''}">${rl}<button type="button" class="aph" data-ap="${batch ? 'open:' + x.id : 'go:' + (x.go || '')}"><span class="apn">${x.n || '·'}</span><span class="apx"><b>${esc(x.title)}</b><small>${esc(x.why)}</small></span><span class="apb">${batch ? (isOpen ? '▴' : t('À valider')) : esc(x.btn || t('Ouvrir'))}</span></button>${body}</div>`;
+  return `<div class="apt t-${x.tone}${isOpen ? ' open' : ''}">${rl}<button type="button" class="aph" data-ap="${batch ? 'open:' + x.id : 'go:' + (x.go || '')}"><span class="apn">${x.n || '·'}</span><span class="apx"><b>${esc(x.title)}</b><small>${esc(x.why)}</small></span><span class="apb">${batch ? (isOpen ? '▴' : t('À valider')) : esc(x.btn || t('Ouvrir'))}</span></button><button type="button" class="apz" data-ap="snooze:${esc(x.id)}" aria-label="${esc(t('Reporter à demain'))}">⏭</button>${body}</div>`;
 }
 /* tuile d'un compteur : touche-la pour ouvrir la tâche correspondante (même action que la ligne dessous) */
 const TILES = [['pub', 'à publier', 'b'], ['colis', 'à préparer', 'a'], ['prix', 'à relancer', 't'], ['fin', 'à finaliser', 'g']];
@@ -165,13 +171,15 @@ function ringHTML(done, total) {
 }
 export function journeeHTML() {
   if (!app.P.length) return '';
-  const T = tasksToday(), mode = apMode(), st = Object.assign({ lots: 0, items: 0, min: 0 }, app.cfg.apStats), log = app.cfg.apLog || [];
+  const AL = allTasks(), T = AL.filter(x => !taskSnoozed(x.id)), nSn = AL.length - T.length, mode = apMode(), st = Object.assign({ lots: 0, items: 0, min: 0 }, app.cfg.apStats), log = app.cfg.apLog || [];
   const hi = new Date().getHours(), hello = hi < 12 ? t('Bonjour') : hi < 18 ? t('Bon après-midi') : t('Bonsoir');
   const d0 = new Date(); d0.setHours(0, 0, 0, 0);
   const done = log.filter(e => e.k !== 'rule' && !e.undone && e.t >= d0.getTime()).length, total = done + T.length, sr = streakInfo().n;
   return `<div class="card tdy ap" data-ck="today" data-lb="${esc(t('Ma journée'))}"><div class="aph0">${ringHTML(done, total)}<div><h3 style="margin:0 0 2px">${t('Ma journée')}</h3><p class="sub" style="margin:0">${hello} ! ${T.length ? t(T.length > 1 ? 'Voici tes {n} priorités.' : 'Voici ta priorité.', { n: T.length }) : t('Tout est à jour : rien d\'urgent aujourd\'hui.')}</p>${sr > 1 ? `<p class="sub" style="margin:2px 0 0">${t('{n} jours de suite', { n: sr })}</p>` : ''}</div></div>
    <div class="apc">${TILES.map(x => tileHTML(x, T, mode)).join('')}</div>
-   ${T.map(taskHTML).join('')}
+   ${T.length ? `<div class="hint apsw">${t('Glisse une tâche vers la droite pour la faire, vers la gauche pour la reporter à demain.')}</div>` : ''}
+   ${T.map(x => `<div class="apw" data-tid="${esc(x.id)}"><div class="apbg" aria-hidden="true"><span>${t('Faire')}</span><span>${t('Reporter')}</span></div>${taskHTML(x)}</div>`).join('')}
+   ${nSn ? `<div class="hint apsn">${t(nSn > 1 ? '{n} tâches reportées à demain.' : '{n} tâche reportée à demain.', { n: nSn })} <button type="button" class="lnk" data-ap="unsnooze">${t('Les remettre')}</button></div>` : ''}
    <details class="apd"${showLog || showSet ? ' open' : ''}><summary>${t('Réglages de Max')}</summary>
    <div class="apm" role="group" aria-label="${esc(t('Niveau d\'automatisation'))}">${AP_MODES.map(([k, l, d]) => `<button type="button" class="${mode === k ? 'on' : ''}" data-ap="mode:${k}"${k === 'auto' ? ' disabled' : ''} title="${esc(t(d))}">${t(l)}</button>`).join('')}</div>
    <div class="hint" style="margin:6px 0 0">${t(AP_MODES.find(m => m[0] === mode)[2])}.</div>
@@ -191,9 +199,43 @@ function goTo(spec) {
   if (k === 'set') return go('set');
   if (k) app.openTool(k);
 }
+/* glisser une tâche : à droite = la faire (comme un appui), à gauche = la reporter à demain */
+let sw = null, swallow = false;
+const swEnd = e => {
+  if (!sw || e.pointerId !== sw.id) return;
+  const { w, c, dx, on } = sw; sw = null;
+  c.style.transform = ''; w.classList.remove('drag', 'r', 'l');
+  if (!on) return;
+  if (dx > 90 && e.type === 'pointerup') w.querySelector('.aph').click();
+  else if (dx < -90 && e.type === 'pointerup') snoozeTask(w.dataset.tid);
+  swallow = true; setTimeout(() => { swallow = false; }, 350);
+};
+$('dsh').addEventListener('pointerdown', e => {
+  const h = e.target.closest('.aph'); if (!h || (e.pointerType === 'mouse' && e.button > 0)) return;
+  const w = h.closest('.apw'), c = h.closest('.apt'); if (!w || c.classList.contains('open')) return;
+  sw = { w, c, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId, el: h };
+});
+$('dsh').addEventListener('pointermove', e => {
+  if (!sw || e.pointerId !== sw.id) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (!sw.on) {
+    if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { sw = null; return; }
+    if (Math.abs(dx) < 10) return;
+    sw.on = true; sw.w.classList.add('drag');
+    try { sw.el.setPointerCapture(e.pointerId); } catch (er) { /* capture indisponible */ }
+  }
+  sw.dx = dx;
+  sw.c.style.transform = `translateX(${Math.max(-140, Math.min(140, dx))}px)`;
+  sw.w.classList.toggle('r', dx > 60); sw.w.classList.toggle('l', dx < -60);
+});
+$('dsh').addEventListener('pointerup', swEnd);
+$('dsh').addEventListener('pointercancel', swEnd);
+$('dsh').addEventListener('click', e => { if (swallow) { e.stopPropagation(); e.preventDefault(); } }, true);
 $('dsh').addEventListener('click', e => {
   const b = e.target.closest('[data-ap]'); if (!b) return;
   const [a, v] = [b.dataset.ap.split(':')[0], b.dataset.ap.split(':').slice(1).join(':')];
+  if (a === 'snooze') return snoozeTask(v);
+  if (a === 'unsnooze') { app.setCfg({ apSnooze: {} }); return app.renderAll(); }
   if (a === 'open') { openId = openId === v ? '' : v; excl = new Set(); return app.renderDash(); }
   if (a === 'close') { openId = ''; return app.renderDash(); }
   if (a === 'go') return goTo(v);

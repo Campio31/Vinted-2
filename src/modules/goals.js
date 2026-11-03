@@ -21,9 +21,11 @@ export function goalCalc(kind,per){const g=+app.cfg[GKEY[kind][per]]||0;if(!g)re
  return{kind,per,g,cur,pct:cur/g,exp:g*elapsed/total,left,reste,proj,projPct:proj/g,rate:per==='m'?reste/Math.max(1,left):reste/Math.max(1,left/30.44)}}
 const goalColor=d=>d.cur>=d.g?'g':'o';
 /** Ligne « au rythme actuel » : estimation de fin de période et écart avec l'objectif. */
-export const projHTML=d=>{const ok=d.proj>=d.g;return `<div class="gl2 gpj"><b class="gc-${ok?'g':'o'}">${t(d.per==='m'?'Au rythme actuel : {p} à la fin du mois':'Au rythme actuel : {p} à la fin de l\'année',{p:eur(d.proj)})}</b> · ${ok?t('{n} % de l\'objectif, tu devrais l\'atteindre',{n:Math.round(d.projPct*100)}):t('{n} % de l\'objectif, il manquerait {m}',{n:Math.round(d.projPct*100),m:eur(d.g-d.proj)})}</div>`};
+export const projHTML=d=>{const ok=d.proj>=d.g;return `<div class="gl2 gpj"><i class="pjd" aria-hidden="true"></i><span><b class="gc-pj">${t(d.per==='m'?'Au rythme actuel : {p} à la fin du mois':'Au rythme actuel : {p} à la fin de l\'année',{p:eur(d.proj)})}</b> · ${ok?t('{n} % de l\'objectif, tu devrais l\'atteindre',{n:Math.round(d.projPct*100)}):t('{n} % de l\'objectif, il manquerait {m}',{n:Math.round(d.projPct*100),m:eur(d.g-d.proj)})}</span></div>`};
 export const bigEur=v=>{const s=Math.abs(v).toFixed(2).split('.');return(v<0?'−':'')+Number(s[0]).toLocaleString(app.LOC)+'<small>'+app.DS+s[1]+' €</small>'};
-const ruler=d=>`<div class="rl"><b class="gc-${goalColor(d)}" style="width:${Math.min(100,Math.max(0,d.pct*100)).toFixed(1)}%"></b></div>`;
+/* la barre montre ce qui est fait (vert ou orange) puis, d'une autre couleur (violet), ce que le rythme actuel ajoutera d'ici la fin de la période */
+const ruler=d=>{const c=Math.min(100,Math.max(0,d.pct*100)),p=Math.min(100,Math.max(c,d.projPct*100));
+ return`<div class="rl">${d.cur<d.g&&p>c?`<i class="pj" style="left:${c.toFixed(1)}%;width:${(p-c).toFixed(1)}%"></i>`:''}<b class="gc-${goalColor(d)}" style="width:${c.toFixed(1)}%"></b></div>`};
 function goalHTML(){const kinds=goalKinds(),out=[],now=new Date(),mois=now.toLocaleDateString(app.LOC,{month:'long'});
  [['m',t('Objectif {m}',{m:mois})],['y',t('Objectif {m}',{m:now.getFullYear()})]].forEach(([per,title])=>{const ds=kinds.map(k=>goalCalc(k,per)).filter(Boolean);if(!ds.length)return;
   const main=ds[0];

@@ -4,19 +4,17 @@ import { go } from './nav.js';
 
 app.openTool = openTool;
 
-/* ---------- outils : coach du lundi, QR et bacs, commande vocale… (treso et rapport s'ouvrent depuis le Bilan) ---------- */
+/* ---------- outils : QR et bacs, commande vocale… (treso et rapport s'ouvrent depuis le Bilan) ---------- */
 export const sheetHead=h=>`<div class="sh"><h2>${h}</h2><button type="button" class="x" data-x="1" aria-label="${t('Fermer')}">×</button></div>`;
 export function showSheet(html){$('shc').onclick=null;$('shc').onchange=null;$('sheet').hidden=false;$('shc').innerHTML=html;$('sheet').firstElementChild.scrollTop=0}
 export const TI=p=>`<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
 export const TOOLS=[
- {k:'coach',t:'Coach du lundi',d:'Ton plan de la semaine en 30 secondes',i:TI('<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m4 6 5-3 5 4 6-4"/>')},
  {k:'qr',t:'Scanner QR et étiquettes',d:'Scanne une pièce, imprime des étiquettes, range dans un bac',i:TI('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM19 17v3h-3"/>')},
  {k:'trophees',t:'Défis, cartes et trophées',d:'Défis de la semaine et du mois, cartes à collectionner, trophées à paliers et classement',i:TI('<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 14v4M8 20h8"/>')},
  {k:'fisc',t:'Ligne fiscale',d:'Plafond micro-entrepreneur, alerte et déclaration URSSAF',i:TI('<path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/>')},
  {k:'complete',t:'Compléter les fiches',d:'Fiches sans grade, état ou code, 10 à la suite',i:TI('<path d="M5 12l4.5 4.5L19 7"/>')},
  {k:'merge',t:'Nettoyer les doublons',d:'Fusionne Aucun et Aucune, Brooks Brother et Brooks Brothers',i:TI('<path d="M6 4v5a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4v3M6 20v-3M18 4v5"/>')},
  {k:'depenses',t:'Dépenses',d:'Carburant, matériel, cintres, abonnements, avec photo du ticket',i:TI('<path d="M5 4h14v17l-3-2-2 2-2-2-2 2-2-2-3 2zM9 9h6M9 13h6"/>')},
- {k:'trash',t:'Corbeille',d:'Récupère une pièce supprimée par erreur (30 jours)',i:TI('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>')},
  {k:'wrapped',t:'Wrapped',d:'Ton récap du mois ou de l\'année, à partager en story',i:TI('<path d="M12 3l2.5 5.5 6 .7-4.5 4 1.3 6L12 16.3 6.7 19.2 8 13.2 3.5 9.2l6-.7z"/>')},
  {k:'rappels',t:'Rappels et notifications',d:'Colis à déposer, live prévu, temps forts',i:TI('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>')}];
 /* L'onglet Outils (view v-tools). Le mode simple (simple-mode.js) fournit app.toolsView : outils à montrer, plus l'en-tête et le pied de la liste */
@@ -24,6 +22,6 @@ export function renderTools(){const v=app.toolsView?app.toolsView():{list:TOOLS,
  $('tv').innerHTML=v.head+`<div class="tools tiles">${main.map(x=>`<button type="button" class="tool" data-tool="${x.k}"><span class="tic">${x.i}</span><span class="tx"><b>${t(x.t)}</b><small>${t(x.d)}</small></span></button>`).join('')}</div>`+(rest.length?`<h3 class="tl2h">${t('Tous les outils')}</h3><div class="tools2">${rest.map(x=>`<button type="button" class="tool2" data-tool="${x.k}"><span class="tic">${x.i}</span><b>${t(x.t)}</b></button>`).join('')}</div>`:'')+v.foot}
 app.renderTools=renderTools;
 export function openTools(){go('tools')}
-function openTool(k){({coach:app.openCoach,qr:app.openQrTool,scan:app.openScanner,trophees:app.openTrophees,fisc:app.openFisc,complete:app.openComplete,merge:app.openMerge,help:app.openHelp,wrapped:app.openWrapped,calcom:app.openCalcom,rappels:app.openRappels,defis:app.openDefis,importo:app.openImportTool,news:app.openNews,aide:app.openAide,idee:app.openIdee,depenses:app.openDepenses,treso:app.openTreso,rapport:app.openReport,trash:app.openTrash})[k]()}
+function openTool(k){({qr:app.openQrTool,scan:app.openScanner,trophees:app.openTrophees,fisc:app.openFisc,complete:app.openComplete,merge:app.openMerge,help:app.openHelp,wrapped:app.openWrapped,calcom:app.openCalcom,rappels:app.openRappels,defis:app.openDefis,importo:app.openImportTool,news:app.openNews,aide:app.openAide,idee:app.openIdee,depenses:app.openDepenses,treso:app.openTreso,rapport:app.openReport,trash:app.openTrash})[k]()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(b){e.preventDefault();app.openTool(b.dataset.tool)}});
 $('tl').onclick=()=>go('set');

@@ -41,7 +41,8 @@ globalThis.MADEIN0 = MADEIN0;
 export const mrg=(a,b)=>[...new Set([...(a||[]),...(b||[])])];
 const dimsFor=cat=>HAUT.includes(cat)?DH:BAS.includes(cat)?DB:[...DH,...DB];
 /* Groupes dans l'ordre de saisie : un seul est ouvert au départ (la catégorie), le suivant s'ouvre quand le précédent est rempli. */
-const ORDER=['cat','sub','marque','taille','genre','grade','achat','renta','prov','coul','mat','photo','dim','det'];
+const ORDER=['cat','sub','marque','taille','genre','grade','achat','renta','prov','coul','mat','photo','dim','etat','ballot','madein','dates','det'];
+const isNeuf=e=>/^neuf/i.test(e||'');
 export const COLORS={Bleu:['#2F6FDE','#fff'],Noir:['#1A1A1A','#fff'],Blanc:['#FFFFFF','#17233B'],Gris:['#8A8F98','#fff'],Rouge:['#D32F2F','#fff'],Vert:['#2E9E5B','#fff'],Beige:['#D8C3A5','#17233B'],Violet:['#7E57C2','#fff'],Marron:['#7B4A2D','#fff'],Rose:['#F48FB1','#17233B'],Jaune:['#F5C518','#17233B'],Orange:['#F57C00','#17233B'],'Bleu marine':['#1B2A57','#fff'],Kaki:['#7A7A3A','#fff'],Bordeaux:['#6E1A2C','#fff'],Moutarde:['#D9A21B','#17233B'],Corail:['#F26B5B','#17233B'],Turquoise:['#1BB5B0','#17233B'],Multicolore:['conic-gradient(#D32F2F,#F5C518,#2E9E5B,#2F6FDE,#7E57C2,#D32F2F)','#17233B']};
 export const abc=a=>[...a].sort((x,y)=>String(tv(x)).localeCompare(String(tv(y)),app.LOC,{sensitivity:'base',numeric:true}));
 export function mkForm(host,S,o){
@@ -81,8 +82,8 @@ export function mkForm(host,S,o){
   const rb=recentBrands(),sug=suggestBrand(S.marque);
   const vv=num(S.pvise),aa=num(S.achat);let rsum='';if(vv>0&&aa>=0){const r0=app.renta(aa,vv,app.defFrais(vv,'Vinted'),app.estDelai(S,vv));rsum=`${esc(eur(vv))}<i class="dot f-${r0.c}"></i>`}
   const recoA=app.advice(S);
-  const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['etat','defauts','modele','madein','collab','ballot','bac','pub','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length;
-  const sums={cat:tv(S.cat),sub:tv(S.sub),marque:S.marque,taille:S.taille,genre:tv(S.genre),achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:tv(S.prov),coul:(S.coul||[]).map(x=>tv(x)).join(', '),mat:(S.mat||[]).map(x=>tv(x)).join(', '),photo:S.photo?t('Ajoutée'):'',dim:dimN?tn(dimN,'valeur','valeurs'):'',det:detN?tn(detN,'renseigné','renseignés'):''};
+  const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['modele','collab','bac','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length,nDef=isNeuf(S.etat)?0:(S.defauts||[]).length,nDates=[S.entree,S.pub].filter(Boolean).length;
+  const sums={cat:tv(S.cat),sub:tv(S.sub),marque:S.marque,taille:S.taille,genre:tv(S.genre),achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:tv(S.prov),coul:(S.coul||[]).map(x=>tv(x)).join(', '),mat:(S.mat||[]).map(x=>tv(x)).join(', '),photo:S.photo?t('Ajoutée'):'',dim:dimN?tn(dimN,'valeur','valeurs'):'',etat:[S.etat&&tv(S.etat),nDef?tn(nDef,'défaut','défauts'):''].filter(Boolean).join(' · '),ballot:S.ballot||'',madein:S.madein?cn(S.madein):'',dates:nDates?tn(nDates,'date','dates'):'',det:detN?tn(detN,'renseigné','renseignés'):''};
   const sec=(k,label,body,opt)=>{opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
    return`<div class="grp${op?' open':''}${errs[k]?' err':''}" data-sec="${k}"><button type="button" class="gh" data-tg="${k}" aria-expanded="${op}"><span class="l">${t(label)}</span><span class="gs">${sm}${sm?'<i class="ckm"></i>':''}</span><span class="gc" aria-hidden="true"></span></button>${op?`<div class="gb">${body}${opt.next&&!edit?`<div class="acts" style="margin-top:12px"><button type="button" class="btn sec sm" data-next="${k}">${t(opt.next)} ›</button></div>`:''}</div>`:''}</div>`};
   host.innerHTML=(edit?'':progHTML())+
@@ -101,13 +102,14 @@ export function mkForm(host,S,o){
    sec('mat','Matière',group('mat',mrg(MAT0,freq('mat',1)),true,true),{next:'Passer'})+
    sec('photo','Photo (facultatif)',`<div class="photo">${S.photo?phImg(S.photo):''}<span class="btn sec sm filebtn">${t('Prendre une photo')}<input type="file" accept="image/*" capture="environment" class="fph" aria-label="${t('Prendre une photo')}"></span><span class="btn sec sm filebtn">${t('Choisir une image')}<input type="file" accept="image/*" class="fph" aria-label="${t('Choisir une image')}"></span>${S.photo?'<button type="button" class="btn sec sm" data-rmph="1">'+t('Retirer')+'</button>':''}</div><div class="hint" id="phs"></div>`,{next:'Passer'})+
    sec('dim','Dimensions (cm)',`<div class="row2">${dimsFor(S.cat).map(([k,l])=>`<div><div class="l">${t(l)}</div><input type="text" inputmode="decimal" data-d="${k}" value="${S[k]!=null&&S[k]!==''?esc(String(S[k]).replace('.',app.DS)):''}" placeholder="cm"></div>`).join('')}</div>`,{next:'Suivant'})+
-   sec('det','Plus de détails',`<div class="l">${t('État général')}</div>${group('etat',ETAT0,false,false)}
-    <div class="l">${t('Défauts du vêtement')}</div>${group('defauts',mrg(DEFAUTS,freq('defauts',1)),true,true)}
-    <div class="l">${t('Ballot')}</div>${group('ballot',abc(freq('ballot')),false,true)}
-    <div class="l">${t('Bac (emplacement)')}</div>${group('bac',abc(freq('bac')),false,true)}
-    <div class="row2"><div><div class="l">${t('Modèle')}</div><input type="text" data-k="modele" value="${esc(S.modele)}"></div><div><div class="l">Made in</div><input type="text" data-k="madein" list="dlmi" value="${esc(cn(S.madein))}" placeholder="${t('Pays')}"><datalist id="dlmi">${abc(mrg(MADEIN0,freq('madein'))).map(b=>`<option value="${esc(cn(b))}">`).join('')}</datalist></div></div>
+   sec('etat','État et défauts',`<div class="l">${t('État général')}</div>${group('etat',ETAT0,false,false)}
+    ${isNeuf(S.etat)?`<div class="hint">${t('Vêtement neuf : pas de défauts à indiquer.')}</div>`:`<div class="l">${t('Défauts du vêtement')}</div>${group('defauts',mrg(DEFAUTS,freq('defauts',1)),true,true)}`}`,{next:'Suivant'})+
+   sec('ballot','Ballot',group('ballot',abc(freq('ballot')),false,true),{next:'Passer'})+
+   sec('madein','Made in',`<input type="text" data-k="madein" list="dlmi" value="${esc(cn(S.madein))}" placeholder="${t('Pays')}"><datalist id="dlmi">${abc(mrg(MADEIN0,freq('madein'))).map(b=>`<option value="${esc(cn(b))}">`).join('')}</datalist>`,{next:'Passer'})+
+   sec('dates','Dates',`<div class="row2"><div><div class="l">${t('Date d\'entrée')}</div><input type="date" data-k="entree" value="${esc(S.entree)}"></div><div><div class="l">${t('Date de publication')}</div><input type="date" data-k="pub" value="${esc(S.pub)}"></div></div>`,{next:'Passer'})+
+   sec('det','Plus de détails',`<div class="l">${t('Bac (emplacement)')}</div>${group('bac',abc(freq('bac')),false,true)}
+    <div class="l">${t('Modèle')}</div><input type="text" data-k="modele" value="${esc(S.modele)}">
     <div class="l">${t('Collab / équipe')}</div><input type="text" data-k="collab" list="dlc" value="${esc(S.collab&&!/^Aucun/.test(S.collab)?S.collab:'')}"><datalist id="dlc">${freq('collab').map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
-    <div class="row2"><div><div class="l">${t('Date d\'entrée')}</div><input type="date" data-k="entree" value="${esc(S.entree)}"></div><div><div class="l">${t('Date de publication')}</div><input type="date" data-k="pub" value="${esc(S.pub)}"></div></div>
     <div class="l">${t('Note')}</div><textarea data-k="note" rows="2">${esc(S.note)}</textarea>`)+
    (edit?'':potHTML())+`<div class="hint" id="cdp"></div>
   <div class="acts">${edit?`<button type="button" class="btn" id="fok">${t('Enregistrer')}</button><button type="button" class="btn sec" id="fcancel">${t('Retour')}</button>`:`<button type="button" class="btn" id="fok">${t('Ajouter')}</button><button type="button" class="btn sec" id="fdup">${t('Ajouter et dupliquer')}</button><button type="button" class="btn sec" id="fclear"${dirty()?'':' disabled'}>${t('Annuler la saisie')}</button>`}</div>`;
@@ -121,7 +123,7 @@ export function mkForm(host,S,o){
   if(c.dataset.next){advance(c.dataset.next);draw();return}
   if(c.dataset.f){const f=c.dataset.f,v=c.dataset.v,multi=c.parentNode.dataset.multi;
    if(multi){const a=S[f]||[];S[f]=a.includes(v)?a.filter(x=>x!==v):[...a,v]}
-   else{S[f]=S[f]===v?'':v;if(f==='cat')S.sub='';if(S[f])advance(f)}
+   else{S[f]=S[f]===v?'':v;if(f==='cat')S.sub='';if(f==='etat'&&isNeuf(S.etat))S.defauts=[];if(S[f]&&f!=='etat')advance(f)}
    delete errs[f];draw();return}
   if(c.dataset.usereco){S.pvise=Number(c.dataset.usereco);S._vt=1;draw();return}
   if(c.dataset.rmph){S.photo='';draw();return}
@@ -159,6 +161,7 @@ export function mkForm(host,S,o){
   if(!S.cat)errs.cat=1;if(!(S.marque||'').trim())errs.marque=1;if(!(a>=0))errs.achat=1;
   if(Object.keys(errs).length){Object.keys(errs).forEach(k=>G.add(k));draw();const el=host.querySelector('.grp.err');if(el)el.scrollIntoView({block:'center',behavior:'smooth'});return}
   DK.forEach(k=>{const v=num(S[k]);S[k]=v>0?v:''});
+  if(isNeuf(S.etat))S.defauts=[];
   const pvv=num(S.pvise);S.pvise=pvv>0?pvv:'';
   S.marque=app.canonVal('marque',canon(S.marque));['collab','prov','ballot','madein'].forEach(k=>{if(S[k])S[k]=app.canonVal(k,S[k])});S.achat=Math.round(a*100)/100;o.onSubmit(S,dup);
  }

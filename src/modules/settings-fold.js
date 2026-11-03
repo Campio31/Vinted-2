@@ -5,7 +5,7 @@ import { $, LSg, LSs } from './core.js';
 /* Une seule carte reste ouverte : en ouvrir une referme la précédente.
    Toutes les cartes de préférences, de données et d'aide sont repliées au départ ; on ouvre celle dont on a besoin.
    Les cartes sont réécrites par leur module à chaque affichage : un observateur remet le pli sur le titre. */
-const FOLD = ['lgc', 'thc', 'cfgc', 'cptc', 'rlc', 'cfc', 'bkc', 'inst', 'xic', 'hlp', 'abo'];
+const FOLD = ['lgc', 'thc', 'cfgc', 'cptc', 'rlc', 'cfc', 'bkc', 'trc', 'inst', 'xic', 'hlp', 'abo'];
 let open = LSg('setOpen', []);
 open = Array.isArray(open) ? open.slice(0, 1) : [];
 

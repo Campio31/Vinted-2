@@ -16,11 +16,8 @@ let touched = false;
 
 /* les 8 outils du mode simple : ceux qui servent à ton profil d'abord, puis les basiques */
 export function essentials() {
-  const o = app.cfg.onb || {}, w = [];
-  if (o.canal === 'live' || o.canal === 'both') w.push('live');
-  if (o.statut === 'micro' || o.statut === 'pro') w.push('fisc');
-  ['colis', 'coach', 'depenses', 'rapport', 'trophees', 'qr', 'complete', 'fourn', 'vintage'].forEach(k => w.push(k));
-  return [...new Set(w)].filter(k => TOOLS.some(x => x.k === k)).slice(0, 8);
+  /* depuis la v43 : les 6 outils majeurs sont les mêmes pour tout le monde */
+  return ['colis', 'trophees', 'qr', 'vintage', 'buyers', 'rapport'].filter(k => TOOLS.some(x => x.k === k));
 }
 
 /* Onglet Outils : 6 grandes tuiles (ceux de ton profil), puis tous les autres en liste compacte (tools-index.js).
@@ -82,7 +79,6 @@ app.renderDash = function () {
   let jr = app.journeeHTML && app.P.length ? app.journeeHTML() : '';
   if (jr) jr = jr.replace(/<\/div>\s*$/, exHTML(todayData()) + '</div>');
   box.insertAdjacentHTML('afterbegin', jr || todayHTML());
-  if (jr) { const ch = box.querySelector('.coachc'); if (ch) ch.remove(); }
   if (todayHidden() && !compact) box.firstElementChild.style.display = 'none';
   if (isSimple() && app.P.length) box.insertAdjacentHTML('beforeend', `<button type="button" class="btn sec" data-td="${showAll ? 'compact' : 'full'}" style="margin-top:4px">${showAll ? t('Revenir à l\'essentiel') : t('Voir le bilan complet')}</button>`);
   $('per').style.display = compact ? 'none' : '';

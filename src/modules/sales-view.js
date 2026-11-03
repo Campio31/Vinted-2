@@ -33,7 +33,17 @@ const perOk = p => {
   const d = p.dv || '', t0 = today();
   return adv.per === 'mo' ? d.slice(0, 7) === t0.slice(0, 7) : adv.per === 'yr' ? d.slice(0, 4) === t0.slice(0, 4) : d >= addDays(t0, -(+adv.per));
 };
-const advOk = p => (!adv.pf || (p.canal || 'Vinted') === adv.pf) && (!adv.cat || p.cat === adv.cat) && (!adv.marque || p.marque === adv.marque) && perOk(p);
+const advOkNoPer = p => (!adv.pf || (p.canal || 'Vinted') === adv.pf) && (!adv.cat || p.cat === adv.cat) && (!adv.marque || p.marque === adv.marque);
+const advOk = p => advOkNoPer(p) && perOk(p);
+/** Fenêtre de la période précédente (même longueur) selon le filtre « Période », ou null s'il n'y en a pas. */
+const prevWin = () => {
+  if (!adv.per) return null;
+  const t0 = today();
+  if (adv.per === 'mo') { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); const m = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); return s => s.slice(0, 7) === m; }
+  if (adv.per === 'yr') { const y = String(+t0.slice(0, 4) - 1); return s => s.slice(0, 4) === y; }
+  const n = +adv.per, a = addDays(t0, -2 * n), b = addDays(t0, -n);
+  return s => s >= a && s < b;
+};
 const advSave = () => { const o = Object.assign({}, adv); delete o.st; delete o.cf; LSs('salesAdv', o); };
 function openSalesFilters() {
   adv.st = flt; adv.cf = cf;
@@ -82,7 +92,15 @@ function renderSales() {
   const STN = { month: t('Ce mois-ci'), prep: t('À préparer'), fin: t('À finaliser') };
   const act = activeChips(Object.assign({}, adv, { st: flt !== 'all' ? flt : '', cf }), ['st', 'cf', ...ADVS], { st: v => STN[v], cf: v => (CP.find(c => c.id === v) || {}).n || v, pf: v => tv(v), cat: v => tv(v), per: v => ({ 7: t('7 derniers jours'), 30: t('30 derniers jours'), mo: t('Ce mois-ci'), yr: t('Cette année') })[v] });
   const ca = L.reduce((a, p) => a + (p.pv || 0), 0), ben = L.reduce((a, p) => a + profit(p), 0), prep = F.prep.length;
-  $('ssum').innerHTML = `<div class="card"><div class="kpis ssk"><div class="kpi"><b>${L.length}</b><span>${t(L.length > 1 ? 'ventes' : 'vente')}</span></div><div class="kpi"><b>${eurR(ca)}</b><span>${t('encaissés')}</span></div><div class="kpi"><b>${eurR(ben)}</b><span>${t('de bénéfice')}</span></div></div>${prep && flt !== 'prep' ? `<div class="tdx"><span>${t('{n} à préparer pour l\'envoi', { n: prep })}</span><button type="button" class="btn sec" data-sprep="1">${t('Préparer')}</button></div>` : ''}${flt === 'fin' ? `<div class="tdx"><span>${F.fin.length ? t('Une vente est finalisée quand l\'argent est reçu. Elle compte alors dans ton chiffre d\'affaires à déclarer.') : t('Aucune vente en attente de finalisation.')}</span>${F.fin.length ? `<button type="button" class="btn sec" data-sfin="1">${t('Tout finaliser ({n})', { n: F.fin.length })}</button>` : ''}</div>` : ''}</div>`;
+  /* 4 tuiles colorées ; avec une période choisie dans « Filtres », une flèche compare à la période d'avant (même longueur) */
+  const win = prevWin(), PV = win ? F[flt].filter(p => !cf || (app.compteOf(p) || {}).id === cf).filter(advOkNoPer).filter(p => win(p.dv || '')) : null;
+  const pCa = PV ? PV.reduce((a, p) => a + (p.pv || 0), 0) : 0, pBen = PV ? PV.reduce((a, p) => a + profit(p), 0) : 0;
+  const mg = ca ? ben / ca * 100 : 0, pMg = pCa ? pBen / pCa * 100 : 0;
+  const evo = (c, p, pts) => { if (!PV || !(p || c)) return ''; const d = pts ? c - p : (p ? (c - p) / Math.abs(p) * 100 : 100), r = Math.round(d); return `<small class="sev ${r > 0 ? 'up' : r < 0 ? 'dn' : ''}">${r > 0 ? '↑' : r < 0 ? '↓' : '='} ${Math.abs(r)}${pts ? ' pt' : ' %'}</small>`; };
+  const stile = (k, ico, big, lab, ev) => `<div class="stt st-${k}"><i class="sti">${ico}</i><b>${big}</b><span>${lab}</span>${ev}</div>`;
+  const SI = { v: '<path d="M6 8h12l-1 12H7zM9 8a3 3 0 0 1 6 0"/>', c: '<circle cx="12" cy="12" r="8"/><path d="M12 8v8M9.5 10.2c.4-1 1.4-1.4 2.5-1.4s2.2.5 2.2 1.5c0 2.2-4.7 1-4.7 3.3 0 1 1 1.6 2.5 1.6 1.2 0 2.1-.5 2.5-1.4"/>', b: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>', m: '<path d="M18 6 6 18M8 8h.01M16 16h.01"/>' };
+  const ico = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${SI[k]}</svg>`;
+  $('ssum').innerHTML = `<div class="card"><div class="sgt">${stile('v', ico('v'), L.length, t(L.length > 1 ? 'ventes' : 'vente'), evo(L.length, PV ? PV.length : 0))}${stile('c', ico('c'), eurR(ca), t('encaissés'), evo(ca, pCa))}${stile('b', ico('b'), eurR(ben), t('de bénéfice'), evo(ben, pBen))}${stile('m', ico('m'), Math.round(mg) + ' %', t('de marge'), evo(mg, pMg, true))}</div>${PV ? `<div class="hint sgc">${t('Flèches : évolution par rapport à la période précédente de même durée.')}</div>` : ''}${prep && flt !== 'prep' ? `<div class="tdx"><span>${t('{n} à préparer pour l\'envoi', { n: prep })}</span><button type="button" class="btn sec" data-sprep="1">${t('Préparer')}</button></div>` : ''}${flt === 'fin' ? `<div class="tdx"><span>${F.fin.length ? t('Une vente est finalisée quand l\'argent est reçu. Elle compte alors dans ton chiffre d\'affaires à déclarer.') : t('Aucune vente en attente de finalisation.')}</span>${F.fin.length ? `<button type="button" class="btn sec" data-sfin="1">${t('Tout finaliser ({n})', { n: F.fin.length })}</button>` : ''}</div>` : ''}</div>`;
   const page = L.slice(0, lim);
   $('slst').innerHTML = act + (page.length ? page.map(row).join('') + (L.length > lim ? `<button type="button" class="btn sec" id="smore">${t('Afficher plus ({n})', { n: L.length - lim })}</button>` : '')
     : `<div class="card empty">${app.P.some(sold) || q ? t('Aucune vente ici.') : t('Aucune vente pour l\'instant. Les ventes faites depuis une fiche ou en Live apparaissent ici.')}</div>`);
