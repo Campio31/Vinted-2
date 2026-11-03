@@ -15,7 +15,7 @@ const VCAT={Tshirt:'T-shirts et débardeurs',Sweat:'Pulls et sweats',Chemise:'Ch
 const typeLbl=p=>t(TYPELBL[p.cat+'|'+p.sub]||(p.sub&&['Blouson','Doudoune','Bomber','Parka','Polaire','Perfecto','Cardigan','Pyjama','Manteau long','Coupe-vent','Duffle-Coat','Blouson Teddy','Mini jupe','Robe de soirée','Sac à main'].includes(p.sub)?p.sub:(CATLBL[p.cat]||p.cat||'Vêtement')));
 const brandOk=p=>p.marque&&!/^non (identifi|renseign)/i.test(p.marque)?p.marque:'';
 const collabOk=p=>p.collab&&!/^aucun/i.test(p.collab)?p.collab:'';
-const vCond=p=>t(/^neuf/i.test(p.etat||'')?'Neuf sans étiquette':p.grade==='A'?'Très bon état':p.grade==='B'?'Bon état':p.grade==='C'?'Satisfaisant':'Bon état');
+const vCond=p=>t(/^neuf avec/i.test(p.etat||'')?'Neuf avec étiquette':/^neuf/i.test(p.etat||'')?'Neuf sans étiquette':/^(très bon état|bon état|satisfaisant)$/i.test(p.etat||'')?p.etat:p.grade==='A'?'Très bon état':p.grade==='B'?'Bon état':p.grade==='C'?'Satisfaisant':'Bon état');
 app.vCond = vCond;
 function vTitle(p){const type=typeLbl(p),m=brandOk(p),mod=p.modele||'',col=lc(tv((p.coul&&p.coul[0])||'')),tail=p.taille?t(' - Taille {s}',{s:p.taille}):'';
  const tries=[[type,m,mod,collabOk(p),col],[type,m,mod,'',col],[type,m,'','',col],[type,m,'','','']];
@@ -25,7 +25,9 @@ function vDesc(p){
  const type=typeLbl(p),m=brandOk(p),cols=(p.coul||[]).map(c=>lc(tv(c))),colTxt=andJoin(cols),genre={Homme:t('Homme'),Femme:t('Femme'),Enfant:t('Enfant'),'Les deux':t('Mixte')}[p.genre]||'';
  const l1=[type,m,p.modele,collabOk(p),colTxt].filter(Boolean).join(' ')+(p.taille?t(', taille {s}',{s:p.taille}):'')+'.';
  const stateTxt={A:t('Très bon état, aucun défaut visible.'),B:t('Bon état, légères traces d\'usure normales pour un article porté.'),C:t('État satisfaisant, des signes d\'usure sont visibles (voir les photos).')}[p.grade]||'';
- const def=p.etat&&!/^(ras|neuf|légères traces d'usure)$/i.test(p.etat)?t('Point à signaler : {d} (visible sur les photos).',{d:lc(tv(p.etat))}):'';
+ /* défauts précis cochés dans la fiche ; une ancienne fiche avec un défaut dans « état » est aussi reprise */
+ const dl=[...(p.defauts||[]),...(p.etat&&!/^(ras|neuf.*|légères traces d'usure|très bon état|bon état|satisfaisant)$/i.test(p.etat)?[p.etat]:[])];
+ const def=dl.length?t(dl.length>1?'Points à signaler : {d} (visibles sur les photos).':'Point à signaler : {d} (visible sur les photos).',{d:dl.map(x=>lc(tv(x))).join(', ')}):'';
  const det=[[t('Marque'),m],[t('Modèle'),p.modele],[t('Taille'),p.taille],[t('Genre'),genre],[t('Couleur'),cols.join(', ')],[t('Matière'),(p.mat||[]).map(tv).join(', ')],['Collab',collabOk(p)],[t('Fabriqué en'),cn(p.madein)]].filter(r=>r[1]);
  const dims=[...DH,...DB].filter(([k])=>p[k]).map(([k,l])=>'• '+t(l)+t(' : ')+String(p[k]).replace('.',app.DS)+' cm');
  const tag=s=>'#'+nrm(s).replace(/[^a-z0-9]+/g,'');

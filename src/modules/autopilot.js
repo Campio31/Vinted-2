@@ -139,7 +139,7 @@ export function applyBatch(kind, ids, rule) {
 }
 
 /* ---- écran : carte « Ma journée » en haut du Bilan ---- */
-let openId = '', excl = new Set(), showLog = false;
+let openId = '', excl = new Set(), showLog = false, showSet = false;
 const KIND_LABEL = { fin: 'Ventes finalisées', colis: 'Colis prêts', pub: 'Pièces publiées', prix: 'Prix mis à jour' };
 function taskHTML(x) {
   const mode = apMode(), batch = x.kind && mode === 'assist', isOpen = openId === x.id && batch;
@@ -151,21 +151,37 @@ function taskHTML(x) {
   const rl = x.rule ? `<div class="apq"><span>${t('Règle : {r}', { r: t(x.ruleName) })}</span><button type="button" class="lnk" data-ap="later:${x.rule}">${t('Pas maintenant')}</button></div>${x.ignored ? `<div class="apq ign"><span>${t('Tu as ignoré cette règle 3 fois de suite.')}</span><button type="button" class="lnk" data-ap="off:${x.rule}">${t('La désactiver')}</button></div>` : ''}` : '';
   return `<div class="apt t-${x.tone}${isOpen ? ' open' : ''}">${rl}<button type="button" class="aph" data-ap="${batch ? 'open:' + x.id : 'go:' + (x.go || '')}"><span class="apn">${x.n || '·'}</span><span class="apx"><b>${esc(x.title)}</b><small>${esc(x.why)}</small></span><span class="apb">${batch ? (isOpen ? '▴' : t('À valider')) : esc(x.btn || t('Ouvrir'))}</span></button>${body}</div>`;
 }
+/* tuile d'un compteur : touche-la pour ouvrir la tâche correspondante (même action que la ligne dessous) */
+const TILES = [['pub', 'à publier', 'b'], ['colis', 'à préparer', 'a'], ['prix', 'à relancer', 't'], ['fin', 'à finaliser', 'g']];
+function tileHTML([id, lab, col], T, mode) {
+  const x = T.find(y => y.id === id), n = x ? x.n : 0;
+  const act = !x ? '' : ` data-ap="${x.kind && mode === 'assist' ? 'open:' + x.id : 'go:' + (x.go || '')}"`;
+  return `<button type="button" class="apc-t c-${col}${n ? '' : ' zero'}"${act}${x ? '' : ' disabled'}><b>${n}</b><span>${t(lab)}</span></button>`;
+}
+/* anneau : tâches faites aujourd'hui sur le total du jour (faites + restantes) */
+function ringHTML(done, total) {
+  const R = 26, C = 2 * Math.PI * R, pc = total ? Math.min(1, done / total) : 1;
+  return `<svg class="apring" viewBox="0 0 64 64" role="img" aria-label="${esc(t('{a} sur {b}', { a: done, b: total }))}"><circle cx="32" cy="32" r="${R}" fill="none" stroke="var(--line)" stroke-width="7"/><circle cx="32" cy="32" r="${R}" fill="none" stroke="var(--ok,#1D9E75)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C * pc).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle" font-size="15" font-weight="800" fill="currentColor">${done}/${total}</text></svg>`;
+}
 export function journeeHTML() {
   if (!app.P.length) return '';
   const T = tasksToday(), mode = apMode(), st = Object.assign({ lots: 0, items: 0, min: 0 }, app.cfg.apStats), log = app.cfg.apLog || [];
-  const cnt = k => (T.find(x => x.id === k) || {}).n || 0, hi = new Date().getHours(), hello = hi < 12 ? t('Bonjour') : hi < 18 ? t('Bon après-midi') : t('Bonsoir');
-  return `<div class="card tdy ap" data-ck="today" data-lb="${esc(t('Ma journée'))}"><h3 style="margin:0 0 4px">${t('Ma journée')}</h3><p class="sub" style="margin:0 0 10px">${hello} ! ${T.length ? t(T.length > 1 ? 'Voici tes {n} priorités.' : 'Voici ta priorité.', { n: T.length }) : t('Tout est à jour : rien d\'urgent aujourd\'hui.')}</p>
-   <div class="apc"><div><b>${cnt('pub')}</b><span>${t('à publier')}</span></div><div><b>${cnt('colis')}</b><span>${t('à préparer')}</span></div><div><b>${cnt('prix')}</b><span>${t('à relancer')}</span></div></div>
+  const hi = new Date().getHours(), hello = hi < 12 ? t('Bonjour') : hi < 18 ? t('Bon après-midi') : t('Bonsoir');
+  const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+  const done = log.filter(e => e.k !== 'rule' && !e.undone && e.t >= d0.getTime()).length, total = done + T.length, sr = streakInfo().n;
+  return `<div class="card tdy ap" data-ck="today" data-lb="${esc(t('Ma journée'))}"><div class="aph0">${ringHTML(done, total)}<div><h3 style="margin:0 0 2px">${t('Ma journée')}</h3><p class="sub" style="margin:0">${hello} ! ${T.length ? t(T.length > 1 ? 'Voici tes {n} priorités.' : 'Voici ta priorité.', { n: T.length }) : t('Tout est à jour : rien d\'urgent aujourd\'hui.')}</p>${sr > 1 ? `<p class="sub" style="margin:2px 0 0">${t('{n} jours de suite', { n: sr })}</p>` : ''}</div></div>
+   <div class="apc">${TILES.map(x => tileHTML(x, T, mode)).join('')}</div>
    ${T.map(taskHTML).join('')}
+   <details class="apd"${showLog || showSet ? ' open' : ''}><summary>${t('Réglages de Max')}</summary>
    <div class="apm" role="group" aria-label="${esc(t('Niveau d\'automatisation'))}">${AP_MODES.map(([k, l, d]) => `<button type="button" class="${mode === k ? 'on' : ''}" data-ap="mode:${k}"${k === 'auto' ? ' disabled' : ''} title="${esc(t(d))}">${t(l)}</button>`).join('')}</div>
    <div class="hint" style="margin:6px 0 0">${t(AP_MODES.find(m => m[0] === mode)[2])}.</div>
    ${st.lots ? `<div class="hint" style="margin:8px 0 0">${t('Avec Max : {l} lots, {n} modifications, environ {m} min gagnées (estimation).', { l: st.lots, n: st.items, m: Math.round(st.min) })}</div>` : ''}
    <button type="button" class="lnk" data-ap="rules" style="margin-top:8px;margin-right:14px">${t('Règles de Max')}</button>${log.length ? `<button type="button" class="lnk" data-ap="log" style="margin-top:8px">${showLog ? t('Masquer le journal') : t('Journal des actions')}</button>` : ''}
    ${showLog ? `<div class="apj">${log.slice(0, 15).map(e => `<div class="${e.undone ? 'un' : ''}"><span>${new Date(e.t).toLocaleString(app.LOC, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span><b>${e.k === 'rule' ? t('Règle : {r}', { r: t(e.rule) }) + ' · ' + t({ later: 'reportée à demain', off: 'désactivée' }[e.res] || e.res) : t(KIND_LABEL[e.k] || e.k) + (e.rule ? ' · ' + t('règle : {r}', { r: t(e.rule) }) : '') + ' · ' + e.n}</b>${e.undone ? `<em>${t('annulé')}</em>` : ''}</div>`).join('')}</div>` : ''}
+   </details>
   </div>`;
-}
-app.journeeHTML = journeeHTML;
+}app.journeeHTML = journeeHTML;
+$('dsh').addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('apd')) showSet = e.target.open; }, true);
 app.tasksToday = tasksToday;
 
 function goTo(spec) {
