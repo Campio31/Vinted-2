@@ -2435,3 +2435,7 @@ K('Organiser','Organise','Organizza','Organizar','Ordnen');
 K('Regrouper par compte','Group by account','Raggruppa per account','Agrupar por cuenta','Nach Konto gruppieren');
 K('Regroupé par compte','Grouped by account','Raggruppato per account','Agrupado por cuenta','Nach Konto gruppiert');
 K('Le compte où tu comptes vendre cette pièce : tu pourras ranger ton stock par compte.','The account where you plan to sell this item: you will be able to organise your stock by account.','L\'account su cui pensi di vendere questo capo: potrai organizzare lo stock per account.','La cuenta donde piensas vender esta prenda: podrás organizar tu stock por cuenta.','Das Konto, auf dem du dieses Teil verkaufen willst: So kannst du deinen Bestand nach Konto ordnen.');
+
+K('Changer de compte','Change account','Cambia account','Cambiar de cuenta','Konto ändern');
+K('Range la sélection dans un compte de vente','Puts the selection in a selling account','Mette la selezione in un account di vendita','Pone la selección en una cuenta de venta','Legt die Auswahl in einem Verkaufskonto ab');
+K('Aucun compte','No account','Nessun account','Ninguna cuenta','Kein Konto');
