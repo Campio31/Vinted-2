@@ -2439,3 +2439,18 @@ K('Le compte où tu comptes vendre cette pièce : tu pourras ranger ton stock pa
 K('Changer de compte','Change account','Cambia account','Cambiar de cuenta','Konto ändern');
 K('Range la sélection dans un compte de vente','Puts the selection in a selling account','Mette la selezione in un account di vendita','Pone la selección en una cuenta de venta','Legt die Auswahl in einem Verkaufskonto ab');
 K('Aucun compte','No account','Nessun account','Ninguna cuenta','Kein Konto');
+K('Compléter et nettoyer les fiches','Complete and clean up items','Completa e pulisci le schede','Completar y limpiar fichas','Artikel vervollständigen und bereinigen');
+K('Fiches incomplètes et doublons au même endroit','Incomplete items and duplicates in one place','Schede incomplete e doppioni nello stesso posto','Fichas incompletas y duplicados en un solo sitio','Unvollständige Artikel und Duplikate an einem Ort');
+K('Configure tes indicateurs','Set up your indicators','Configura i tuoi indicatori','Configura tus indicadores','Richte deine Kennzahlen ein');
+K('Configurer mes indicateurs','Set up my indicators','Configura i miei indicatori','Configurar mis indicadores','Meine Kennzahlen einrichten');
+K('Quelques questions pour que le Bilan soit juste. Chaque ligne ouvre son questionnaire, tu peux les faire plus tard depuis Outils.','A few questions to make the Overview accurate. Each line opens its questionnaire; you can do them later from Tools.','Qualche domanda per rendere il Bilancio preciso. Ogni riga apre il suo questionario, puoi farli più tardi da Strumenti.','Unas preguntas para que el Balance sea exacto. Cada línea abre su cuestionario; puedes hacerlos más tarde desde Herramientas.','Ein paar Fragen, damit die Auswertung stimmt. Jede Zeile öffnet ihren Fragebogen; du kannst sie später unter Werkzeuge erledigen.');
+K('Rapport PDF du mois','Monthly PDF report','Report PDF del mese','Informe PDF del mes','PDF-Bericht des Monats');
+K('Sachets, cartons, scotch : le coût réel d\'un colis','Bags, boxes, tape: the real cost of a parcel','Buste, scatole, nastro: il costo reale di un pacco','Bolsas, cajas, cinta: el coste real de un paquete','Beutel, Kartons, Klebeband: die echten Kosten eines Pakets');
+K('Tes frais fixes du mois, pour savoir combien de ventes les couvrent','Your monthly fixed costs, to know how many sales cover them','Le tue spese fisse del mese, per sapere quante vendite le coprono','Tus gastos fijos del mes, para saber cuántas ventas los cubren','Deine monatlichen Fixkosten, um zu wissen, wie viele Verkäufe sie decken');
+K('Ton objectif du mois, en bénéfice ou en chiffre d\'affaires','Your goal for the month, in profit or revenue','Il tuo obiettivo del mese, in utile o fatturato','Tu objetivo del mes, en beneficio o en facturación','Dein Monatsziel, als Gewinn oder Umsatz');
+K('Ton solde actuel, pour la prévision à 15 et 30 jours','Your current balance, for the 15 and 30-day forecast','Il tuo saldo attuale, per la previsione a 15 e 30 giorni','Tu saldo actual, para la previsión a 15 y 30 días','Dein aktueller Kontostand für die Prognose auf 15 und 30 Tage');
+K('Voir le bilan complet','See the full overview','Vedi il bilancio completo','Ver el balance completo','Gesamte Auswertung ansehen');
+K('{a} sur {b} faits','{a} of {b} done','{a} su {b} fatti','{a} de {b} hechos','{a} von {b} erledigt');
+K('Ma journée est terminée','My day is done','La mia giornata è finita','Mi día ha terminado','Mein Tag ist erledigt');
+K('Réduire','Collapse','Riduci','Reducir','Einklappen');
+K('Tout est à jour : rien d\'urgent aujourd\'hui.','Everything is up to date: nothing urgent today.','Tutto aggiornato: niente di urgente oggi.','Todo al día: nada urgente hoy.','Alles aktuell: heute nichts Dringendes.');
