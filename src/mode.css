@@ -363,3 +363,56 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .apc-t.c-b{background:#E6F1FB;color:#0C447C}.apc-t.c-a{background:#FAEEDA;color:#633806}.apc-t.c-t{background:#E1F5EE;color:#085041}.apc-t.c-g{background:#EAF3DE;color:#27500A}
 .apc-t.zero{background:var(--bg);color:var(--mute);cursor:default}
 .apd{margin-top:10px;border-top:1px solid var(--line);padding-top:6px}.apd summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--mute);padding:8px 0;min-height:36px}.apc .apc-t span{color:inherit;font-size:13px}.apc .apc-t b{display:block}
+
+/* ===== v43 ===== */
+/* objectifs : la projection au rythme actuel est en violet, sur la barre et sur la courbe */
+.rl i.pj{position:absolute;top:0;bottom:0;border-radius:3px;background:repeating-linear-gradient(135deg,#7C6CF0 0 4px,#A99FF7 4px 8px)}
+.gc-pj{color:#6E5DE0}.gcard .gc-pj{color:#B7AEFF}.gpj{display:flex;gap:7px;align-items:flex-start}.gpj .pjd{flex:none;width:10px;height:10px;margin-top:5px;border-radius:3px;background:#7C6CF0}
+.crv path.pj{fill:none;stroke:#7C6CF0;stroke-width:3;stroke-dasharray:1 7;stroke-linecap:round}.crv .pjc{fill:var(--card);stroke:#7C6CF0;stroke-width:2.5}.crv .td{stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 3}
+.crl{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--mute);margin:-2px 0 10px}
+.crl span:before{content:"";display:inline-block;width:16px;height:0;border-top:3px solid;margin-right:6px;vertical-align:middle}
+.cr-a:before{border-color:var(--mint)}.cr-p:before{border-top-style:dotted;border-color:#7C6CF0}.cr-o:before{border-top-style:dashed;border-color:var(--mute)}
+/* Bilan : légende des six mois (la classe .lg est celle du logo), médailles or, argent, bronze */
+.lgd{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--mute);margin-top:8px}
+.lgd span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;background:var(--ink)}
+.lgd span.p:before{background:var(--mint)}
+.hb{grid-template-columns:minmax(104px,34%) 1fr auto}
+.hb.md-gold .tr i{background:linear-gradient(90deg,#D9A21B,#F5D76E)}
+.hb.md-silver .tr i{background:linear-gradient(90deg,#8E98A4,#D3D8DE)}
+.hb.md-bronze .tr i{background:linear-gradient(90deg,#A4571B,#DE9A5E)}
+.mdl{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;font-style:normal;font-size:12px;font-weight:800;margin-right:6px;color:#1f1700;vertical-align:1px}
+.md-gold .mdl{background:#F2C94C}.md-silver .mdl{background:#C9CED6}.md-bronze .mdl{background:#D08A4E}
+/* Stock : cartes « vitrine photo » */
+#lst .tl.vit{overflow:hidden}
+#lst .tl.vit .ph{position:relative}
+#lst .tl.vit .im{height:auto;aspect-ratio:4/5;border-radius:0;position:relative}
+#lst .tl.vit .im::after{content:"";position:absolute;left:0;right:0;bottom:0;height:58%;background:linear-gradient(transparent,rgba(10,14,24,.82));pointer-events:none}
+#lst .tl.vit .pr{top:10px;left:10px}
+#lst .tl.vit .stb{position:absolute;top:10px;right:10px;z-index:2;font-size:12px;font-weight:700;line-height:1.3;border-radius:999px;padding:3px 10px;background:rgba(255,255,255,.94);color:#17233B}
+#lst .tl.vit .stb.on{background:var(--mint);color:#fff}#lst .tl.vit .stb.off{background:var(--acc);color:#111}
+#lst .tl.vit .ov{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:0 11px 9px}
+#lst .tl.vit .ov .ti b{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+#lst .tl.vit .ov .cdm{color:rgba(255,255,255,.88)}
+#lst .tl.vit .bd{padding:9px 10px 10px}
+#lst .tl.vit .hl{display:none}
+/* Vente : 4 tuiles colorées avec évolution */
+.sgt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.stt{border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stt .sti{display:block;height:22px}.stt .sti svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.stt b{font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.stt span{font-size:13px;font-weight:600}
+.st-v{background:#E6F1FB;color:#0C447C}.st-c{background:#FAEEDA;color:#633806}.st-b{background:#EAF3DE;color:#27500A}.st-m{background:#EEEDFE;color:#3C3489}
+.sev{font-size:12px;font-weight:700}.sev.up{color:#1B7A46}.sev.dn{color:#B3261E}
+.sgc{margin-top:8px}
+/* Ma journée : tuiles compactes sur une ligne, tâches à glisser */
+.ap .apc{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.ap .apc-t{padding:8px 4px;min-height:56px;align-items:center;text-align:center;border-radius:12px}
+.ap .apc-t b{font-size:20px}.ap .apc-t span{font-size:12px;line-height:1.2}
+.apsw,.apsn{margin:2px 0 8px}
+.apw{position:relative;margin-bottom:8px;border-radius:16px;overflow:hidden}
+.apbg{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:13px;font-weight:700;background:var(--soft);color:var(--mute);border-radius:16px}
+.apw.r .apbg{background:var(--mint);color:#fff}.apw.l .apbg{background:var(--acc);color:#111}
+.apw .apt{position:relative;margin:0;touch-action:pan-y;transition:transform .18s ease}
+.apw.drag .apt{transition:none}
+.apw .aph{padding-right:46px;touch-action:pan-y}
+.apt.open .apz{display:none}
+.apz{position:absolute;bottom:6px;right:8px;width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--mute);font-size:14px;cursor:pointer;z-index:2}
