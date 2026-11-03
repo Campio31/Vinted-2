@@ -416,3 +416,17 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .apw .aph{padding-right:46px;touch-action:pan-y}
 .apt.open .apz{display:none}
 .apz{position:absolute;bottom:6px;right:8px;width:34px;height:34px;border:0;border-radius:50%;background:transparent;color:var(--mute);font-size:14px;cursor:pointer;z-index:2}
+/* ===== v44 ===== */
+#dsh[data-bt="m"]>.bt-a,#dsh[data-bt="m"]>.bt-s,#dsh[data-bt="a"]>.bt-m,#dsh[data-bt="a"]>.bt-s,#dsh[data-bt="s"]>.bt-m,#dsh[data-bt="s"]>.bt-a{display:none!important}
+.dsa.btabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:8px 0 12px;padding:4px;background:var(--soft);border-radius:999px}
+.btabs .chip{justify-content:center;text-align:center;min-height:42px;border:0;background:transparent;font-weight:700;box-shadow:none}
+.btabs .chip.on{background:var(--ink);color:var(--on)}
+/* Stock : le grade remplace le prix sur la photo ; titres de groupe par compte */
+#lst .tl.vit .pr.gr{background:none;padding:0;border-radius:0}
+.gbd{font-size:15px;font-weight:800;padding:4px 13px;min-width:34px;text-align:center}
+.stkh{grid-column:1/-1;margin:14px 2px 2px;font-size:15px}
+/* Outils : pastille de notification (colis à préparer) */
+.tool .tic,.tool2 .tic{position:relative}
+.tbd{position:absolute;top:-6px;right:-8px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--acc);color:#111;font-size:12px;font-weight:800;font-style:normal;display:inline-grid;place-items:center;line-height:1}
+/* Ajouter : prix de vente conseillé dans le potentiel */
+.pr2.reco{border-top:1px dashed var(--line);margin-top:4px;padding-top:6px}.pr2.reco b{color:var(--mint)}

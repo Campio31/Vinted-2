@@ -82,5 +82,6 @@ import './modules/history.js';
 import './modules/account.js';
 import './modules/a11y.js';
 import './modules/auth-guard.js';
+import './modules/bilan-tabs.js';
 import './modules/boot.js';
 import './modules/updates.js';
