@@ -32,22 +32,16 @@ describe('v45 : Bilan', () => {
     expect(hero.className).not.toMatch(/bt-[mas]/);
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
   });
-  it('Finances : trésorerie en menu déroulant, chiffres clés sur une seule carte, pas de plafond ; Activité en bandeau', async () => {
+  it('chaque onglet montre 6 indicateurs ; les anciennes cartes d\'indicateurs ont disparu', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     const box = $('dsh');
+    for (const k of ['m', 'a', 's']) expect(box.querySelectorAll(`.btiles.bt-${k} .bkt`), k).toHaveLength(6);
     expect(box.querySelector('[data-tool="fisc"]')).toBeNull();
-    const d = box.querySelector('details.bdrop.bt-m');
-    expect(d).not.toBeNull();
-    expect(d.querySelector('summary b')).not.toBeNull();
-    expect(d.querySelector('[data-tool="treso"]')).not.toBeNull();
-    const k = box.querySelector('.card.bkp.bt-m');
-    expect(k).not.toBeNull();
-    expect(k.querySelector('.kpis')).not.toBeNull();
-    expect(box.querySelectorAll(':scope > .kpis')).toHaveLength(0);
-    expect(box.querySelector('.bstrip.bt-a [data-tool="defis"]')).not.toBeNull();
+    expect(box.querySelector('details.bdrop')).toBeNull();
+    expect(box.querySelectorAll(':scope > .kpis, :scope > .minic')).toHaveLength(0);
     /* « Personnaliser » retrouve toujours chaque carte */
     box.querySelector('[data-dcust]').click(); await tick(20);
-    expect($('shc').querySelectorAll('.dcr').length).toBeGreaterThan(6);
+    expect($('shc').querySelectorAll('.dcr').length).toBeGreaterThan(4);
     $('sheet').hidden = true;
   });
 });
@@ -70,5 +64,62 @@ describe('v45 : compte en sélection', () => {
     L.forEach(p => expect(app.P.find(x => x.id === p.id).stk).toBeUndefined());
     app.setCfg({ comptes: [], cptMain: '' }, true);
     $('sheet').hidden = true;
+  });
+});
+describe('v47 : onglets du Bilan', () => {
+  it('les graphiques sont ouverts en petit ; un appui les agrandit, un appui sur le titre les rétrécit', async () => {
+    nav.go('dash'); app.renderDash(); await tick(30);
+    const c = $('dsh').querySelector('.card.bmini[data-ck="seuil"]') || [...$('dsh').querySelectorAll('.card.bmini')].find(x => x.querySelector('h3[data-sec]'));
+    expect(c).not.toBeNull();
+    expect(c.classList.contains('shut')).toBe(false);
+    expect(c.classList.contains('bbig')).toBe(false);
+    c.click();
+    expect(c.classList.contains('bbig')).toBe(true);
+    /* l'état agrandi est gardé quand le Bilan est redessiné */
+    app.renderDash(); await tick(20);
+    const k = c.dataset.ck || c.querySelector('h3[data-sec]').dataset.sec;
+    expect(k).toBeTruthy();
+    const c2 = $('dsh').querySelector(`.card[data-ck="${k}"]`) || [...$('dsh').querySelectorAll('.card')].find(x => (x.querySelector('h3[data-sec]') || {}).dataset?.sec === k);
+    expect(c2.classList.contains('bbig')).toBe(true);
+    c2.querySelector('h3').click();
+    expect(c2.classList.contains('bbig')).toBe(false);
+  });
+  it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
+    nav.go('dash'); app.renderDash(); await tick(30);
+    const bar = $('dsh').querySelector('.btabs');
+    for (const k of ['m', 'a', 's']) {
+      bar.querySelector(`[data-bt="${k}"]`).click();
+      expect($('dsh').dataset.bt).toBe(k);
+      expect(bar.querySelector(`[data-bt="${k}"]`).classList.contains('on')).toBe(true);
+    }
+    bar.querySelector('[data-bt="m"]').click();
+  });
+  it('les objectifs sont des jauges demi-cercle avec la projection en violet', async () => {
+    const vendu = app.P.find(x => x.statut === 'Vendu' && (x.pv || 0) > (x.achat || 0)), dv0 = vendu.dv;
+    vendu.dv = new Date().toISOString().slice(0, 10);
+    app.setCfg({ goal: 100000, goalMode: 'both', goalCA: 100000 }, true);
+    nav.go('dash'); app.renderDash(); await tick(30);
+    const g = $('dsh').querySelector('.gcard.gaus');
+    expect(g.querySelectorAll('.gau')).toHaveLength(2);
+    expect(g.querySelector('.gau svg .gnd')).not.toBeNull();
+    expect(g.querySelector('.gau .gpc').textContent).toMatch(/%/);
+    vendu.dv = dv0;
+    app.setCfg({ goal: 0, goalCA: 0, goalMode: 'net' }, true);
+  });
+});
+
+describe('v47 : Ma journée se réduit à tout moment', () => {
+  it('même avec des tâches, on peut réduire la carte, puis la rouvrir', async () => {
+    nav.go('dash'); app.renderDash(); await tick(30);
+    const A = await import('../src/modules/autopilot.js');
+    expect(A.tasksToday().length).toBeGreaterThan(0);
+    const c = $('dsh').querySelector('.ap');
+    expect(c.classList.contains('apdone')).toBe(false);
+    c.querySelector('[data-ap="jclose"]').click(); await tick(20);
+    const r = $('dsh').querySelector('.ap');
+    expect(r.classList.contains('apdone')).toBe(true);
+    expect(r.querySelector('.apok').textContent.trim()).toBe(String(A.tasksToday().length));
+    r.querySelector('[data-ap="jopen"]').click(); await tick(20);
+    expect($('dsh').querySelector('.ap').classList.contains('apdone')).toBe(false);
   });
 });

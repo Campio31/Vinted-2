@@ -49,11 +49,11 @@ describe('v46 : Bilan', () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     expect($('dsh').querySelector('[data-ck="courbe"]')).toBeNull();
     expect($('dsh').querySelector('[data-tool="rapport"]')).toBeNull();
-    expect($('rpt').hidden).toBe(false);
+    expect($('rptb').hidden).toBe(false);
     nav.go('list'); await tick(10);
-    expect($('rpt').hidden).toBe(true);
+    expect($('rptb').hidden).toBe(true);
     nav.go('dash');
-    $('rpt').click(); await tick(30);
+    $('rptb').click(); await tick(30);
     expect($('sheet').hidden).toBe(false);
   });
 });

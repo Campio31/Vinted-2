@@ -69,7 +69,7 @@ describe('v43 : objectifs et courbe', () => {
     app.setCfg({ goal: 100000, goalMode: 'net', goalCA: 0 }, true);
     const h = document.createElement('div'); h.innerHTML = goals.goalHTML ? goals.goalHTML() : app.goalHTML();
     const d = new Date(), fin = d.getDate() === new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    if (!fin) expect(h.querySelector('.rl i.pj')).not.toBeNull();
+    if (!fin) expect(h.querySelector('.gau .gpjarc')).not.toBeNull();
     expect(h.querySelector('.gpj .pjd')).not.toBeNull();
     const an = await import('../src/modules/analytics.js');
     const c = document.createElement('div'); c.innerHTML = an.courbeBody();

@@ -101,8 +101,8 @@ describe('v44 : Bilan en onglets', () => {
     tous.forEach(el => expect(el.className.match(/bt-[mas]/g)).toHaveLength(1));
     const de = k => tous.filter(el => el.classList.contains('bt-' + k));
     ['m', 'a', 's'].forEach(k => expect(de(k).length, k).toBeGreaterThan(0));
-    expect(box.querySelector('[data-tool="treso"]').classList.contains('bt-m')).toBe(true);
-    expect(box.querySelector('[data-tool="defis"]').classList.contains('bt-a')).toBe(true);
+    expect(box.querySelector('.btiles.bt-m [data-tool="treso"]')).not.toBeNull();
+    expect(box.querySelector('.btiles.bt-a [data-tool="trophees"]')).not.toBeNull();
     bar.querySelector('[data-bt="a"]').click();
     expect(box.dataset.bt).toBe('a');
     expect(bar.querySelector('[data-bt="a"]').classList.contains('on')).toBe(true);

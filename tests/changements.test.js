@@ -93,11 +93,13 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     const card = h.closest('.card');
     const holder = [...card.children].find(el => el.contains(h));
     expect(holder.classList.contains('hd')).toBe(true);
-    const before = card.classList.contains('shut');
+    /* depuis la v47 : graphique ouvert en petit, un appui l'agrandit, un appui sur son titre le rétrécit */
+    expect(card.classList.contains('bmini')).toBe(true);
+    expect(card.classList.contains('bbig')).toBe(false);
     h.click();
-    expect(card.classList.contains('shut')).toBe(!before);
+    expect(card.classList.contains('bbig')).toBe(true);
     h.click();
-    expect(card.classList.contains('shut')).toBe(before);
+    expect(card.classList.contains('bbig')).toBe(false);
   });
 
   it('la trésorerie se calcule toute seule, sans solde de départ', async () => {
@@ -108,9 +110,9 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     expect(c.auto).toBe(true);
     expect(Number.isFinite(c.now)).toBe(true);
     app.renderDash();
-    const card = document.querySelector('#dsh [data-tool="treso"]');
-    expect(card).toBeTruthy();
-    expect(card.textContent).toContain(t('trésorerie estimée'));
+    const tuile = document.querySelector('#dsh .btiles.bt-m [data-tool="treso"]');
+    expect(tuile).toBeTruthy();
+    expect(tuile.textContent).toContain(t('trésorerie'));
   });
 
   it('avec un solde indiqué, le calcul repart de ce solde', async () => {
@@ -127,8 +129,8 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
   it('le rapport PDF est un bouton en haut du Bilan, à côté des Réglages', async () => {
     nav.go('dash'); app.renderDash();
     expect(document.querySelector('#dsh [data-tool="rapport"]')).toBeNull();
-    expect(document.getElementById('rpt').hidden).toBe(false);
-    expect(document.getElementById('rpt').nextElementSibling.id).toBe('tl');
+    expect(document.getElementById('rptb').hidden).toBe(false);
+    expect(document.getElementById('rptb').nextElementSibling.id).toBe('tl');
     await app.openTool('rapport');
     expect($('shc').textContent).toContain(t('Bilan mensuel'));
     $('sheet').hidden = true;
