@@ -12,19 +12,37 @@ beforeAll(async () => {
 });
 afterEach(() => { $('sheet').hidden = true; });
 
-describe('v46 : Ajouter, étapes', () => {
-  it('les étapes suivent les onglets et avancent avec l\'onglet ouvert', async () => {
+describe('v49 : Ajouter, 4 étapes guidées', () => {
+  it('quatre étapes ; chacune ne montre que ses paramètres, un par un', async () => {
     nav.go('add'); app.addForm.draw(); await tick(20);
-    const dots = () => [...$('fadd').querySelectorAll('.prog .pg i')];
-    const txt = () => $('fadd').querySelector('.prog .mono').textContent;
-    expect(dots().length).toBeGreaterThan(12);
-    expect(txt()).toMatch(/1\D+\d+/);
-    $('fadd').querySelector('[data-tg="cat"]').click();
-    $('fadd').querySelector('[data-tg="etat"]').click();
-    expect(dots().filter(d => d.className === 'f').length).toBeGreaterThan(5);
+    const f = $('fadd'), noms = () => [...f.querySelectorAll('.grp')].map(g => g.dataset.sec);
+    expect(f.querySelectorAll('.steps [data-step]')).toHaveLength(4);
+    expect(f.querySelector('.stb.cur').dataset.step).toBe('0');
+    expect(noms()).toEqual(['cat', 'marque', 'genre']);
+    f.querySelector('[data-step="1"]').click();
+    expect(noms()).toEqual(['taille', 'coul', 'mat', 'dim', 'madein']);
+    expect(f.querySelectorAll('.grp.open')).toHaveLength(1);
+    f.querySelector('[data-step="2"]').click();
+    expect(noms()).toEqual(['grade', 'photo', 'etat']);
+    f.querySelector('[data-step="3"]').click();
+    expect(noms()).toEqual(expect.arrayContaining(['achat', 'prov', 'ballot', 'dates', 'det']));
+    expect(f.querySelectorAll('.stb.done')).toHaveLength(3);
+  });
+  it('remplir l\'étape 1 paramètre après paramètre amène à l\'étape 2', async () => {
+    nav.go('add'); app.addForm.draw(); await tick(10);
+    const f = $('fadd'), S = app.addForm.state;
+    Object.assign(S, { cat: '', sub: '', marque: '', genre: '' });
+    f.querySelector('[data-step="0"]').click();
+    expect(f.querySelector('.grp.open').dataset.sec).toBe('cat');
+    for (let i = 0; i < 6 && f.querySelector('.stb.cur').dataset.step === '0'; i++) {
+      const g = f.querySelector('.grp.open'), k = g.dataset.sec;
+      if (k === 'marque') g.querySelector('[data-next]').click(); else g.querySelector('[data-f]').click();
+    }
+    expect(f.querySelector('.stb.cur').dataset.step).toBe('1');
+    expect(f.querySelector('.grp.open').dataset.sec).toBe('taille');
+    expect(f.querySelectorAll('.stb.done')).toHaveLength(1);
   });
 });
-
 describe('v46 : outils', () => {
   it('Dépenses, Compléter et Nettoyer ne sont plus des outils séparés', () => {
     const k = tools.TOOLS.map(x => x.k);
@@ -94,5 +112,20 @@ describe('v46 : premier lancement', () => {
     expect($('shc').querySelector('[data-su="goal"]').classList.contains('su-ok')).toBe(false);
     $('shc').querySelector('[data-su="seuil"]').click(); await tick(30);
     expect($('sheet').hidden).toBe(false);
+  });
+});
+describe('v49 : objectif dépassé', () => {
+  it('objectif dépassé : arc plein, 2e tour doré et mention du dépassement', async () => {
+    const goals = await import('../src/modules/goals.js');
+    const d = { kind: 'net', per: 'm', g: 100, cur: 130, pct: 1.3, exp: 50, left: 5, reste: 0, proj: 130, projPct: 1.3, rate: 0 };
+    const h = document.createElement('div'); h.innerHTML = goals.gaugeHTML(d);
+    expect(h.querySelector('.gfg')).not.toBeNull();
+    expect(h.querySelector('.gov2')).not.toBeNull();
+    expect(h.querySelector('.gov').textContent).toMatch(/30/);
+    expect(h.querySelector('.gpc').textContent).toMatch(/130/);
+    const e = document.createElement('div'); e.innerHTML = goals.gaugeHTML(Object.assign({}, d, { cur: 100, pct: 1 }));
+    expect(e.querySelector('.gov2')).toBeNull();
+    const f = document.createElement('div'); f.innerHTML = goals.gaugeHTML(Object.assign({}, d, { cur: 250, pct: 2.5 }));
+    expect(f.querySelector('.gov2')).not.toBeNull();
   });
 });

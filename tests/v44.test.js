@@ -57,6 +57,7 @@ describe('v44 : comptes, Ajouter et Stock', () => {
   it('une pièce peut être rattachée à un compte, et le stock se range par compte', async () => {
     app.setCfg({ comptes: [{ id: 'c1', n: 'Vinted perso', pf: 'Vinted', fiscal: true }, { id: 'c2', n: 'Vinted pro', pf: 'Vinted', fiscal: true }], cptMain: 'c1' }, true);
     nav.go('add'); app.addForm.draw(); await tick(20);
+    $('fadd').querySelector('[data-step="3"]').click();
     const sec = $('fadd').querySelector('[data-sec="stk"]');
     expect(sec).not.toBeNull();
     $('fadd').querySelector('[data-tg="stk"]').click();

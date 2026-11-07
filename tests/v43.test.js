@@ -83,17 +83,24 @@ describe('v43 : objectifs et courbe', () => {
 describe('v43 : Ajouter, onglets séparés', () => {
   it('état et défauts, ballot, made in et dates ont chacun leur onglet', async () => {
     nav.go('add'); app.addForm.draw(); await tick(20);
-    for (const k of ['etat', 'ballot', 'madein', 'dates', 'det']) expect($('fadd').querySelector(`[data-sec="${k}"]`), k).not.toBeNull();
+    /* v49 : 4 étapes ; un onglet de saisie par paramètre, rangés par étape */
+    const etape = n => $('fadd').querySelector(`[data-step="${n}"]`).click();
+    const a = k => $('fadd').querySelector(`[data-sec="${k}"]`);
+    etape(2); expect(a('etat')).not.toBeNull();
+    etape(1); expect(a('madein')).not.toBeNull();
+    $('fadd').querySelector('[data-tg="madein"]').click();
+    expect($('fadd').querySelector('[data-sec="madein"] input[data-k="madein"]')).not.toBeNull();
+    etape(3);
+    for (const k of ['ballot', 'dates', 'det']) expect(a(k), k).not.toBeNull();
     $('fadd').querySelector('[data-tg="dates"]').click();
     expect($('fadd').querySelector('[data-sec="dates"] input[data-k="entree"]')).not.toBeNull();
     expect($('fadd').querySelector('[data-sec="dates"] input[data-k="pub"]')).not.toBeNull();
-    $('fadd').querySelector('[data-tg="madein"]').click();
-    expect($('fadd').querySelector('[data-sec="madein"] input[data-k="madein"]')).not.toBeNull();
     $('fadd').querySelector('[data-tg="ballot"]').click();
     expect($('fadd').querySelector('[data-sec="ballot"] [data-g="ballot"]')).not.toBeNull();
   });
   it('un vêtement neuf n\'affiche pas les défauts', async () => {
     nav.go('add'); app.addForm.draw(); await tick(10);
+    $('fadd').querySelector('[data-step="2"]').click();
     $('fadd').querySelector('[data-tg="etat"]').click();
     expect($('fadd').querySelector('[data-g="defauts"]')).not.toBeNull();
     $('fadd').querySelector('[data-f="defauts"][data-v="Petit trou"]').click();

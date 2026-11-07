@@ -143,13 +143,17 @@ describe('formulaire Ajouter', () => {
     const kids = [...$('fadd').children];
     const pot = kids.findIndex(e => e.id === 'pot'), lastGrp = kids.map(e => e.classList.contains('grp')).lastIndexOf(true);
     expect(pot).toBeGreaterThan(lastGrp);
+    /* v49 : 4 étapes ; couleur et matière sont dans l'étape 2, « Plus de détails » dans l'étape 4 */
+    $('fadd').querySelector('[data-step="1"]').click();
     const secs = [...$('fadd').querySelectorAll('.grp')].map(g => g.dataset.sec);
     expect(secs).toContain('coul');
     expect(secs).toContain('mat');
-    expect(secs.indexOf('coul')).toBeLessThan(secs.indexOf('det'));
+    $('fadd').querySelector('[data-step="3"]').click();
+    expect([...$('fadd').querySelectorAll('.grp')].map(g => g.dataset.sec)).toContain('det');
   });
 
   it('couleur et matière ne sont plus dans « Plus de détails »', () => {
+    $('fadd').querySelector('[data-step="3"]').click();
     const det = [...$('fadd').querySelectorAll('.grp')].find(g => g.dataset.sec === 'det');
     det.querySelector('.gh').click();
     const body = $('fadd').querySelector('.grp[data-sec="det"] .gb');
