@@ -2454,3 +2454,11 @@ K('{a} sur {b} faits','{a} of {b} done','{a} su {b} fatti','{a} de {b} hechos','
 K('Ma journée est terminée','My day is done','La mia giornata è finita','Mi día ha terminado','Mein Tag ist erledigt');
 K('Réduire','Collapse','Riduci','Reducir','Einklappen');
 K('Tout est à jour : rien d\'urgent aujourd\'hui.','Everything is up to date: nothing urgent today.','Tutto aggiornato: niente di urgente oggi.','Todo al día: nada urgente hoy.','Alles aktuell: heute nichts Dringendes.');
+K('bénéfice par vente','profit per sale','utile per vendita','beneficio por venta','Gewinn pro Verkauf');
+K('colis à préparer','parcels to prepare','pacchi da preparare','paquetes por preparar','Pakete vorzubereiten');
+K('de dépenses','in expenses','di spese','de gastos','Ausgaben');
+K('fiches à compléter','items to complete','schede da completare','fichas por completar','Artikel zu vervollständigen');
+K('jours de série','day streak','giorni di serie','días de racha','Tage in Folge');
+K('pièces en ligne','items online','capi online','prendas en línea','Teile online');
+K('pièces en stock','items in stock','capi in magazzino','prendas en stock','Teile im Bestand');
+K('sur {g}','of {g}','su {g}','de {g}','von {g}');
