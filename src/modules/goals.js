@@ -29,11 +29,12 @@ const ruler=d=>{const c=Math.min(100,Math.max(0,d.pct*100)),p=Math.min(100,Math.
 /* objectifs en jauges demi-cercle : arc vert ou orange = fait, arc violet = projection au rythme actuel, aiguille sur l'avancement */
 const arc = (a0, a1, r = 50) => { const P = a => [60 - r * Math.cos(Math.PI * a), 60 - r * Math.sin(Math.PI * a)], [x0, y0] = P(a0), [x1, y1] = P(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
 export function gaugeHTML(d) {
-  const c = Math.min(.999, Math.max(0, d.pct)), p = Math.min(.999, Math.max(c, d.projPct)), done = d.cur >= d.g;
+  /* objectif dépassé : l'arc principal est plein, l'aiguille reste au bout, et un 2e tour doré (arc intérieur) montre le dépassement */
+  const ov = Math.min(.999, Math.max(0, d.pct - 1)), c = Math.min(.999, Math.max(0, d.pct)), p = Math.min(.999, Math.max(c, d.projPct)), done = d.cur >= d.g;
   const nx = 60 - 38 * Math.cos(Math.PI * c), ny = 60 - 38 * Math.sin(Math.PI * c);
-  const stat = done ? `<span class="gst up">${t('Objectif atteint, bravo !')}</span>` : `<span class="gst ${d.cur >= d.exp ? 'up' : 'dn'}">${t(d.cur >= d.exp ? 'en avance sur le rythme' : 'en retard sur le rythme')}</span>`;
+  const stat = done ? `<span class="gst up">${t('Objectif atteint, bravo !')}</span>${ov > 0 ? `<div class="gov">+${Math.round((d.pct - 1) * 100)} % ${t('au-dessus de l\'objectif')}</div>` : ''}` : `<span class="gst ${d.cur >= d.exp ? 'up' : 'dn'}">${t(d.cur >= d.exp ? 'en avance sur le rythme' : 'en retard sur le rythme')}</span>`;
   return `<div class="gau"><div class="gnm">${glab(d.kind)}</div>
-   <svg viewBox="0 0 120 68" role="img" aria-label="${esc(t('{k} · objectif {g}', { k: lc(glab(d.kind)), g: eurR(d.g) }))}"><path d="${arc(0, .999)}" class="gtr"/>${!done && p > c ? `<path d="${arc(c, p)}" class="gpjarc"/>` : ''}${c > 0 ? `<path d="${arc(0, c)}" class="gfg gc-${goalColor(d)}"/>` : ''}<line x1="60" y1="60" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="gnd"/><circle cx="60" cy="60" r="4" class="gnd0"/></svg>
+   <svg viewBox="0 0 120 68" role="img" aria-label="${esc(t('{k} · objectif {g}', { k: lc(glab(d.kind)), g: eurR(d.g) }))}"><path d="${arc(0, .999)}" class="gtr"/>${!done && p > c ? `<path d="${arc(c, p)}" class="gpjarc"/>` : ''}${c > 0 ? `<path d="${arc(0, c)}" class="gfg gc-${goalColor(d)}"/>` : ''}${ov > 0 ? `<path d="${arc(0, ov, 38)}" class="gov2"/>` : ''}<line x1="60" y1="60" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="gnd"/><circle cx="60" cy="60" r="4" class="gnd0"/></svg>
    <div class="gpc gc-${goalColor(d)}">${Math.round(d.pct * 100)} %</div>
    <div class="gauv">${eurR(d.cur)} <small>${t('sur {g}', { g: eurR(d.g) })}</small></div>${stat}
    ${done ? '' : `<div class="gl2">${t('Reste {r}', { r: eur(d.reste) })} · ${t(d.per === 'm' ? '{x} par jour' : '{x} par mois', { x: eur(d.rate) })}</div>${projHTML(d)}`}</div>`;

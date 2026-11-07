@@ -41,13 +41,16 @@ globalThis.MADEIN0 = MADEIN0;
 export const mrg=(a,b)=>[...new Set([...(a||[]),...(b||[])])];
 const dimsFor=cat=>HAUT.includes(cat)?DH:BAS.includes(cat)?DB:[...DH,...DB];
 /* Groupes dans l'ordre de saisie : un seul est ouvert au départ (la catégorie), le suivant s'ouvre quand le précédent est rempli. */
-const ORDER=['cat','sub','marque','taille','genre','grade','achat','prov','stk','coul','mat','photo','dim','etat','ballot','madein','dates','det'];
+/* 4 étapes guidées ; dans chaque étape, un paramètre à la fois (Suivant / Passer). L'ordre suit l'ordre d'affichage de chaque étape. */
+const STEPS=[['Article',['cat','sub','marque','genre']],['Caractéristiques',['taille','coul','mat','dim','madein']],['État',['grade','photo','etat']],['Achat et gestion',['achat','prov','stk','ballot','dates','det']]];
+const ORDER=STEPS.flatMap(s=>s[1]);
+const stepOf=k=>STEPS.findIndex(s=>s[1].includes(k));
 const isNeuf=e=>/^neuf/i.test(e||'');
 export const COLORS={Bleu:['#2F6FDE','#fff'],Noir:['#1A1A1A','#fff'],Blanc:['#FFFFFF','#17233B'],Gris:['#8A8F98','#fff'],Rouge:['#D32F2F','#fff'],Vert:['#2E9E5B','#fff'],Beige:['#D8C3A5','#17233B'],Violet:['#7E57C2','#fff'],Marron:['#7B4A2D','#fff'],Rose:['#F48FB1','#17233B'],Jaune:['#F5C518','#17233B'],Orange:['#F57C00','#17233B'],'Bleu marine':['#1B2A57','#fff'],Kaki:['#7A7A3A','#fff'],Bordeaux:['#6E1A2C','#fff'],Moutarde:['#D9A21B','#17233B'],Corail:['#F26B5B','#17233B'],Turquoise:['#1BB5B0','#17233B'],Multicolore:['conic-gradient(#D32F2F,#F5C518,#2E9E5B,#2F6FDE,#7E57C2,#D32F2F)','#17233B']};
 export const abc=a=>[...a].sort((x,y)=>String(tv(x)).localeCompare(String(tv(y)),app.LOC,{sensitivity:'base',numeric:true}));
 export function mkForm(host,S,o){
  const edit=o.mode==='edit';
- let G=new Set(edit?ORDER:['cat']),errs={},newField=null,focusKey=null;
+ let G=new Set(edit?ORDER:['cat']),errs={},newField=null,focusKey=null,curStep=0;
  const chip=(f,v,on,sm)=>{let cls='chip'+(on?' on':'')+(sm?' sm':''),st='',inner=esc(tv(v));
   if(f==='grade')cls+=' g-'+v;
   if(f==='coul'&&COLORS[v]){cls+=' cl';st=` style="--c:${COLORS[v][0]};--ct:${COLORS[v][1]}"`;inner='<i class="sw"></i>'+inner}
@@ -70,9 +73,9 @@ export function mkForm(host,S,o){
   const ra=S.cat?app.advice(S):null,recoRow=ra&&ra.ok&&ra.reco>0?`<div class="pr2 reco"><span>${t('Prix de vente conseillé')}</span><b>${eur(ra.reco)}</b></div>`:'';
   return`<div class="pot pot-${lvl}${p.stock>=3?' sat':''}" id="pot"><div class="pt"><span class="mono">${t('potentiel de vente')}${tag?' · '+esc(tag):''}</span><b>${esc(tt)}</b></div>${rows}${recoRow}<div class="ps">${esc(note)}</div>${l2?`<div class="ps w">${esc(l2)}</div>`:''}</div>`} function updatePot(){const e=host.querySelector('#pot');if(!e)return;const t=document.createElement('div');t.innerHTML=potHTML();e.replaceWith(t.firstChild)}
  /* les étapes suivent les onglets de saisie, dans l'ordre : l'étape en cours est le premier onglet ouvert, les précédents sont faits ou passés */
- function progHTML(){const L=ORDER.filter(k=>k!=='det'&&(k!=='sub'||hasSub())&&(k!=='stk'||app.hasComptes()));
-  const n=L.length,i0=L.findIndex(k=>G.has(k)),c=i0<0?n:i0;
-  return`<div class="prog"><div class="mono">${t('étape {a} sur {b}',{a:Math.min(c+1,n),b:n})}</div><div class="pg">${L.map((k,i)=>`<i class="${i<c?'f':i===c?'c':''}"></i>`).join('')}</div></div>`}
+ const stepKeys=n=>STEPS[n][1].filter(k=>(k!=='sub'||hasSub())&&(k!=='stk'||app.hasComptes()));
+ function progHTML(){const L=stepKeys(curStep),i=L.findIndex(k=>G.has(k));
+  return`<div class="prog stps"><div class="steps">${STEPS.map(([l],n)=>`<button type="button" class="stb${n===curStep?' cur':n<curStep?' done':''}" data-step="${n}"${n===curStep?' aria-current="step"':''}><b>${n<curStep?'✓':n+1}</b><span>${t(l)}</span></button>`).join('')}</div><div class="mono">${t('étape {a} sur {b}',{a:curStep+1,b:STEPS.length})} · ${t(STEPS[curStep][0])}${i>=0?' · '+(i+1)+' / '+L.length:''}</div></div>`}
  function updateRenta(){const el=host.querySelector('#rp');if(!el)return;const a=num(S.achat),v=num(S.pvise);
   if(isNaN(a)||isNaN(v)||v<=0){el.innerHTML='<div class="hint">'+t('Saisis le prix d\'achat et le prix de vente visé pour voir la marge.')+'</div>';return}
   const fr=app.defFrais(v,'Vinted'),r=app.renta(a,v,fr,app.estDelai(S,v));el.innerHTML=`<div class="pv">${app.rentaHTML(r)}<div class="hint" style="margin-top:6px">${esc(t('Frais comptés : {f} (emballage, envoi et commission d\'après tes réglages)',{f:eur(fr)}))}</div></div>`}
@@ -84,7 +87,9 @@ export function mkForm(host,S,o){
   const rb=recentBrands(),sug=suggestBrand(S.marque);
   const dimN=DK.filter(k=>S[k]!=null&&S[k]!=='').length,detN=['modele','collab','bac','note'].filter(k=>Array.isArray(S[k])?S[k].length:S[k]).length,nDef=isNeuf(S.etat)?0:(S.defauts||[]).length,nDates=[S.entree,S.pub].filter(Boolean).length;
   const sums={cat:tv(S.cat),sub:tv(S.sub),marque:S.marque,taille:S.taille,genre:tv(S.genre),achat:S.achat!==''&&S.achat!=null&&num(S.achat)>=0?eur(num(S.achat)):'',prov:tv(S.prov),coul:(S.coul||[]).map(x=>tv(x)).join(', '),mat:(S.mat||[]).map(x=>tv(x)).join(', '),photo:S.photo?t('Ajoutée'):'',dim:dimN?tn(dimN,'valeur','valeurs'):'',etat:[S.etat&&tv(S.etat),nDef?tn(nDef,'défaut','défauts'):''].filter(Boolean).join(' · '),ballot:S.ballot||'',madein:S.madein?cn(S.madein):'',dates:nDates?tn(nDates,'date','dates'):'',det:detN?tn(detN,'renseigné','renseignés'):''};
-  const sec=(k,label,body,opt)=>{opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
+  /* l'étape affichée est celle du premier paramètre ouvert */
+  if(!edit){const i0=ORDER.findIndex(k=>G.has(k)&&(k!=='sub'||hasSub())&&(k!=='stk'||app.hasComptes()));if(i0>=0)curStep=stepOf(ORDER[i0])}
+  const sec=(k,label,body,opt)=>{if(!edit&&stepOf(k)!==curStep)return'';opt=opt||{};const op=G.has(k),sm=opt.sumHtml!==undefined?opt.sumHtml:esc(sums[k]||'');
    return`<div class="grp${op?' open':''}${errs[k]?' err':''}" data-sec="${k}"><button type="button" class="gh" data-tg="${k}" aria-expanded="${op}"><span class="l">${t(label)}</span><span class="gs">${sm}${sm?'<i class="ckm"></i>':''}</span><span class="gc" aria-hidden="true"></span></button>${op?`<div class="gb">${body}${opt.next&&!edit?`<div class="acts" style="margin-top:12px"><button type="button" class="btn sec sm" data-next="${k}">${t(opt.next)} ›</button></div>`:''}</div>`:''}</div>`};
   host.innerHTML=(edit?'':progHTML())+
    sec('cat','Catégorie',group('cat',cats,false,true))+
@@ -119,6 +124,7 @@ export function mkForm(host,S,o){
  }
  host.addEventListener('click',e=>{
   const c=e.target.closest('button');if(!c)return;
+  if(c.dataset.step!==undefined){const n=+c.dataset.step,L=stepKeys(n);G=new Set([L[0]]);curStep=n;focusKey=L[0];draw();return}
   if(c.dataset.tg){const k=c.dataset.tg;if(G.has(k))G.delete(k);else G.add(k);draw();return}
   if(c.dataset.next){advance(c.dataset.next);draw();return}
   if(c.dataset.f){const f=c.dataset.f,v=c.dataset.v,multi=c.parentNode.dataset.multi;
@@ -159,7 +165,7 @@ export function mkForm(host,S,o){
  function submit(dup){
   errs={};const a=num(S.achat);
   if(!S.cat)errs.cat=1;if(!(S.marque||'').trim())errs.marque=1;if(!(a>=0))errs.achat=1;
-  if(Object.keys(errs).length){Object.keys(errs).forEach(k=>G.add(k));draw();const el=host.querySelector('.grp.err');if(el)el.scrollIntoView({block:'center',behavior:'smooth'});return}
+  if(Object.keys(errs).length){if(!edit)G=new Set();Object.keys(errs).forEach(k=>G.add(k));draw();const el=host.querySelector('.grp.err');if(el)el.scrollIntoView({block:'center',behavior:'smooth'});return}
   DK.forEach(k=>{const v=num(S[k]);S[k]=v>0?v:''});
   if(isNeuf(S.etat))S.defauts=[];
   const pvv=num(S.pvise);S.pvise=pvv>0?pvv:'';
