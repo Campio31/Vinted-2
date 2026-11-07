@@ -2462,3 +2462,5 @@ K('jours de série','day streak','giorni di serie','días de racha','Tage in Fol
 K('pièces en ligne','items online','capi online','prendas en línea','Teile online');
 K('pièces en stock','items in stock','capi in magazzino','prendas en stock','Teile im Bestand');
 K('sur {g}','of {g}','su {g}','de {g}','von {g}');
+K('en hausse','rising','in aumento','al alza','steigend');
+K('en baisse','falling','in calo','a la baja','fallend');
