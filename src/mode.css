@@ -494,3 +494,12 @@ button.bkt{cursor:pointer}
 #lst .tl.vit.gr-A{box-shadow:0 0 0 3px var(--mint)}
 #lst .tl.vit.gr-B{box-shadow:0 0 0 3px var(--tag)}
 #lst .tl.vit.gr-C{box-shadow:0 0 0 3px var(--red)}
+/* ===== v49 ===== */
+.gau .gov2{fill:none;stroke:#F2C94C;stroke-width:6;stroke-linecap:round}
+.gau .gov{margin:2px 0;font-size:13px;font-weight:800;color:#F2C94C}/* Ajouter : 4 étapes guidées */
+.stps .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:6px}
+.stps .stb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:0;border-radius:14px;background:var(--soft);color:var(--mute);font:inherit;cursor:pointer;min-height:56px}
+.stps .stb b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--card);font-size:13px}
+.stps .stb span{font-size:12px;font-weight:700;line-height:1.15;text-align:center;max-width:100%;overflow-wrap:anywhere;hyphens:auto}
+.stps .stb.cur{background:var(--ink);color:var(--on)}.stps .stb.cur b{background:var(--acc);color:#111}
+.stps .stb.done{background:rgba(29,158,117,.16);color:var(--ink)}.stps .stb.done b{background:var(--mint);color:#fff}
