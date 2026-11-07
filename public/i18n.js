@@ -2464,3 +2464,11 @@ K('pièces en stock','items in stock','capi in magazzino','prendas en stock','Te
 K('sur {g}','of {g}','su {g}','de {g}','von {g}');
 K('en hausse','rising','in aumento','al alza','steigend');
 K('en baisse','falling','in calo','a la baja','fallend');
+K('Article','Item','Articolo','Artículo','Artikel');
+K('Caractéristiques','Features','Caratteristiche','Características','Merkmale');
+K('Achat et gestion','Purchase and management','Acquisto e gestione','Compra y gestión','Einkauf und Verwaltung');
+K('Grade {g}','Grade {g}','Grado {g}','Grado {g}','Güteklasse {g}');
+K('Aucun défaut visible','No visible defects','Nessun difetto visibile','Sin defectos visibles','Keine sichtbaren Mängel');
+K('Légères traces d\'usure normales','Slight, normal signs of wear','Lievi segni d\'usura normali','Ligeras marcas de uso normales','Leichte, normale Gebrauchsspuren');
+K('Des signes d\'usure sont visibles','Signs of wear are visible','Sono visibili segni d\'usura','Se ven signos de desgaste','Gebrauchsspuren sind sichtbar');
+K('au-dessus de l\'objectif','above the goal','sopra l\'obiettivo','por encima del objetivo','über dem Ziel');
