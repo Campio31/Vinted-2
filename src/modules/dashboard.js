@@ -8,6 +8,8 @@ import { activeChips, activeCount, facet, filterLabel, openFilters } from './fil
 app.renderDash = renderDash;
 
 /* ---------- bilan ---------- */
+/** Période et ventes du dernier dessin du Bilan, pour les indicateurs des onglets (bilan-tabs.js). */
+export const bilCtx={inP:[],S:null,from:'',lbl:''};
 export function stats(list){const s=list.filter(sold);const ca=s.reduce((a,x)=>a+(x.pv||0),0),cost=s.reduce((a,x)=>a+(x.achat||0),0),fr=s.reduce((a,x)=>a+(x.frais||0),0),ben=ca-cost-fr;
  const dl=s.filter(x=>ok(x.dv)&&(ok(x.pub)||ok(x.entree))).map(x=>Math.max(0,days(ok(x.pub)?x.pub:x.entree,x.dv)));
  return{s,n:s.length,ca,cost,fr,ben,marge:ca?ben/ca:0,panier:s.length?ca/s.length:0,delai:dl.length?dl.reduce((a,b)=>a+b,0)/dl.length:0}}
@@ -49,7 +51,7 @@ function renderDash(){
  const act=activeChips(Object.assign({},badv,{cf:app.cptFilt||'',per:perCustom()?String(app.period):''}),['per','cf',...BADV],{per:v=>t(PERL[v]),cf:v=>(CP.find(c=>c.id===v)||{}).n||v,pf:v=>tv(v),cat:v=>tv(v),genre:v=>tv(v),prov:v=>tv(v)});
  $('per').innerHTML=[[30,'30 jours'],[90,'90 jours'],[0,'Tout']].map(([k,l])=>`<button type="button" class="chip${app.period===k?' on':''}" data-p="${k}">${t(l)}</button>`).join('')+`<button type="button" class="chip fbtn${nAdv?' on':''}" data-badv="1">${filterLabel(nAdv)}</button>`+act; if(!app.P.length){$('dsh').innerHTML=`<div class="card empty">${app.loaded?t('Le bilan apparaît dès que tu as des pièces.')+'<br><button class="btn" id="exb2" type="button">'+t('Charger des exemples')+'</button>':t('Chargement…')}</div>`;if($('exb2'))$('exb2').onclick=app.loadExamples;return}
  const {from,to,lbl}=bilRange();
- const inP=app.P.filter(x=>sold(x)&&(!from||(x.dv||'')>=from)&&(!to||(x.dv||'')<=to)&&advOk(x)&&(!app.cptFilt||(app.compteOf(x)||{}).id===app.cptFilt)),S=stats(inP),st=app.P.filter(avail);
+ const inP=app.P.filter(x=>sold(x)&&(!from||(x.dv||'')>=from)&&(!to||(x.dv||'')<=to)&&advOk(x)&&(!app.cptFilt||(app.compteOf(x)||{}).id===app.cptFilt)),S=stats(inP),st=app.P.filter(avail);Object.assign(bilCtx,{inP,S,from,lbl});
  const rets=[];app.P.forEach(x=>(x.retours||[]).forEach(r=>{if(ok(r.d)&&(!from||r.d>=from)&&(!to||r.d<=to))rets.push(r)}));const retSum=rets.reduce((a,r)=>a+(r.p||0),0);
  const stCost=st.reduce((a,x)=>a+(x.achat||0),0),old=st.filter(x=>ok(x.pub)&&days(x.pub,today())>=30).sort((a,b)=>days(b.pub,today())-days(a.pub,today()));
  const ecoul=app.P.length?app.P.filter(sold).length/app.P.length:0,avgAge=st.length?st.reduce((a,x)=>a+age(x),0)/st.length:0;

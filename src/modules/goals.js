@@ -26,13 +26,21 @@ export const bigEur=v=>{const s=Math.abs(v).toFixed(2).split('.');return(v<0?'�
 /* la barre montre ce qui est fait (vert ou orange) puis, d'une autre couleur (violet), ce que le rythme actuel ajoutera d'ici la fin de la période */
 const ruler=d=>{const c=Math.min(100,Math.max(0,d.pct*100)),p=Math.min(100,Math.max(c,d.projPct*100));
  return`<div class="rl">${d.cur<d.g&&p>c?`<i class="pj" style="left:${c.toFixed(1)}%;width:${(p-c).toFixed(1)}%"></i>`:''}<b class="gc-${goalColor(d)}" style="width:${c.toFixed(1)}%"></b></div>`};
+/* objectifs en jauges demi-cercle : arc vert ou orange = fait, arc violet = projection au rythme actuel, aiguille sur l'avancement */
+const arc = (a0, a1, r = 50) => { const P = a => [60 - r * Math.cos(Math.PI * a), 60 - r * Math.sin(Math.PI * a)], [x0, y0] = P(a0), [x1, y1] = P(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)}A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+export function gaugeHTML(d) {
+  const c = Math.min(.999, Math.max(0, d.pct)), p = Math.min(.999, Math.max(c, d.projPct)), done = d.cur >= d.g;
+  const nx = 60 - 38 * Math.cos(Math.PI * c), ny = 60 - 38 * Math.sin(Math.PI * c);
+  const stat = done ? `<span class="gst up">${t('Objectif atteint, bravo !')}</span>` : `<span class="gst ${d.cur >= d.exp ? 'up' : 'dn'}">${t(d.cur >= d.exp ? 'en avance sur le rythme' : 'en retard sur le rythme')}</span>`;
+  return `<div class="gau"><div class="gnm">${glab(d.kind)}</div>
+   <svg viewBox="0 0 120 68" role="img" aria-label="${esc(t('{k} · objectif {g}', { k: lc(glab(d.kind)), g: eurR(d.g) }))}"><path d="${arc(0, .999)}" class="gtr"/>${!done && p > c ? `<path d="${arc(c, p)}" class="gpjarc"/>` : ''}${c > 0 ? `<path d="${arc(0, c)}" class="gfg gc-${goalColor(d)}"/>` : ''}<line x1="60" y1="60" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="gnd"/><circle cx="60" cy="60" r="4" class="gnd0"/></svg>
+   <div class="gpc gc-${goalColor(d)}">${Math.round(d.pct * 100)} %</div>
+   <div class="gv">${eurR(d.cur)} <small>${t('sur {g}', { g: eurR(d.g) })}</small></div>${stat}
+   ${done ? '' : `<div class="gl2">${t('Reste {r}', { r: eur(d.reste) })} · ${t(d.per === 'm' ? '{x} par jour' : '{x} par mois', { x: eur(d.rate) })}</div>${projHTML(d)}`}</div>`;
+}
 function goalHTML(){const kinds=goalKinds(),out=[],now=new Date(),mois=now.toLocaleDateString(app.LOC,{month:'long'});
  [['m',t('Objectif {m}',{m:mois})],['y',t('Objectif {m}',{m:now.getFullYear()})]].forEach(([per,title])=>{const ds=kinds.map(k=>goalCalc(k,per)).filter(Boolean);if(!ds.length)return;
-  const main=ds[0];
-  out.push(`<div class="gcard"><div class="gh2"><span>${esc(title)} · ${lc(glab(main.kind))}</span><button type="button" data-goalset>${t('Modifier')}</button></div>
-  <div class="gbig cd">${bigEur(main.cur)}</div>
-  ${ds.map(d=>`<div class="gr"><span>${t('{k} · objectif {g}',{k:lc(glab(d.kind)),g:eurR(d.g)})}</span><b class="gp gc-${goalColor(d)}">${Math.round(d.pct*100)} %</b></div>${ruler(d)}<div class="gl2">${d.kind!==main.kind?eur(d.cur)+' · ':''}${d.cur>=d.g?t('Objectif atteint, bravo !'):t('Reste {r}',{r:eur(d.reste)})+' · '+t(d.per==='m'?'{x} par jour':'{x} par mois',{x:eur(d.rate)})+' · '+t(d.cur>=d.exp?'en avance sur le rythme':'en retard sur le rythme')}</div>${d.cur>=d.g?'':projHTML(d)}`).join('')}</div>`)});
- return out.length?out.join(''):'<div class="card goal"><h3>'+t('Objectifs')+'</h3><p class="sub">'+t('Fixe un objectif mensuel ou annuel (bénéfice net, chiffre d\'affaires ou les deux) pour suivre ta progression.')+'</p><button type="button" class="btn sm" data-goalset>'+t('Définir mes objectifs')+'</button></div>'}
-export function goalMini(){let ds=goalKinds().map(k=>goalCalc(k,'m')).filter(Boolean);if(!ds.length)ds=goalKinds().map(k=>goalCalc(k,'y')).filter(Boolean);
+  out.push(`<div class="gcard gaus"><div class="gh2"><span>${esc(title)}</span><button type="button" data-goalset>${t('Modifier')}</button></div><div class="gaug${ds.length>1?' two':''}">${ds.map(gaugeHTML).join('')}</div></div>`)});
+ return out.length?out.join(''):'<div class="card goal"><h3>'+t('Objectifs')+'</h3><p class="sub">'+t('Fixe un objectif mensuel ou annuel (bénéfice net, chiffre d\'affaires ou les deux) pour suivre ta progression.')+'</p><button type="button" class="btn sm" data-goalset>'+t('Définir mes objectifs')+'</button></div>'}export function goalMini(){let ds=goalKinds().map(k=>goalCalc(k,'m')).filter(Boolean);if(!ds.length)ds=goalKinds().map(k=>goalCalc(k,'y')).filter(Boolean);
  return ds.map(d=>`<button type="button" class="gmini" data-goalset><div class="gr"><span>${t(d.kind==='net'?(d.per==='m'?'bénéfice du mois':'bénéfice de l\'année'):(d.per==='m'?'chiffre d\'affaires du mois':'chiffre d\'affaires de l\'année'))}</span><b class="gp gc-${goalColor(d)}">${Math.round(d.pct*100)} %</b></div>${ruler(d)}<small>${t('{a} sur {b}',{a:eur(d.cur),b:eur(d.g)})}</small></button>`).join('')}
 document.addEventListener('click',e=>{if(e.target.closest('[data-goalset]')){go('set');setTimeout(()=>{const c=$('cfgc');if(c)c.scrollIntoView({behavior:'smooth',block:'center'});const i=c&&c.querySelector('input');if(i)i.focus()},80)}});

@@ -27,4 +27,4 @@ export function openTools(){go('tools')}
 function openTool(k){({fiches:app.openFiches,journee:app.openJournee,setup:app.openSetup,qr:app.openQrTool,scan:app.openScanner,trophees:app.openTrophees,fisc:app.openFisc,complete:app.openComplete,merge:app.openMerge,help:app.openHelp,wrapped:app.openWrapped,calcom:app.openCalcom,rappels:app.openRappels,defis:app.openDefis,importo:app.openImportTool,news:app.openNews,aide:app.openAide,idee:app.openIdee,depenses:app.openDepenses,treso:app.openTreso,rapport:app.openReport,trash:app.openTrash})[k]()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-tool]');if(b){e.preventDefault();app.openTool(b.dataset.tool)}});
 $('tl').onclick=()=>go('set');
-$('rpt').onclick=()=>app.openReport();
+$('rptb').onclick=()=>app.openReport();
