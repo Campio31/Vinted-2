@@ -477,7 +477,20 @@ button.bkt{cursor:pointer}
 .gau .gpjarc{stroke:#A99FF7;stroke-dasharray:1 8}
 .gau .gnd{stroke:#fff;stroke-width:2.5;stroke-linecap:round}.gau .gnd0{fill:#fff}
 .gau .gpc{font-size:26px;font-weight:800;font-stretch:68%;margin-top:-4px}.gau .gpc.gc-g{color:var(--mint)}.gau .gpc.gc-o{color:var(--acc)}
-.gau .gv{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}.gau .gv small{font-size:12px;font-weight:500;opacity:.75}
+.gau .gauv{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}.gau .gauv small{font-size:12px;font-weight:500;opacity:.75}
 .gau .gst{display:inline-block;margin:4px 0;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}.gau .gst.up{background:rgba(29,158,117,.25);color:#7BE0BC}.gau .gst.dn{background:rgba(245,124,0,.25);color:#FFB36B}
 .gau .gl2{margin-top:2px}.gau .gpj{justify-content:center;text-align:left;margin-top:4px}
 .apcl{align-self:flex-start;width:36px;height:36px;border:0;border-radius:50%;background:var(--soft);color:var(--mute);cursor:pointer;flex:none}
+/* ===== v48 : un graphique à la fois ===== */
+#dsh .bnot{display:none!important}
+#dsh .bsel{box-shadow:inset 4px 0 0 var(--bt);max-height:52vh;overflow:auto}
+.bchips{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px;padding-bottom:2px;scrollbar-width:none}
+.bchips::-webkit-scrollbar{display:none}
+.bchips .chip{flex:none;white-space:nowrap}
+.bchips.bt-m .chip.on{background:#1D9E75;border-color:#1D9E75;color:#fff}.bchips.bt-a .chip.on{background:#2F6FDE;border-color:#2F6FDE;color:#fff}.bchips.bt-s .chip.on{background:#E07B12;border-color:#E07B12;color:#fff}
+.bka{display:block;font-style:normal;font-size:12px;font-weight:800;line-height:1.2;min-height:15px}
+.bka.ok{color:#1B7A46}.bka.ko{color:#B3261E}.bka.eq{color:inherit;opacity:.6}
+/* Stock : le contour de la carte prend la couleur du grade */
+#lst .tl.vit.gr-A{box-shadow:0 0 0 3px var(--mint)}
+#lst .tl.vit.gr-B{box-shadow:0 0 0 3px var(--tag)}
+#lst .tl.vit.gr-C{box-shadow:0 0 0 3px var(--red)}
