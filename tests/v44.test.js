@@ -21,9 +21,10 @@ describe('v44 : cartes du stock', () => {
       expect(c.querySelector('.dot')).toBeNull();
       expect(c.querySelector('.pr small')).toBeNull();
     });
-    const avecGrade = tuiles.find(c => c.querySelector('.pr.gr .pill'));
+    /* v48 : le grade n'est plus une pastille, il colore le contour de la carte */
+    tuiles.forEach(c => expect(c.querySelector('.pr.gr')).toBeNull());
+    const avecGrade = tuiles.find(c => /(^| )gr-[ABC]( |$)/.test(c.className));
     expect(avecGrade).toBeTruthy();
-    expect(avecGrade.querySelector('.pr.gr .pill').textContent).toMatch(/^[ABC]$/);
   });
 });
 

@@ -71,11 +71,10 @@ describe('Bilan : toutes les cartes se replient', () => {
       const card = document.querySelector(`#dsh [data-ck="${k}"]`);
       const h = card.querySelector('h3[data-sec]');
       expect(h, k).toBeTruthy();
-      expect(card.classList.contains('bmini'), k).toBe(true);
-      h.click();
-      expect(card.classList.contains('bbig'), k).toBe(true);
-      h.click();
-      expect(card.classList.contains('bbig'), k).toBe(false);
+      const chip = document.querySelector(`#dsh [data-bp][data-bk="${k}"]`);
+      expect(chip, k).toBeTruthy();
+      chip.click();
+      expect(card.classList.contains('bsel'), k).toBe(true);
     }
   });
 });

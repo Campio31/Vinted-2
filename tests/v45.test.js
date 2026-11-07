@@ -67,24 +67,24 @@ describe('v45 : compte en sélection', () => {
   });
 });
 describe('v47 : onglets du Bilan', () => {
-  it('les graphiques sont ouverts en petit ; un appui les agrandit, un appui sur le titre les rétrécit', async () => {
+  it('un seul graphique par onglet : les pastilles changent de graphique, le choix est gardé', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
-    const c = $('dsh').querySelector('.card.bmini[data-ck="seuil"]') || [...$('dsh').querySelectorAll('.card.bmini')].find(x => x.querySelector('h3[data-sec]'));
-    expect(c).not.toBeNull();
-    expect(c.classList.contains('shut')).toBe(false);
-    expect(c.classList.contains('bbig')).toBe(false);
-    c.click();
-    expect(c.classList.contains('bbig')).toBe(true);
-    /* l'état agrandi est gardé quand le Bilan est redessiné */
+    const box = $('dsh');
+    for (const k of ['m', 'a', 's']) {
+      const cartes = [...box.querySelectorAll(`.card.bt-${k}.bsel0`)];
+      expect(cartes.length, k).toBeGreaterThan(1);
+      expect(cartes.filter(c => c.classList.contains('bsel')), k).toHaveLength(1);
+      expect(cartes.filter(c => !c.classList.contains('bnot')), k).toHaveLength(1);
+      expect(box.querySelectorAll(`.bchips.bt-${k} .chip`)).toHaveLength(cartes.length);
+    }
+    const p = box.querySelectorAll('.bchips.bt-m .chip')[1];
+    p.click();
+    const sel = box.querySelector('.card.bt-m.bsel');
+    expect(sel.dataset.bk).toBe(p.dataset.bk);
     app.renderDash(); await tick(20);
-    const k = c.dataset.ck || c.querySelector('h3[data-sec]').dataset.sec;
-    expect(k).toBeTruthy();
-    const c2 = $('dsh').querySelector(`.card[data-ck="${k}"]`) || [...$('dsh').querySelectorAll('.card')].find(x => (x.querySelector('h3[data-sec]') || {}).dataset?.sec === k);
-    expect(c2.classList.contains('bbig')).toBe(true);
-    c2.querySelector('h3').click();
-    expect(c2.classList.contains('bbig')).toBe(false);
-  });
-  it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
+    expect($('dsh').querySelector('.card.bt-m.bsel').dataset.bk).toBe(p.dataset.bk);
+    $('dsh').querySelector('.bchips.bt-m .chip').click();
+  });  it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     const bar = $('dsh').querySelector('.btabs');
     for (const k of ['m', 'a', 's']) {
@@ -121,5 +121,16 @@ describe('v47 : Ma journée se réduit à tout moment', () => {
     expect(r.querySelector('.apok').textContent.trim()).toBe(String(A.tasksToday().length));
     r.querySelector('[data-ap="jopen"]').click(); await tick(20);
     expect($('dsh').querySelector('.ap').classList.contains('apdone')).toBe(false);
+  });
+});
+describe('v48 : flèches des indicateurs', () => {
+  it('chaque tuile avec historique a une flèche, et la couleur dit si c\'est bon ou mauvais', async () => {
+    nav.go('dash'); app.renderDash(); await tick(30);
+    const box = $('dsh');
+    for (const k of ['m', 'a', 's']) expect(box.querySelectorAll(`.btiles.bt-${k} .bkt .bka`), k).toHaveLength(6);
+    const ts = [...box.querySelectorAll('.bka.up, .bka.dn')];
+    expect(ts.length).toBeGreaterThan(2);
+    ts.forEach(a => expect(/(^| )(ok|ko)( |$)/.test(a.className)).toBe(true));
+    expect(box.querySelector('.hero')).not.toBeNull();
   });
 });

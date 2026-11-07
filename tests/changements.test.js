@@ -93,13 +93,13 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     const card = h.closest('.card');
     const holder = [...card.children].find(el => el.contains(h));
     expect(holder.classList.contains('hd')).toBe(true);
-    /* depuis la v47 : graphique ouvert en petit, un appui l'agrandit, un appui sur son titre le rétrécit */
-    expect(card.classList.contains('bmini')).toBe(true);
-    expect(card.classList.contains('bbig')).toBe(false);
-    h.click();
-    expect(card.classList.contains('bbig')).toBe(true);
-    h.click();
-    expect(card.classList.contains('bbig')).toBe(false);
+    /* v48 : un seul graphique par onglet, choisi avec les pastilles */
+    expect(card.classList.contains('bsel0')).toBe(true);
+    const chip = document.querySelector('#dsh [data-bp="a"][data-bk="Ventes"]');
+    expect(chip).toBeTruthy();
+    chip.click();
+    expect(card.classList.contains('bsel')).toBe(true);
+    expect(card.classList.contains('bnot')).toBe(false);
   });
 
   it('la trésorerie se calcule toute seule, sans solde de départ', async () => {
