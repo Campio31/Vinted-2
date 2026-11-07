@@ -453,3 +453,31 @@ input[type=month]{display:block;width:100%;min-width:0;max-width:100%;-webkit-ap
 .apx0 .apb{font-size:13px;font-weight:700;color:var(--mute)}
 /* configuration des indicateurs au premier lancement */
 .su-c{font-size:22px;font-weight:800;color:var(--mute)}.su-ok .su-c{color:var(--mint)}
+/* ===== v47 : onglets du Bilan en couleurs, indicateurs et graphiques en petit ===== */
+#dsh{--bt:#1D9E75}#dsh[data-bt="a"]{--bt:#2F6FDE}#dsh[data-bt="s"]{--bt:#E07B12}
+.btabs .chip[data-bt="m"]{color:#0F6E56;background:#E1F5EE}.btabs .chip[data-bt="a"]{color:#1B4FA8;background:#E6F1FB}.btabs .chip[data-bt="s"]{color:#9A4F08;background:#FAEEDA}
+.dsa.btabs{background:transparent;padding:0;gap:8px}
+.btabs .chip.on[data-bt="m"]{background:#1D9E75;color:#fff}.btabs .chip.on[data-bt="a"]{background:#2F6FDE;color:#fff}.btabs .chip.on[data-bt="s"]{background:#E07B12;color:#fff}
+.btiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.bkt{display:flex;flex-direction:column;gap:2px;min-width:0;padding:11px 10px;border:0;border-radius:14px;text-align:left;font:inherit;cursor:default}
+button.bkt{cursor:pointer}
+.bkt b{font-size:20px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.bkt span{font-size:12px;font-weight:600;line-height:1.25}
+.btiles.bt-m .bkt{background:#E1F5EE;color:#085041}.btiles.bt-a .bkt{background:#E6F1FB;color:#0C447C}.btiles.bt-s .bkt{background:#FAEEDA;color:#633806}
+#dsh .bmini{box-shadow:inset 4px 0 0 var(--bt)}
+#dsh .bmini:not(.bbig){max-height:190px;overflow:hidden;position:relative;cursor:pointer}
+#dsh .bmini:not(.bbig)::after{content:"⤢";position:absolute;left:0;right:0;bottom:0;padding:34px 14px 8px;text-align:right;font-size:16px;color:var(--bt);background:linear-gradient(transparent,var(--card) 70%);pointer-events:none}
+/* objectifs en jauges */
+.gaus .gaug{display:grid;grid-template-columns:1fr;gap:14px}.gaus .gaug.two{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gau{min-width:0;text-align:center;font-size:12px}
+.gau .gnm{font-size:13px;font-weight:700;margin-bottom:2px}
+.gau svg{display:block;width:100%;max-width:210px;margin:0 auto}
+.gau .gtr,.gau .gfg,.gau .gpjarc{fill:none;stroke-width:9;stroke-linecap:round}
+.gau .gtr{stroke:rgba(255,255,255,.18)}.gau .gfg.gc-g{stroke:var(--mint)}.gau .gfg.gc-o{stroke:var(--acc)}.gau .gfg.gc-r{stroke:var(--red)}
+.gau .gpjarc{stroke:#A99FF7;stroke-dasharray:1 8}
+.gau .gnd{stroke:#fff;stroke-width:2.5;stroke-linecap:round}.gau .gnd0{fill:#fff}
+.gau .gpc{font-size:26px;font-weight:800;font-stretch:68%;margin-top:-4px}.gau .gpc.gc-g{color:var(--mint)}.gau .gpc.gc-o{color:var(--acc)}
+.gau .gv{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}.gau .gv small{font-size:12px;font-weight:500;opacity:.75}
+.gau .gst{display:inline-block;margin:4px 0;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}.gau .gst.up{background:rgba(29,158,117,.25);color:#7BE0BC}.gau .gst.dn{background:rgba(245,124,0,.25);color:#FFB36B}
+.gau .gl2{margin-top:2px}.gau .gpj{justify-content:center;text-align:left;margin-top:4px}
+.apcl{align-self:flex-start;width:36px;height:36px;border:0;border-radius:50%;background:var(--soft);color:var(--mute);cursor:pointer;flex:none}
