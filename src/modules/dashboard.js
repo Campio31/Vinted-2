@@ -29,6 +29,8 @@ export function bilRange(){const p=app.period,t0=today();
  if(p==='yr')return{from:t0.slice(0,4)+'-01-01',to:'',lbl:t('cette année')};
  const n=+p||0;return{from:n?addDays(t0,-n):'',to:'',lbl:n?t('sur les {n} derniers jours',{n}):t('depuis le début')}}
 const advOk=x=>(!badv.pf||(x.canal||'Vinted')===badv.pf)&&(!badv.cat||x.cat===badv.cat)&&(!badv.marque||x.marque===badv.marque)&&(!badv.prov||x.prov===badv.prov)&&(!badv.genre||x.genre===badv.genre);
+/** Vente retenue par les filtres du Bilan (plateforme, catégorie, marque, provenance, genre, compte), sans la période. */
+export const bilOk=x=>advOk(x)&&(!app.cptFilt||(app.compteOf(x)||{}).id===app.cptFilt);
 const perCustom=()=>!(app.period===30||app.period===90||!app.period);
 function openBilanFilters(){
  const st={...badv,per:String(app.period||0),cf:app.cptFilt||''};

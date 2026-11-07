@@ -41,14 +41,14 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-pub]');if(
 function pieceTile(p,open){if(open)return pieceRow(p,true);
  const [bg,fg]=pastel(p),isA=avail(p);let price='',cls='',lab='';
  /* en stock : le grade prend la place du prix visé (plus de prix ni de marge sur la carte) */
- if(isA){price=p.grade?`<span class="pill g-${esc(p.grade)} gbd">${esc(p.grade)}</span>`:''}
+ if(isA){price=''}
  else if(sold(p)){const g=profit(p);price=(g>=0?'+':'−')+fmtP(Math.abs(g));cls=g>=0?'g':'n'}
  else{price=t('Indispo');cls='n'}
  const stkN=app.hasComptes()&&p.stk?(app.comptes().find(c=>c.id===p.stk)||{}).n:'';
  const sub=[p.code?esc(p.code):'',esc(p.taille||''),stkN?'<span class="ex-bac">'+esc(stkN)+'</span>':'',p.bac?'<span class="ex-bac">'+esc(p.bac)+'</span>':'',incomplete(p)?'<span class="inc">'+t('à compléter')+'</span>':''].filter(Boolean).join(' · ');
  /* vitrine : la photo prend toute la carte, le statut est en haut à droite, le prix en haut à gauche et le titre en surimpression */
  const stb=isA?(ok(p.pub)?`<span class="stb on">${t('en ligne {n} j',{n:days(p.pub,today())})}</span>`:'<span class="stb off">'+t('à publier')+'</span>'):`<span class="stb">${t(sold(p)?'Vendu':'Indispo')}</span>`;
- return`<div class="tl vit"><span class="hl"></span><div class="ph"><button type="button" class="im" data-id="${esc(p.id)}" style="background:${bg};color:${fg}" aria-label="${t('Ouvrir la fiche')}">${p.photo?phImg(p.photo):catSvg(p)}</button>${stb}${isA?(price?`<span class="pr gr">${price}</span>`:''):`<span class="pr ${cls}">${price}</span>`}<div class="ov"><button type="button" class="ti" data-id="${esc(p.id)}"><b>${esc(title(p))}${p.ex?'<span class="ex">'+t('exemple')+'</span>':''}</b><span class="cdm">${sub}</span></button></div></div><div class="bd">${isA?`<div class="ft">${ok(p.pub)?'':`<button type="button" class="vb pb" data-pub="${esc(p.id)}">${t('Publié')}</button>`}<button type="button" class="vb" data-qv="${esc(p.id)}">${t('Vendu')}</button></div>`:`<div class="st">${sold(p)?t('Vendu {p}',{p:eur(p.pv)})+' · '+esc(tv(p.canal||'Vinted')):t('Marquée indisponible')}</div>`}</div></div>`}
+ return`<div class="tl vit${isA&&p.grade?' gr-'+esc(p.grade):''}"><span class="hl"></span><div class="ph"><button type="button" class="im" data-id="${esc(p.id)}" style="background:${bg};color:${fg}" aria-label="${t('Ouvrir la fiche')}">${p.photo?phImg(p.photo):catSvg(p)}</button>${stb}${isA?(price?`<span class="pr gr">${price}</span>`:''):`<span class="pr ${cls}">${price}</span>`}<div class="ov"><button type="button" class="ti" data-id="${esc(p.id)}"><b>${esc(title(p))}${p.ex?'<span class="ex">'+t('exemple')+'</span>':''}</b><span class="cdm">${sub}</span></button></div></div><div class="bd">${isA?`<div class="ft">${ok(p.pub)?'':`<button type="button" class="vb pb" data-pub="${esc(p.id)}">${t('Publié')}</button>`}<button type="button" class="vb" data-qv="${esc(p.id)}">${t('Vendu')}</button></div>`:`<div class="st">${sold(p)?t('Vendu {p}',{p:eur(p.pv)})+' · '+esc(tv(p.canal||'Vinted')):t('Marquée indisponible')}</div>`}</div></div>`}
 function pieceRow(p,open){const adv=open?null:advice(p);
  const th=p.photo?phImg(p.photo,'th'):`<div class="th">${catSvg(p)}</div>`,isA=avail(p);
  const info=isA?(ok(p.pub)?t('en ligne {n} j',{n:days(p.pub,today())}):'<span class="off">'+t('à publier')+'</span>'):'';

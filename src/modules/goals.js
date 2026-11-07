@@ -35,7 +35,7 @@ export function gaugeHTML(d) {
   return `<div class="gau"><div class="gnm">${glab(d.kind)}</div>
    <svg viewBox="0 0 120 68" role="img" aria-label="${esc(t('{k} · objectif {g}', { k: lc(glab(d.kind)), g: eurR(d.g) }))}"><path d="${arc(0, .999)}" class="gtr"/>${!done && p > c ? `<path d="${arc(c, p)}" class="gpjarc"/>` : ''}${c > 0 ? `<path d="${arc(0, c)}" class="gfg gc-${goalColor(d)}"/>` : ''}<line x1="60" y1="60" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="gnd"/><circle cx="60" cy="60" r="4" class="gnd0"/></svg>
    <div class="gpc gc-${goalColor(d)}">${Math.round(d.pct * 100)} %</div>
-   <div class="gv">${eurR(d.cur)} <small>${t('sur {g}', { g: eurR(d.g) })}</small></div>${stat}
+   <div class="gauv">${eurR(d.cur)} <small>${t('sur {g}', { g: eurR(d.g) })}</small></div>${stat}
    ${done ? '' : `<div class="gl2">${t('Reste {r}', { r: eur(d.reste) })} · ${t(d.per === 'm' ? '{x} par jour' : '{x} par mois', { x: eur(d.rate) })}</div>${projHTML(d)}`}</div>`;
 }
 function goalHTML(){const kinds=goalKinds(),out=[],now=new Date(),mois=now.toLocaleDateString(app.LOC,{month:'long'});
