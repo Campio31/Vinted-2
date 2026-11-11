@@ -29,8 +29,11 @@ export function bilRange(){const p=app.period,t0=today();
  if(p==='yr')return{from:t0.slice(0,4)+'-01-01',to:'',lbl:t('cette année')};
  const n=+p||0;return{from:n?addDays(t0,-n):'',to:'',lbl:n?t('sur les {n} derniers jours',{n}):t('depuis le début')}}
 const advOk=x=>(!badv.pf||(x.canal||'Vinted')===badv.pf)&&(!badv.cat||x.cat===badv.cat)&&(!badv.marque||x.marque===badv.marque)&&(!badv.prov||x.prov===badv.prov)&&(!badv.genre||x.genre===badv.genre);
-/** Vente retenue par les filtres du Bilan (plateforme, catégorie, marque, provenance, genre, compte), sans la période. */
+/** Pièce retenue par les filtres du Bilan (plateforme, catégorie, marque, provenance, genre, compte), sans la période.
+    Sert à tous les indicateurs et graphiques : ventes, stock, retours, ballots, calendrier. */
 export const bilOk=x=>advOk(x)&&(!app.cptFilt||(app.compteOf(x)||{}).id===app.cptFilt);
+/** Règle les critères du Bilan (utile aux tests et aux raccourcis) ; renvoie les critères en cours. */
+export const bilSet=o=>{Object.assign(badv,o);bilSave();return Object.assign({},badv)};
 const perCustom=()=>!(app.period===30||app.period===90||!app.period);
 function openBilanFilters(){
  const st={...badv,per:String(app.period||0),cf:app.cptFilt||''};
@@ -53,13 +56,13 @@ function renderDash(){
  const act=activeChips(Object.assign({},badv,{cf:app.cptFilt||'',per:perCustom()?String(app.period):''}),['per','cf',...BADV],{per:v=>t(PERL[v]),cf:v=>(CP.find(c=>c.id===v)||{}).n||v,pf:v=>tv(v),cat:v=>tv(v),genre:v=>tv(v),prov:v=>tv(v)});
  $('per').innerHTML=[[30,'30 jours'],[90,'90 jours'],[0,'Tout']].map(([k,l])=>`<button type="button" class="chip${app.period===k?' on':''}" data-p="${k}">${t(l)}</button>`).join('')+`<button type="button" class="chip fbtn${nAdv?' on':''}" data-badv="1">${filterLabel(nAdv)}</button>`+act; if(!app.P.length){$('dsh').innerHTML=`<div class="card empty">${app.loaded?t('Le bilan apparaît dès que tu as des pièces.')+'<br><button class="btn" id="exb2" type="button">'+t('Charger des exemples')+'</button>':t('Chargement…')}</div>`;if($('exb2'))$('exb2').onclick=app.loadExamples;return}
  const {from,to,lbl}=bilRange();
- const inP=app.P.filter(x=>sold(x)&&(!from||(x.dv||'')>=from)&&(!to||(x.dv||'')<=to)&&advOk(x)&&(!app.cptFilt||(app.compteOf(x)||{}).id===app.cptFilt)),S=stats(inP),st=app.P.filter(avail);Object.assign(bilCtx,{inP,S,from,lbl});
- const rets=[];app.P.forEach(x=>(x.retours||[]).forEach(r=>{if(ok(r.d)&&(!from||r.d>=from)&&(!to||r.d<=to))rets.push(r)}));const retSum=rets.reduce((a,r)=>a+(r.p||0),0);
+ const inP=app.P.filter(x=>sold(x)&&(!from||(x.dv||'')>=from)&&(!to||(x.dv||'')<=to)&&advOk(x)&&(!app.cptFilt||(app.compteOf(x)||{}).id===app.cptFilt)),S=stats(inP),st=app.P.filter(x=>avail(x)&&bilOk(x));Object.assign(bilCtx,{inP,S,from,lbl});
+ const rets=[];app.P.filter(bilOk).forEach(x=>(x.retours||[]).forEach(r=>{if(ok(r.d)&&(!from||r.d>=from)&&(!to||r.d<=to))rets.push(r)}));const retSum=rets.reduce((a,r)=>a+(r.p||0),0);
  const stCost=st.reduce((a,x)=>a+(x.achat||0),0),old=st.filter(x=>ok(x.pub)&&days(x.pub,today())>=30).sort((a,b)=>days(b.pub,today())-days(a.pub,today()));
- const ecoul=app.P.length?app.P.filter(sold).length/app.P.length:0,avgAge=st.length?st.reduce((a,x)=>a+age(x),0)/st.length:0;
+ const fp=app.P.filter(bilOk),ecoul=fp.length?fp.filter(sold).length/fp.length:0,avgAge=st.length?st.reduce((a,x)=>a+age(x),0)/st.length:0;
  const pl=group(inP,'canal').sort((a,b)=>b.ben-a.ben),ct=group(inP,'cat').sort((a,b)=>b.ben-a.ben),br=group(inP.filter(x=>x.marque),'marque').sort((a,b)=>b.ben-a.ben).slice(0,6),sr=group(inP.filter(x=>x.prov),'prov').sort((a,b)=>b.ben-a.ben);
  const months=[];for(let i=5;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);months.push(d.getFullYear()+'-'+pad(d.getMonth()+1,2))}
- const ms=months.map(m=>({m,...stats(app.P.filter(x=>sold(x)&&(x.dv||'').startsWith(m)))})),mxm=Math.max(...ms.map(x=>x.ca),1);
+ const ms=months.map(m=>({m,...stats(app.P.filter(x=>sold(x)&&bilOk(x)&&(x.dv||'').startsWith(m)))})),mxm=Math.max(...ms.map(x=>x.ca),1);
  const mn=m=>new Date(m+'-15T12:00:00').toLocaleDateString(app.LOC,{month:'short'}).replace('.','');
  $('dsh').innerHTML=app.goalHTML()+`${app.tresoCardHTML()}${app.gamCardHTML()}${app.calCardHTML()}${app.defiCardHTML()}
  <div class="hero"><div class="t">${t('Bénéfice net {l}',{l:lbl})}</div><div class="big">${eur(S.ben)}</div><div class="s">${tn(S.n,'vente','ventes')} · ${t('{c} encaissés',{c:eur(S.ca)})} · ${t('marge {m} %',{m:(S.marge*100).toFixed(0)})}</div></div>
@@ -70,7 +73,7 @@ function renderDash(){
   ${app.pubBlock(st)}${old.length?`<div style="margin-top:14px"><span class="l">${t('En ligne depuis 30 jours et plus, à relancer ou baisser · {n}',{n:old.length})}</span>${old.slice(0,5).map(x=>`<button type="button" class="li" data-id="${esc(x.id)}" style="margin-bottom:6px"><div class="th">${catSvg(x)}</div><div class="m"><b>${esc(title(x))}</b><small>${esc([x.taille,tv(x.cat)].filter(Boolean).join(' · '))}</small></div><div class="p"><span class="tag x">${dj(days(x.pub,today()))}</span>${(a=>a.ok?`<small>${t('conseillé {p}',{p:eur(a.reco)})}</small>`:'')(app.advice(x))}</div></button>`).join('')}</div>`:'<div class="hint" style="margin-top:12px">'+t('Aucune pièce en ligne ne stagne depuis plus de 30 jours.')+'</div>'}</div>
  <div class="card"><h3>${t('Six derniers mois')}</h3><p class="sub">${t('Chiffre d\'affaires et bénéfice net par mois de vente')}</p><div class="mo">${ms.map(x=>`<div><b>${x.n?eurR(x.ben):''}</b><div class="pair"><i class="c" style="height:${x.ca/mxm*100}%;${x.ca?'':'display:none'}"></i><i class="p" style="height:${Math.max(0,x.ben)/mxm*100}%;${x.ben>0?'':'display:none'}"></i></div>${mn(x.m)}</div>`).join('')}</div><div class="lgd"><span>${t('Chiffre d\'affaires')}</span><span class="p">${t('Bénéfice net')}</span></div></div>
  <div class="card"><h3>${t('Par plateforme')}</h3><p class="sub">${t('Bénéfice net {l}',{l:lbl})}</p>${hbars(pl.map(g=>({k:g.k,v:g.ben,sub:tn(g.n,'vente','ventes')+' · '+eur(g.ca)})),eurR)}</div>
- ${CP.length>1?`<div class="card"><h3>${t('Par compte')}</h3><p class="sub">${t('Bénéfice net {l}',{l:lbl})}</p>${hbars(CP.map(c=>{const L=app.P.filter(x=>sold(x)&&(!from||(x.dv||'')>=from)&&(app.compteOf(x)||{}).id===c.id),S2=stats(L);return{k:c.n,v:S2.ben,sub:tn(S2.n,'vente','ventes')+' · '+eur(S2.ca)+(c.fiscal===false?' · '+t('hors déclaration'):'')}}),eurR)}</div>`:''}
+ ${CP.length>1?`<div class="card"><h3>${t('Par compte')}</h3><p class="sub">${t('Bénéfice net {l}',{l:lbl})}</p>${hbars(CP.filter(c=>!app.cptFilt||c.id===app.cptFilt).map(c=>{const L=app.P.filter(x=>sold(x)&&(!from||(x.dv||'')>=from)&&(!to||(x.dv||'')<=to)&&advOk(x)&&(app.compteOf(x)||{}).id===c.id),S2=stats(L);return{k:c.n,v:S2.ben,sub:tn(S2.n,'vente','ventes')+' · '+eur(S2.ca)+(c.fiscal===false?' · '+t('hors déclaration'):'')}}),eurR)}</div>`:''}
  <div class="card"><h3>${t('Par catégorie')}</h3><p class="sub">${t('Bénéfice net {l}',{l:lbl})}</p>${hbars(ct.map(g=>({k:g.k,v:g.ben,sub:tn(g.n,'vente','ventes')})),eurR,true)}</div>
  <div class="card"><h3>${t('Meilleures marques')}</h3><p class="sub">${t('Bénéfice net {l}',{l:lbl})}</p>${hbars(br.map(g=>({k:g.k,v:g.ben,sub:tn(g.n,'vente','ventes')+' · '+t('{p} par pièce',{p:eurR(g.ben/g.n)})})),eurR,true)}</div>
  ${app.ballotsHTML()}${app.retoursHTML()}${sr.length?`<div class="card"><h3>${t('Provenance')}</h3><p class="sub">${t('Bénéfice net {l}, selon l\'endroit d\'achat',{l:lbl})}</p>${hbars(sr.map(g=>({k:g.k,v:g.ben,sub:tn(g.n,'vente','ventes')})),eurR)}</div>`:''}`;hydrate()}

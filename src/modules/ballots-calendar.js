@@ -1,6 +1,6 @@
 import { app } from '../state.js';
 import { $, addDays, avail, esc, eur, eurR, fd, isnum, ok, pad, sold, title, today } from './core.js';
-import { hbars } from './dashboard.js';
+import { bilOk, hbars } from './dashboard.js';
 import { sheetHead, showSheet } from './tools-index.js';
 import { MOIS, WDAYS } from './gamification.js';
 
@@ -12,12 +12,13 @@ app.openMotifs = openMotifs;
 /* ===== v17 : ballots, calendrier des ventes, retours, recherche, photos ===== */
 /* --- analyse par ballot : barre avec deux objectifs (prix du ballot, puis le double) --- */
 app.ballAll = false;
-export function ballotsData(){const g={};app.P.forEach(p=>{if(p.ballot)(g[p.ballot]=g[p.ballot]||[]).push(p)});
+/** Ballots avec leur coût et leurs ventes ; `keep` limite aux pièces retenues (filtres du Bilan), sans lui tout est compté (trésorerie). */
+export function ballotsData(keep){const g={};app.P.forEach(p=>{if(p.ballot&&(!keep||keep(p)))(g[p.ballot]=g[p.ballot]||[]).push(p)});
  return Object.entries(g).map(([name,l])=>{const cost=l.reduce((a,x)=>a+(x.achat||0),0),S=l.filter(sold),rec=S.reduce((a,x)=>a+(x.pv||0)-(x.frais||0),0),start=l.map(x=>x.entree).filter(ok).sort()[0]||'';
   return{name,n:l.length,sold:S.length,left:l.filter(avail).length,cost,rec,start}}).filter(b=>b.cost>0).sort((a,b)=>b.start.localeCompare(a.start))}
 function ballotBar(b){const g2=b.cost*2,sc=Math.max(g2,b.rec)*1.04,lv=b.rec>=g2?'g':b.rec>=b.cost?'o':'r';
  return`<div class="b2t"><i class="b2f bl-${lv}" style="width:${Math.min(100,b.rec/sc*100).toFixed(1)}%"></i><u style="left:${(b.cost/sc*100).toFixed(1)}%"></u><u style="left:${(g2/sc*100).toFixed(1)}%"></u></div>`}
-function ballotsHTML(){const L=ballotsData();if(!L.length)return'';const show=app.ballAll?L:L.slice(0,6);
+function ballotsHTML(){const L=ballotsData(bilOk);if(!L.length)return'';const show=app.ballAll?L:L.slice(0,6);
  return`<div class="card"><h3>${t('Analyse par ballot')}</h3><p class="sub">${t('Encaissé (frais déduits) face au prix du ballot. Rouge sous le prix, jaune entre le prix et le double, vert au-delà du double.')}</p>
  ${show.map(b=>{const lv=b.rec>=b.cost*2?'g':b.rec>=b.cost?'o':'r',pct=Math.round(b.rec/b.cost*100);
   return`<div class="b2"><div class="b2h"><b>${esc(b.name)}</b><span class="bp bl-${lv}">${pct} %</span></div>${ballotBar(b)}<div class="b2l"><span>${t('{c} encaissés',{c:eurR(b.rec)})}</span><span>1 : ${eurR(b.cost)} · 2 : ${eurR(b.cost*2)}</span></div><div class="b2s">${t(b.sold>1?'{a} vendues sur {b}':'{a} vendue sur {b}',{a:b.sold,b:b.n})}${b.left?' · '+t('{n} en stock',{n:b.left}):''}${b.rec>=b.cost?'':' · '+t('reste {r} pour couvrir le prix',{r:eurR(b.cost-b.rec)})}</div></div>`}).join('')}
@@ -27,7 +28,7 @@ function ballotsHTML(){const L=ballotsData();if(!L.length)return'';const show=ap
 app.calM = '';
 app.calD = '';
 function calHTML(){const cur=today().slice(0,7);if(!app.calM)app.calM=cur;const lim6=(()=>{const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+6);return d.getFullYear()+'-'+pad(d.getMonth()+1,2)})();const[y,m]=app.calM.split('-').map(Number),nd=new Date(y,m,0).getDate(),first=(new Date(y,m-1,1).getDay()+6)%7;
- const S=app.P.filter(p=>sold(p)&&ok(p.dv)&&p.dv.startsWith(app.calM)),byD={},byC={};
+ const S=app.P.filter(p=>sold(p)&&bilOk(p)&&ok(p.dv)&&p.dv.startsWith(app.calM)),byD={},byC={};
  S.forEach(p=>{(byD[p.dv]=byD[p.dv]||[]).push(p);const c=p.canal||'Autre',o=byC[c]=byC[c]||{n:0,ca:0};o.n++;o.ca+=p.pv||0});
  const sum=l=>l.reduce((a,x)=>a+(x.pv||0),0),tot=sum(S),mx=Math.max(1,...Object.values(byD).map(sum));
  const EV=app.commEventsAll?app.commEventsAll():[],evBy={},pre=new Set();EV.forEach(e=>{(evBy[e.date]=evBy[e.date]||[]).push(e);for(let k=e.start;k<e.date;k=addDays(k,1))pre.add(k)});
@@ -49,11 +50,11 @@ function dayExtras(d,EV){let h='';
 /* --- retours : motifs, marques et catégories --- */
 const MOTIFS=['Taille','Défaut non signalé','Changement d\'avis','Autre'];
 app.MOTIFS = MOTIFS;
-function retoursHTML(){const R=[];app.P.forEach(p=>(p.retours||[]).forEach(r=>R.push({p,r})));if(!R.length)return'';
+function retoursHTML(){const PF=app.P.filter(bilOk),R=[];PF.forEach(p=>(p.retours||[]).forEach(r=>R.push({p,r})));if(!R.length)return'';
  const mo={};R.forEach(({r})=>{const k=r.m||'Non précisé';mo[k]=(mo[k]||0)+1});
- const base=(f)=>{const b={};app.P.forEach(p=>{const k=p[f];if(k&&(sold(p)||(p.retours||[]).length))b[k]=(b[k]||0)+1});return b};
+ const base=(f)=>{const b={};PF.forEach(p=>{const k=p[f];if(k&&(sold(p)||(p.retours||[]).length))b[k]=(b[k]||0)+1});return b};
  const by=(f)=>{const b=base(f),c={};R.forEach(({p})=>{const k=p[f];if(k)c[k]=(c[k]||0)+1});return Object.entries(c).map(([k,n])=>({k,v:n,sub:t('{a} sur {b}',{a:tn(n,'retour','retours'),b:tn(b[k],'vente','ventes')})+' · '+Math.round(n/b[k]*100)+' %'})).sort((a,b)=>b.v-a.v).slice(0,5)};
- const tot=R.reduce((a,x)=>a+(x.r.p||0),0),nv=app.P.filter(p=>sold(p)||(p.retours||[]).length).length,np=R.filter(x=>!x.r.m).length;
+ const tot=R.reduce((a,x)=>a+(x.r.p||0),0),nv=PF.filter(p=>sold(p)||(p.retours||[]).length).length,np=R.filter(x=>!x.r.m).length;
  return`<div class="card"><h3>${t('Analyse des retours')}</h3><p class="sub">${tn(R.length,'retour','retours')} ${t('depuis le début')} · ${t('{a} remboursés',{a:eurR(tot)})} · ${t('{p} % des ventes',{p:nv?Math.round(R.length/nv*100):0})}</p>
  <span class="l">${t('Motifs')}</span>${hbars(Object.entries(mo).sort((a,b)=>b[1]-a[1]).map(([k,n])=>({k,v:n,sub:Math.round(n/R.length*100)+' %'})),v=>String(v))}
  ${np?`<button type="button" class="btn sec sm" data-motifs="1" style="margin-top:8px">${t('Renseigner les motifs manquants ({n})',{n:np})}</button>`:''}

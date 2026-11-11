@@ -37,10 +37,10 @@ function windows() {
 const soldIn = (a, b) => app.P.filter(p => sold(p) && ok(p.dv) && p.dv >= a && p.dv <= b && bilOk(p));
 const depIn = (a, b) => (app.DEP || []).filter(d => ok(d.date) && d.date >= a && d.date <= b).reduce((s, d) => s + (d.montant || 0), 0);
 /* état du stock à une date passée, reconstitué avec les dates d'entrée, de publication et de vente */
-const stockAt = d => app.P.filter(p => ok(p.entree) && p.entree <= d && !(sold(p) && ok(p.dv) && p.dv <= d));
+const stockAt = d => app.P.filter(p => bilOk(p) && ok(p.entree) && p.entree <= d && !(sold(p) && ok(p.dv) && p.dv <= d));
 const sumAge = (L, d) => L.length ? L.reduce((a, p) => a + Math.max(0, days(p.entree, d)), 0) / L.length : 0;
 const onlineAt = d => stockAt(d).filter(p => ok(p.pub) && p.pub <= d);
-const rateAt = d => { const all = app.P.filter(p => ok(p.entree) && p.entree <= d); return all.length ? all.filter(p => sold(p) && ok(p.dv) && p.dv <= d).length / all.length : 0; };
+const rateAt = d => { const all = app.P.filter(p => bilOk(p) && ok(p.entree) && p.entree <= d); return all.length ? all.filter(p => sold(p) && ok(p.dv) && p.dv <= d).length / all.length : 0; };
 const mtr = L => { const S = stats(L); return { n: S.n, ca: S.ca, ben: S.ben, bpv: S.n ? S.ben / S.n : 0, marge: S.marge * 100, panier: S.panier, delai: S.delai }; };
 
 /** Flèche d'une tuile : cur et prev sont comparés ; goodUp dit si la hausse est une bonne nouvelle ; pts = écart en points. */
@@ -54,11 +54,11 @@ function arrow(cur, prev, goodUp, pts) {
 
 /** Les 6 indicateurs de chaque onglet : [valeur, libellé, outil au toucher, flèche]. */
 export function tilesOf(k) {
-  const S = bilCtx.S || { n: 0, ca: 0, ben: 0, marge: 0, panier: 0, delai: 0 }, A = app.P.filter(avail), td = today(), td0 = addDays(td, -30);
+  const S = bilCtx.S || { n: 0, ca: 0, ben: 0, marge: 0, panier: 0, delai: 0 }, A = app.P.filter(p => avail(p) && bilOk(p)), td = today(), td0 = addDays(td, -30);
   if (k === 'm' || k === 'a') {
     const W = windows(), c = mtr(soldIn(W.from, W.to)), p = mtr(soldIn(W.pf, W.pt));
     if (k === 'm') {
-      const dep = (app.DEP || []).filter(d => ok(d.date) && (!bilCtx.from || d.date >= bilCtx.from)).reduce((a, d) => a + (d.montant || 0), 0), tr = tresoData();
+      const dep = (app.DEP || []).filter(d => ok(d.date) && (!bilCtx.from || d.date >= bilCtx.from) && (!bilRange().to || d.date <= bilRange().to)).reduce((a, d) => a + (d.montant || 0), 0), tr = tresoData();
       return [
         [eurR(S.ca), t('chiffre d\'affaires'), '', arrow(c.ca, p.ca, true)],
         [S.n ? eurR(S.ben / S.n) : '—', t('bénéfice par vente'), '', arrow(c.bpv, p.bpv, true)],
@@ -67,7 +67,7 @@ export function tilesOf(k) {
         [eurR(dep), t('de dépenses'), '', arrow(depIn(W.from, W.to), depIn(W.pf, W.pt), false)],
         [tr ? eurR(tr.now) : '—', t('trésorerie'), 'treso', tr ? arrow(tr.rate, 0, true) : arrow()]];
     }
-    const sd = app.P.filter(p => p.statut === 'Vendu').length, ecoul = app.P.length ? sd / app.P.length : 0;
+    const fp = app.P.filter(bilOk), sd = fp.filter(p => p.statut === 'Vendu').length, ecoul = fp.length ? sd / fp.length : 0;
     return [
       [S.n, t(S.n > 1 ? 'ventes' : 'vente'), '', arrow(c.n, p.n, true)],
       [S.n ? dj(S.delai) : '—', t('délai avant la vente'), '', arrow(c.delai, p.delai, false)],
@@ -85,7 +85,7 @@ export function tilesOf(k) {
     [A.length ? dj(moy) : '—', t('ancienneté moyenne'), '', arrow(sumAge(s1, td), sumAge(s0, td0), false)],
     [A.filter(p => !ok(p.pub)).length, t('à publier'), '', arrow(aPub(s1, td), aPub(s0, td0), false)],
     [A.filter(p => ok(p.pub) && days(p.pub, td) >= 30).length, t('à relancer'), '', arrow(relance(s1, td), relance(s0, td0), false)],
-    [app.P.filter(incomplete).length, t('fiches à compléter'), 'fiches', arrow()]];
+    [app.P.filter(p => bilOk(p) && incomplete(p)).length, t('fiches à compléter'), 'fiches', arrow()]];
 }
 const tilesHTML = k => `<div class="btiles bt-${k}">${tilesOf(k).map(([v, l, tool, ar]) => `<${tool ? 'button type="button"' : 'div'} class="bkt"${tool ? ` data-tool="${tool}"` : ''}>${ar}<b>${v}</b><span>${l}</span></${tool ? 'button' : 'div'}>`).join('')}</div>`;
 
