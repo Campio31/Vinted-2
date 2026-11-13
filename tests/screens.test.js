@@ -30,7 +30,7 @@ describe('fiche d\'une pièce', () => {
 });
 
 describe('bilan', () => {
-  it('affiche toutes les cartes et le menu Personnaliser', () => { nav.go('dash'); app.renderDash(); expect(document.querySelectorAll('#dsh > .card, #dsh > .hero').length).toBeGreaterThan(8); expect(document.querySelector('[data-dcust]')).toBeTruthy(); });
+  it('affiche toutes les cartes et le menu Personnaliser', () => { nav.go('dash'); app.renderDash(); expect(document.querySelectorAll('#dsh .card, #dsh > .hero').length).toBeGreaterThan(8); expect(document.querySelector('[data-dcust]')).toBeTruthy(); });
   it('masquer une carte la cache', () => { app.setCfg({ dash: { hide: ['S:Par catégorie'], order: [] } }); app.renderDash(); const h = [...document.querySelectorAll('#dsh h3[data-sec]')].find(x => x.dataset.sec === 'Par catégorie'); expect(h.closest('.card').style.display).toBe('none'); });
 });
 

@@ -67,24 +67,32 @@ describe('v45 : compte en sélection', () => {
   });
 });
 describe('v47 : onglets du Bilan', () => {
-  it('un seul graphique par onglet : les pastilles changent de graphique, le choix est gardé', async () => {
+  it('les graphiques sont de petites vignettes sur 3 colonnes : un toucher agrandit, le choix est gardé', async () => {
+    localStorage.removeItem('bilOpen');
     nav.go('dash'); app.renderDash(); await tick(30);
     const box = $('dsh');
     for (const k of ['m', 'a', 's']) {
-      const cartes = [...box.querySelectorAll(`.card.bt-${k}.bsel0`)];
+      const grille = box.querySelector(`.bgrid.bt-${k}`);
+      expect(grille, k).not.toBeNull();
+      const cartes = [...grille.querySelectorAll(':scope > .card.bgr')];
       expect(cartes.length, k).toBeGreaterThan(1);
-      expect(cartes.filter(c => c.classList.contains('bsel')), k).toHaveLength(1);
-      expect(cartes.filter(c => !c.classList.contains('bnot')), k).toHaveLength(1);
-      expect(box.querySelectorAll(`.bchips.bt-${k} .chip`)).toHaveLength(cartes.length);
+      cartes.forEach(c => { expect(c.classList.contains('open'), k).toBe(false); expect(c.querySelector(':scope > .bgv'), k).not.toBeNull(); });
+      /* la grille suit juste les indicateurs de l'onglet */
+      expect(box.querySelector(`.btiles.bt-${k}`).compareDocumentPosition(grille) & Node.DOCUMENT_POSITION_FOLLOWING, k).toBeTruthy();
     }
-    const p = box.querySelectorAll('.bchips.bt-m .chip')[1];
-    p.click();
-    const sel = box.querySelector('.card.bt-m.bsel');
-    expect(sel.dataset.bk).toBe(p.dataset.bk);
+    const c = box.querySelectorAll('.bgrid.bt-m > .card.bgr')[1], key = c.dataset.bk;
+    c.click();
+    expect(c.classList.contains('open')).toBe(true);
+    expect(JSON.parse(localStorage.getItem('bilOpen'))).toContain(key);
+    /* un nouveau dessin garde le graphique ouvert */
     app.renderDash(); await tick(20);
-    expect($('dsh').querySelector('.card.bt-m.bsel').dataset.bk).toBe(p.dataset.bk);
-    $('dsh').querySelector('.bchips.bt-m .chip').click();
-  });  it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
+    expect([...$('dsh').querySelectorAll('.bgrid.bt-m > .card.bgr.open')].map(x => x.dataset.bk)).toEqual([key]);
+    /* un toucher sur le titre le referme */
+    $('dsh').querySelector('.bgrid.bt-m > .card.bgr.open h3').click();
+    expect($('dsh').querySelectorAll('.bgrid.bt-m > .card.bgr.open')).toHaveLength(0);
+    expect(JSON.parse(localStorage.getItem('bilOpen'))).not.toContain(key);
+  });
+  it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     const bar = $('per').querySelector('.btabs');
     for (const k of ['j', 'g', 'm', 'a', 's']) {

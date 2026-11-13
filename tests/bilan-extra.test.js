@@ -15,10 +15,12 @@ describe('Bilan : bénéfice net en haut, indicateur du mois, 6 graphiques par o
     app.setCfg({ goal: 800, goalMode: 'net', goalCA: 0 }, true); app.renderDash();
     const box = document.getElementById('dsh'), hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), bmo = box.querySelector('.bmo');
     expect(hero).toBeTruthy(); expect(goal).toBeTruthy(); expect(bmo).toBeTruthy();
+    /* le bénéfice du mois (stock acheté compris) vit dans la carte du bénéfice net */
+    expect(bmo.parentElement).toBe(hero); expect(bmo.classList.contains('card')).toBe(false);
     /* seule la carte « Ma journée » peut rester au-dessus du bénéfice net */
     let el = hero.previousElementSibling; while (el) { expect(el.matches('.ap, .tdy, .dsa, .bsum, .bnote')).toBe(true); el = el.previousElementSibling; }
     expect(hero.nextElementSibling).toBe(goal);
-    expect(goal.nextElementSibling).toBe(bmo);
+    expect(goal.nextElementSibling.classList.contains('bobj')).toBe(true);
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
   });
   it('indicateur : ventes du mois − frais − prix d\'achat de tout le stock ajouté ce mois-ci', () => {
@@ -48,7 +50,7 @@ describe('Bilan : bénéfice net en haut, indicateur du mois, 6 graphiques par o
   });
   it('chaque onglet propose au moins 6 graphiques avec le jeu d\'essai', () => {
     app.renderDash();
-    ['m', 'a', 's'].forEach(tab => { const n = document.querySelectorAll(`#dsh .card.bt-${tab}.bsel0`).length; expect(n, tab).toBeGreaterThanOrEqual(tab === 's' ? 4 : 6); });
+    ['m', 'a', 's'].forEach(tab => { const n = document.querySelectorAll(`#dsh .bgrid.bt-${tab} > .card.bgr`).length; expect(n, tab).toBeGreaterThanOrEqual(tab === 's' ? 4 : 6); });
   });
   it('les graphiques suivent les filtres du Bilan', () => {
     app.renderDash();

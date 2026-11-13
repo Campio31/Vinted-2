@@ -71,10 +71,9 @@ describe('Bilan : toutes les cartes se replient', () => {
       const card = document.querySelector(`#dsh [data-ck="${k}"]`);
       const h = card.querySelector('h3[data-sec]');
       expect(h, k).toBeTruthy();
-      const chip = document.querySelector(`#dsh [data-bp][data-bk="${k}"]`);
-      expect(chip, k).toBeTruthy();
-      chip.click();
-      expect(card.classList.contains('bsel'), k).toBe(true);
+      expect(card.classList.contains('bgr'), k).toBe(true);
+      card.click();
+      expect(card.classList.contains('open'), k).toBe(true);
     }
   });
 });
@@ -98,10 +97,10 @@ describe('Réglages : cartes repliées, objectifs et export fusionnés', () => {
     expect($('xic').querySelectorAll('h3').length).toBe(1);
   });
 
-  it('Objectifs et coûts : quatre blocs, mêmes champs, frais d\'exemple', () => {
+  it('Objectifs et coûts : six blocs, mêmes champs, frais d\'exemple', () => {
     app.setCfg({ emb: 0.5, port: 0, comV: 10, pf1: '', pf2: '' });
     nav.go('set'); app.renderSet();
-    expect($('cfgc').querySelectorAll('.cg').length).toBe(4);
+    expect($('cfgc').querySelectorAll('.cg').length).toBe(6);
     for (const id of ['c_goal', 'c_goalY', 'c_emb', 'c_port', 'c_pf1', 'c_pf2', 'c_comV', 'c_comT', 'c_roi', 'c_minM']) expect($(id), id).toBeTruthy();
     expect($('cfgc').querySelector('.cprev').textContent).toMatch(/20/);
   });

@@ -118,7 +118,9 @@ describe('Analyse de chaque ballot', () => {
   });
   it('un ballot inconnu ne renvoie rien ; la fiche s\'ouvre depuis le Bilan', () => {
     expect(X.ballotDetail('nope')).toBeNull(); faire(); app.renderDash();
-    const row = document.querySelector('#dsh [data-ballot="Ballot test"]'); expect(row).toBeTruthy(); row.click();
+    const row = document.querySelector('#dsh [data-ballot="Ballot test"]'); expect(row).toBeTruthy();
+    const carte = row.closest('.bgr'); expect(carte.classList.contains('open')).toBe(false); carte.click();   /* d'abord on agrandit la vignette */
+    expect(carte.classList.contains('open')).toBe(true); row.click();
     const s = document.getElementById('shc'); expect(s.textContent).toContain('Ballot test'); expect(s.querySelectorAll('.card').length).toBeGreaterThanOrEqual(3);
   });
 });
@@ -177,3 +179,25 @@ describe('Bilan : tout est traduit', () => {
 function faireBallot() {
   const m = mAgo(1); app.P.slice(0, 5).forEach((p, i) => app.save(Object.assign({}, p, { ballot: 'Ballot trad', achat: 30, entree: jour(m, 2), statut: i < 2 ? 'Vendu' : 'Disponible', dv: i < 2 ? jour(m, 8) : '', pv: i < 2 ? 25 : 0, frais: 1, pub: i >= 2 ? jour(m, 3) : p.pub })));
 }
+
+describe('Général : couleur de l\'onglet et objectifs mieux présentés', () => {
+  it('le fond noir devient la couleur de Général, pour le bénéfice net et l\'objectif', () => {
+    app.renderDash();
+    const css = document.getElementById('bt5css').textContent;
+    expect(css).toContain('#dsh[data-bt="g"]{--hero:#C9235F');
+    expect(css).toContain('#dsh[data-bt="g"] .gcard');
+  });
+  it('chaque objectif détaillé a son anneau, sa valeur et son état', () => {
+    app.setCfg({ objx: { ventes: 10, marge: 50, delai: 30 } }, true); app.renderDash();
+    const c = document.querySelector('#dsh .bobj');
+    expect(c.querySelectorAll('svg')).toHaveLength(3);
+    expect(c.textContent).toMatch(/\d+%/);
+    expect(c.querySelector('[data-obj]')).toBeTruthy();
+    app.setCfg({ objx: { ventes: 10 } }, true); app.renderDash();
+    expect(document.querySelector('#dsh .bobj').querySelectorAll('svg')).toHaveLength(1);
+  });
+  it('sans objectif, la carte explique comment en fixer', () => {
+    app.setCfg({ objx: {} }, true); app.renderDash();
+    const c = document.querySelector('#dsh .bobj'); expect(c.querySelectorAll('svg')).toHaveLength(0); expect(c.querySelector('[data-obj]')).toBeTruthy();
+  });
+});
