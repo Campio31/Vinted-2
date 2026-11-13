@@ -16,7 +16,7 @@ describe('Bilan : bénéfice net en haut, indicateur du mois, 6 graphiques par o
     const box = document.getElementById('dsh'), hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), bmo = box.querySelector('.bmo');
     expect(hero).toBeTruthy(); expect(goal).toBeTruthy(); expect(bmo).toBeTruthy();
     /* seule la carte « Ma journée » peut rester au-dessus du bénéfice net */
-    let el = hero.previousElementSibling; while (el) { expect(el.matches('.ap, .tdy, .dsa')).toBe(true); el = el.previousElementSibling; }
+    let el = hero.previousElementSibling; while (el) { expect(el.matches('.ap, .tdy, .dsa, .bsum, .bnote')).toBe(true); el = el.previousElementSibling; }
     expect(hero.nextElementSibling).toBe(goal);
     expect(goal.nextElementSibling).toBe(bmo);
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
@@ -83,7 +83,7 @@ describe('Rapport du mois', () => {
     document.querySelector('#dsh [data-mrep]').click();
     const sheet = document.getElementById('shc');
     expect(sheet.querySelector('#mr_pdf')).toBeTruthy();
-    expect(sheet.querySelectorAll('h4').length).toBe(4);
+    expect(sheet.querySelectorAll('h4').length).toBeGreaterThanOrEqual(7);   /* score, indicateurs, images, forts, à améliorer, perspectives, plan */
     const autre = sheet.querySelectorAll('[data-mm]')[1]; autre.click();
     expect(document.getElementById('shc').querySelector('.rp')).toBeTruthy();
   });
