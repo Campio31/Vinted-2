@@ -96,3 +96,21 @@ describe('Rapport du mois', () => {
     expect(manquants).toEqual([]);
   });
 });
+
+describe('Bilan : onglet Général', () => {
+  it('six indicateurs : bénéfice net, chiffre d\'affaires, marge, ventes, stock, score', async () => {
+    localStorage.removeItem('bilTab'); app.renderDash();
+    const tuiles = [...document.querySelectorAll('#dsh .btiles.bt-g .bkt')];
+    expect(tuiles).toHaveLength(6);
+    const S = D.bilCtx.S; expect(tuiles[0].querySelector('b').textContent.replace(/\D/g, '')).toBe(new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.round(S.ben)).replace(/\D/g, ''));
+    expect(tuiles[3].querySelector('b').textContent).toBe(String(S.n));
+    expect(tuiles[5].querySelector('b').textContent).toMatch(/^(\d+ \/ 100|—)$/);
+  });
+  it('les filtres se trouvent sous les onglets et disparaissent dans « Ma journée »', () => {
+    app.renderDash();
+    const per = document.getElementById('per');
+    expect(per.firstElementChild.classList.contains('btabs')).toBe(true);
+    expect(per.querySelector('.bflt [data-p]')).toBeTruthy();
+    expect(document.getElementById('bt5css').textContent).toContain('#per[data-bt="j"] .bflt{display:none}');
+  });
+});

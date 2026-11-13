@@ -92,27 +92,31 @@ describe('v44 : comptes, Ajouter et Stock', () => {
 });
 
 describe('v44 : Bilan en onglets', () => {
-  it('trois onglets : chaque carte est dans un seul, les autres sont masquées', async () => {
+  it('cinq onglets en haut, à la place des filtres : chaque élément est dans un seul, les autres sont masqués', async () => {
+    localStorage.removeItem('bilTab');
     nav.go('dash'); app.renderDash(); await tick(30);
-    const box = $('dsh'), bar = box.querySelector('.btabs');
+    const box = $('dsh'), bar = $('per').querySelector('.btabs');
     expect(bar).not.toBeNull();
-    expect(bar.querySelectorAll('[data-bt]')).toHaveLength(3);
-    expect(box.dataset.bt).toBe('m');
-    const tous = [...box.children].filter(el => /(^| )bt-[mas]( |$)/.test(el.className));
+    expect([...bar.querySelectorAll('[data-bt]')].map(b => b.dataset.bt)).toEqual(['j', 'g', 'm', 'a', 's']);
+    expect(box.dataset.bt).toBe('g');
+    /* les filtres sont toujours là, juste sous les onglets */
+    expect($('per').querySelector('.bflt [data-badv]')).not.toBeNull();
+    expect(bar.nextElementSibling.classList.contains('bflt')).toBe(true);
+    const tous = [...box.children].filter(el => /(^| )bt-[jgmas]( |$)/.test(el.className));
     expect(tous.length).toBeGreaterThan(3);
-    tous.forEach(el => expect(el.className.match(/bt-[mas]/g)).toHaveLength(1));
+    tous.forEach(el => expect(el.className.match(/bt-[jgmas]/g)).toHaveLength(1));
     const de = k => tous.filter(el => el.classList.contains('bt-' + k));
-    ['m', 'a', 's'].forEach(k => expect(de(k).length, k).toBeGreaterThan(0));
+    ['j', 'g', 'm', 'a', 's'].forEach(k => expect(de(k).length, k).toBeGreaterThan(0));
+    expect(de('j').every(el => el.matches('.tdy, .ap'))).toBe(true);
+    expect(box.querySelector('.hero').classList.contains('bt-g')).toBe(true);
     expect(box.querySelector('.btiles.bt-m [data-tool="treso"]')).not.toBeNull();
     expect(box.querySelector('.btiles.bt-a [data-tool="trophees"]')).not.toBeNull();
     bar.querySelector('[data-bt="a"]').click();
     expect(box.dataset.bt).toBe('a');
     expect(bar.querySelector('[data-bt="a"]').classList.contains('on')).toBe(true);
-    /* la barre est placée juste avant la première carte classée */
-    expect(bar.nextElementSibling).toBe(tous[0]);
     /* l'onglet est gardé après un nouveau dessin */
     app.renderDash(); await tick(20);
     expect($('dsh').dataset.bt).toBe('a');
-    $('dsh').querySelector('[data-bt="m"]').click();
+    $('per').querySelector('[data-bt="g"]').click();
   });
 });

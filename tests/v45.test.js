@@ -35,7 +35,7 @@ describe('v45 : Bilan', () => {
   it('chaque onglet montre 6 indicateurs ; les anciennes cartes d\'indicateurs ont disparu', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     const box = $('dsh');
-    for (const k of ['m', 'a', 's']) expect(box.querySelectorAll(`.btiles.bt-${k} .bkt`), k).toHaveLength(6);
+    for (const k of ['g', 'm', 'a', 's']) expect(box.querySelectorAll(`.btiles.bt-${k} .bkt`), k).toHaveLength(6);
     expect(box.querySelector('[data-tool="fisc"]')).toBeNull();
     expect(box.querySelector('details.bdrop')).toBeNull();
     expect(box.querySelectorAll(':scope > .kpis, :scope > .minic')).toHaveLength(0);
@@ -86,13 +86,18 @@ describe('v47 : onglets du Bilan', () => {
     $('dsh').querySelector('.bchips.bt-m .chip').click();
   });  it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
-    const bar = $('dsh').querySelector('.btabs');
-    for (const k of ['m', 'a', 's']) {
+    const bar = $('per').querySelector('.btabs');
+    for (const k of ['j', 'g', 'm', 'a', 's']) {
       bar.querySelector(`[data-bt="${k}"]`).click();
       expect($('dsh').dataset.bt).toBe(k);
+      expect($('per').dataset.bt).toBe(k);
       expect(bar.querySelector(`[data-bt="${k}"]`).classList.contains('on')).toBe(true);
     }
-    bar.querySelector('[data-bt="m"]').click();
+    /* chaque onglet a sa propre couleur */
+    const css = document.getElementById('bt5css').textContent;
+    ['j', 'g', 'm', 'a', 's'].forEach(k => expect(css.includes(`#dsh[data-bt="${k}"]>`), k).toBe(true));
+    expect(new Set(['#7B5CD6', '#D6336C']).size).toBe(2);
+    bar.querySelector('[data-bt="g"]').click();
   });
   it('les objectifs sont des jauges demi-cercle avec la projection en violet', async () => {
     const vendu = app.P.find(x => x.statut === 'Vendu' && (x.pv || 0) > (x.achat || 0)), dv0 = vendu.dv;
@@ -127,7 +132,7 @@ describe('v48 : flèches des indicateurs', () => {
   it('chaque tuile avec historique a une flèche, et la couleur dit si c\'est bon ou mauvais', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     const box = $('dsh');
-    for (const k of ['m', 'a', 's']) expect(box.querySelectorAll(`.btiles.bt-${k} .bkt .bka`), k).toHaveLength(6);
+    for (const k of ['g', 'm', 'a', 's']) expect(box.querySelectorAll(`.btiles.bt-${k} .bkt .bka`), k).toHaveLength(6);
     const ts = [...box.querySelectorAll('.bka.up, .bka.dn')];
     expect(ts.length).toBeGreaterThan(2);
     ts.forEach(a => expect(/(^| )(ok|ko)( |$)/.test(a.className)).toBe(true));
