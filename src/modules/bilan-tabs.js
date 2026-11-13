@@ -9,8 +9,9 @@ import './bilan-plus.js';
 
 /* ---------- Bilan : cinq onglets en haut, chacun avec sa couleur ---------- */
 /* Ma journée (violet), Général (rose), Finance (vert), Activité (bleu), Stock (orange). Les onglets prennent la place des filtres, qui passent juste dessous.
-   Général garde le bénéfice net, les objectifs et le résumé ; Finance, Activité et Stock montrent 6 indicateurs clés avec une flèche de hausse ou de baisse,
-   puis UN graphique à la fois (des pastilles pour changer). Le dernier onglet et le dernier graphique de chaque onglet sont retenus. */
+   Général garde le bénéfice net (avec le bénéfice du mois, stock acheté compris), les objectifs et le résumé, sur le fond rose de l'onglet.
+   Finance, Activité et Stock montrent 6 indicateurs clés avec une flèche de hausse ou de baisse, puis leurs graphiques en petites vignettes rangées comme les indicateurs :
+   un toucher agrandit un graphique, un toucher sur son titre le referme. Le dernier onglet et les graphiques ouverts sont retenus. */
 const TABS = [['j', 'Ma journée'], ['g', 'Général'], ['m', 'Finance'], ['a', 'Activité'], ['s', 'Stock']];
 const TAB_IDS = TABS.map(x => x[0]);
 /* couleurs : [fond de l'onglet, texte, fond de l'onglet choisi] */
@@ -19,6 +20,16 @@ const COLORS = { j: ['#EEEAFB', '#4A2FA0', '#7B5CD6'], g: ['#FCE7F0', '#99224F',
   const css = TAB_IDS.map(x => `#dsh[data-bt="${x}"]>${TAB_IDS.filter(o => o !== x).map(o => `.bt-${o}`).join(`,#dsh[data-bt="${x}"]>`)}{display:none!important}`).join('')
     + Object.entries(COLORS).map(([k, c]) => `.btabs .chip[data-bt="${k}"]{color:${c[1]};background:${c[0]}}.btabs .chip.on[data-bt="${k}"]{background:${c[2]};color:#fff}#dsh[data-bt="${k}"]{--bt:${c[2]}}.bchips.bt-${k} .chip.on{background:${c[2]};border-color:${c[2]};color:#fff}`).join('')
     + '.btiles.bt-g .bkt{background:#FCE7F0;color:#7A1B3D}'
+    /* Général : le fond noir devient rose (bénéfice net et objectif), le bénéfice du mois vit dans la carte du bénéfice net */
+    + '#dsh[data-bt="g"]{--hero:#C9235F;--hero-on:#fff}#dsh[data-bt="g"] .gcard{--acc:#FFD166;--mint:#A8F0CF;--red:#FFD6D6}#dsh[data-bt="g"] .gcard .gc-pj{color:#FFE9F2}#dsh[data-bt="g"] .gcard .gpj .pjd{background:#FFE9F2}#dsh[data-bt="g"] .gcard .gau .gpjarc{stroke:#FFE9F2}'
+    + '.hero .bmo{margin:16px 0 0;padding:14px 0 0;border-top:1px solid rgba(255,255,255,.3);background:none;box-shadow:none;border-radius:0;color:inherit}.hero .bmo .l{color:rgba(255,255,255,.88)}.hero .bmo .hint{color:rgba(255,255,255,.85)}.hero .bmo .bmov{color:#fff!important;font-size:34px!important}.hero .bmo .btn{background:#fff;color:#8f1c47;border:0}'
+    /* Finance, Activité, Stock : graphiques en vignettes sur 3 colonnes, comme les indicateurs ; un toucher les agrandit */
+    + '#dsh>.bgrid,#dsh>.btiles{grid-column:1/-1;max-width:640px}.bgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px;align-items:start}'
+    + '.bgrid>.card.bgr{margin:0;min-width:0;border-top:3px solid var(--bt);cursor:pointer;position:relative}'
+    + '.bgrid>.card.bgr:not(.open){padding:8px;height:132px;overflow:hidden;border-radius:14px}.bgrid>.card.bgr:not(.open) h3{font-size:12px;line-height:1.2;margin:0 0 6px;max-height:29px;overflow:hidden}'
+    + '.bgrid>.card.bgr:not(.open) .hd::after,.bgrid>.card.bgr:not(.open) h3::after,.bgrid>.card.bgr:not(.open) h3::before{display:none!important}.bgr:not(.open) .sub,.bgr:not(.open) .calh .ib{display:none!important}'
+    + '.bgrid>.card.bgr:not(.open)>.bgv{width:333.33%;transform:scale(.3);transform-origin:0 0;pointer-events:none}'
+    + '.bgrid>.card.bgr.open{grid-column:1/-1;cursor:default;box-shadow:inset 4px 0 0 var(--bt)}.bgrid>.card.bgr.open>.hd,.bgrid>.card.bgr.open>h3{cursor:pointer}'
     + '.bt5{display:flex;gap:4px;overflow-x:auto;width:100%;margin:0 0 6px;scrollbar-width:none}.bt5::-webkit-scrollbar{display:none}.bt5 .chip{flex:1 0 auto;white-space:nowrap;min-height:44px;padding:0 9px;font-size:13px}'
     + '.bflt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%}#per[data-bt="j"] .bflt{display:none}';
   if (typeof document !== 'undefined' && !document.getElementById('bt5css')) { const s = document.createElement('style'); s.id = 'bt5css'; s.textContent = css; document.head.appendChild(s); }
@@ -41,9 +52,20 @@ export const tabOf = el => {
 };
 let tab = LSg('bilTab', 'g');
 if (!TAB_IDS.includes(tab)) tab = 'g';
-const pick = Object.assign({ m: '', a: '', s: '' }, LSg('bilPick', {}));   /* graphique choisi dans chaque onglet */
+const OPEN = new Set(LSg('bilOpen', []));   /* graphiques agrandis, gardés d'une fois sur l'autre */
 const keyOf = el => el.dataset.ck || (el.querySelector('h3[data-sec]') || {}).dataset?.sec || (el.querySelector('h3') || {}).textContent || '';
-const labelOf = el => (el.dataset.lb || (el.querySelector('h3') || {}).textContent || keyOf(el)).split('·')[0].replace(/\s+/g, ' ').trim();
+/** Prépare une carte-graphique en vignette : le titre reste dehors, tout le reste va dans .bgv (réduit tant que la carte est fermée). */
+function vignette(el) {
+  el.classList.add('bgr'); el.classList.remove('shut'); el.dataset.bk = keyOf(el);
+  const h = el.querySelector('h3'), head = h ? (h.parentElement === el ? h : (h.closest('.calh') || h)) : null, wrap = document.createElement('div'); wrap.className = 'bgv';
+  [...el.childNodes].forEach(n => { if (n !== head) wrap.appendChild(n); }); el.appendChild(wrap);
+  const open = OPEN.has(el.dataset.bk); el.classList.toggle('open', open); el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-expanded', String(open));
+}
+/** Ouvre ou ferme une vignette et retient le choix. */
+function basculer(el, on) {
+  el.classList.toggle('open', on); el.setAttribute('aria-expanded', String(on));
+  if (on) OPEN.add(el.dataset.bk); else OPEN.delete(el.dataset.bk); LSs('bilOpen', [...OPEN]);
+}
 
 /* ---- flèches : la période du Bilan face à la période d'avant, de même durée (30 jours si « Tout ») ---- */
 function windows() {
@@ -133,10 +155,11 @@ app.renderDash = function () {
   /* la carte « Aujourd'hui » / « Ma journée » reste tout en haut quand elle existe */
   const hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), top = box.querySelector('.ap, .tdy'), bmo = box.querySelector('.bmo');
   if (hero) { if (goal) { if (goal.previousElementSibling !== hero) goal.before(hero); } else if (top) { if (top.nextElementSibling !== hero) top.after(hero); } else if (box.firstElementChild !== hero) box.prepend(hero); }
-  if (bmo) { const after = goal || hero || top; if (after && after.nextElementSibling !== bmo) after.after(bmo); }
-  /* objectifs détaillés sous le bénéfice du mois ; résumé en une phrase puis rappel du rapport, juste avant le bénéfice net */
-  const bobj = box.querySelector('.bobj'), bsum = box.querySelector('.bsum'), bnote = box.querySelector('.bnote');
-  if (bobj && bmo && bmo.nextElementSibling !== bobj) bmo.after(bobj);
+  /* le bénéfice du mois (stock acheté compris) rejoint le bénéfice net dans la même carte */
+  if (bmo && hero && bmo.parentElement !== hero) { bmo.classList.remove('card'); hero.appendChild(bmo); }
+  /* objectifs détaillés sous l'objectif du mois ; résumé en une phrase puis rappel du rapport, juste avant le bénéfice net */
+  const bobj = box.querySelector('.bobj'), bsum = box.querySelector('.bsum'), bnote = box.querySelector('.bnote'), after = goal || hero;
+  if (bobj && after && after.nextElementSibling !== bobj) after.after(bobj);
   if (hero && bsum && hero.previousElementSibling !== bsum) hero.before(bsum);
   if (bnote && (bsum || hero)) (bsum || hero).before(bnote);
   box.querySelectorAll('.btiles, .btabs, .bchips').forEach(b => b.remove());
@@ -148,16 +171,14 @@ app.renderDash = function () {
   /* les anciennes cartes d'indicateurs sont remplacées par les 6 tuiles de l'onglet */
   items.filter(el => el.matches('button.minic, .kpis')).forEach(el => el.remove());
   const rest = kids(box), cards = rest.filter(el => el.classList.contains('card') && el.style.display !== 'none');
-  /* un seul graphique par onglet, choisi avec les pastilles */
-  const chips = TABS.map(([k]) => {
-    const L = cards.filter(el => el.classList.contains('bt-' + k));
-    if (!L.length) return '';
-    const cur = L.find(el => keyOf(el) === pick[k]) || L[0];
-    L.forEach(el => { el.classList.add('bsel0'); el.classList.remove('shut'); el.classList.toggle('bnot', el !== cur); el.classList.toggle('bsel', el === cur); el.dataset.bk = keyOf(el); });
-    return L.length > 1 ? `<div class="bchips bt-${k}" role="tablist">${L.map(el => `<button type="button" role="tab" class="chip sm${el === cur ? ' on' : ''}" aria-selected="${el === cur}" data-bp="${k}" data-bk="${keyOf(el).replace(/"/g, '&quot;')}">${labelOf(el)}</button>`).join('')}</div>` : '';
-  }).join('');
-  const head = ['g', 'm', 'a', 's'].map(tilesHTML).join('') + chips;
+  const head = ['g', 'm', 'a', 's'].map(tilesHTML).join('');
   if (rest[0]) rest[0].insertAdjacentHTML('beforebegin', head); else box.insertAdjacentHTML('beforeend', head);
+  /* les graphiques de chaque onglet : vignettes rangées sur 3 colonnes, sous les indicateurs */
+  ['m', 'a', 's'].forEach(k => {
+    const L = cards.filter(el => el.classList.contains('bt-' + k)); if (!L.length) return;
+    const grid = document.createElement('div'); grid.className = 'bgrid bt-' + k; L[0].before(grid);
+    L.forEach(el => { vignette(el); grid.appendChild(el); });
+  });
   /* les onglets prennent la place des filtres, qui passent dans une ligne juste dessous */
   const shown = shownTabs(box), per = $('per'); if (!shown.some(x => x[0] === tab)) tab = 'g';
   if (per) { per.innerHTML = barHTML(shown) + '<div class="bflt">' + per.innerHTML + '</div>'; per.dataset.bt = tab; const on = per.querySelector('.btabs .chip.on'); if (on && typeof on.scrollIntoView === 'function') on.scrollIntoView({ inline: 'center', block: 'nearest' }); }
@@ -170,13 +191,14 @@ function setTab(k) {
   document.querySelectorAll('#per .btabs .chip').forEach(c => { const on = c.dataset.bt === tab; c.classList.toggle('on', on); c.setAttribute('aria-selected', String(on)); if (on && typeof c.scrollIntoView === 'function') c.scrollIntoView({ inline: 'center', block: 'nearest' }); });
 }
 $('per').addEventListener('click', e => { const b = e.target.closest('.btabs [data-bt]'); if (b) setTab(b.dataset.bt); });
+/* un toucher sur une vignette l'agrandit ; un toucher sur le titre d'un graphique ouvert le referme. Les boutons à l'intérieur gardent leur rôle.
+   Écouteur en phase de capture : il passe avant le repli des sections du Bilan. */
 $('dsh').addEventListener('click', e => {
-  const box = $('dsh');
-  const p = e.target.closest('[data-bp]');
-  if (p) {
-    const k = p.dataset.bp, key = p.dataset.bk;
-    pick[k] = key; LSs('bilPick', pick);
-    box.querySelectorAll(`.bchips.bt-${k} .chip`).forEach(c => { const on = c.dataset.bk === key; c.classList.toggle('on', on); c.setAttribute('aria-selected', String(on)); });
-    box.querySelectorAll(`.card.bt-${k}.bsel0`).forEach(el => { const on = el.dataset.bk === key; el.classList.toggle('bsel', on); el.classList.toggle('bnot', !on); });
-  }
+  const el = e.target.closest('.bgrid > .card.bgr'); if (!el) return;
+  if (!el.classList.contains('open')) { basculer(el, true); e.stopPropagation(); return; }
+  if (e.target.closest('h3')) { basculer(el, false); e.stopPropagation(); }
+}, true);
+$('dsh').addEventListener('keydown', e => {
+  if ((e.key !== 'Enter' && e.key !== ' ') || !e.target.matches || !e.target.matches('.bgrid > .card.bgr')) return;
+  e.preventDefault(); basculer(e.target, !e.target.classList.contains('open'));
 });

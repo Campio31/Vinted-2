@@ -65,11 +65,19 @@ export function objState() {
   if (+o.delai > 0) { const tg = +o.delai, v = st.delai; out.push({ k: 'delai', l: t('Délai avant la vente'), v: st.n ? dj(v) : '—', tg: dj(tg), p: st.n && v ? tg / v : 0, s: st.n < 3 ? 'wait' : v <= tg ? 'ok' : v <= tg * 1.2 ? 'pace' : 'late', hint: '' }); }
   return out;
 }
-const PILL = { ok: ['Atteint', 'var(--mint)'], pace: ['Dans le rythme', 'var(--denim)'], late: ['En retard', 'var(--red)'], wait: ['Pas assez de ventes', 'var(--mute)'] };
+const PILL = { ok: ['Atteint', '#1D9E75'], pace: ['Dans le rythme', '#2F6FDE'], late: ['En retard', '#E24B4A'], wait: ['Pas assez de ventes', '#9AA0A6'] };
+/** Anneau de progression : p = part de l'objectif atteinte (0 à 1), c = couleur, txt = texte au centre. */
+function ring(p, c, txt) {
+  const R = 30, L = 2 * Math.PI * R, f = Math.max(0, Math.min(1, p));
+  return `<svg viewBox="0 0 76 76" width="76" height="76" role="img" aria-label="${esc(txt)}" style="display:block;margin:0 auto"><circle cx="38" cy="38" r="${R}" fill="none" stroke="#F3D3E0" stroke-width="8"/><circle cx="38" cy="38" r="${R}" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(L * f).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 38 38)"/><text x="38" y="43" text-anchor="middle" style="font-size:17px;font-weight:800;fill:#3a1424;font-variant-numeric:tabular-nums">${esc(txt)}</text></svg>`;
+}
+/** Objectifs détaillés : une tuile par objectif (anneau, valeur, état), sur le fond rose de l'onglet Général. */
 function objCard() {
-  const L = objState();
-  if (!L.length) return `<div class="card bobj"><span class="l">${t('Objectifs détaillés')}</span><p class="hint" style="margin:4px 0 8px">${t('Fixe un objectif de ventes, de marge ou de délai de vente : le Bilan te dit si tu es dans le rythme.')}</p><button type="button" class="btn sm sec" data-obj="1">${t('Fixer mes objectifs')}</button></div>`;
-  return `<div class="card bobj"><span class="l">${t('Objectifs détaillés')}</span>${L.map(x => `<div style="margin:10px 0 0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="flex:1">${esc(x.l)}</b><span style="font-variant-numeric:tabular-nums">${esc(x.v)} <span style="color:var(--mute)">/ ${esc(x.tg)}</span></span><span style="font-size:11px;font-weight:700;color:#fff;background:${PILL[x.s][1]};border-radius:10px;padding:2px 8px">${t(PILL[x.s][0])}</span></div><div style="height:8px;background:var(--soft);border-radius:4px;overflow:hidden;margin-top:5px"><i style="display:block;height:100%;width:${Math.min(100, Math.max(2, x.p * 100))}%;background:${PILL[x.s][1]}"></i></div>${x.hint ? `<div class="hint" style="margin:4px 0 0">${esc(x.hint)}</div>` : ''}</div>`).join('')}<button type="button" class="btn sm sec" data-obj="1" style="margin-top:10px">${t('Modifier mes objectifs')}</button></div>`;
+  const L = objState(), head = `<div style="display:flex;align-items:center;gap:8px;margin:0 0 10px"><b style="flex:1;font-size:15px;color:#7A1B3D">${t('Objectifs détaillés')}</b><button type="button" class="chip sm" data-obj="1" style="background:#fff;border-color:#F3D3E0;color:#99224F">${L.length ? t('Modifier') : t('Fixer mes objectifs')}</button></div>`;
+  const wrap = body => `<div class="card bobj" style="background:#FCE7F0;color:#3a1424;border:0">${head}${body}</div>`;
+  if (!L.length) return wrap(`<p style="margin:0;font-size:13px;line-height:1.4;color:#7A1B3D">${t('Fixe un objectif de ventes, de marge ou de délai de vente : le Bilan te dit si tu es dans le rythme.')}</p>`);
+  return wrap(`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px">${L.map(x => { const c = PILL[x.s][1], pc = x.s === 'wait' ? '—' : Math.round(Math.min(x.p, 9.99) * 100) + '%';
+    return `<div style="background:#fff;border-radius:16px;padding:10px 6px 10px;text-align:center;min-width:0">${ring(x.s === 'wait' ? 0 : x.p, c, pc)}<div style="font-size:12px;font-weight:700;margin-top:6px;line-height:1.2">${esc(x.l)}</div><div style="font-size:13px;font-variant-numeric:tabular-nums;margin-top:2px"><b>${esc(x.v)}</b> <span style="color:#8a5a6c">/ ${esc(x.tg)}</span></div><span style="display:inline-block;margin-top:5px;font-size:11px;font-weight:700;color:#fff;background:${c};border-radius:999px;padding:2px 8px">${t(PILL[x.s][0])}</span>${x.hint ? `<div style="font-size:11px;color:#8a5a6c;margin-top:5px;line-height:1.3">${esc(x.hint)}</div>` : ''}</div>`; }).join('')}</div>`);
 }
 export function openObjectifs() {
   const o = app.cfg.objx || {}, f = (id, lab, unit, v) => `<div style="margin:0 0 12px"><span class="l">${lab}</span><div class="price"><input type="text" inputmode="decimal" id="${id}" value="${v > 0 ? v : ''}" placeholder="0"><span>${unit}</span></div></div>`;
