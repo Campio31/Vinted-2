@@ -4,6 +4,7 @@ import { bilCtx, bilOk, bilRange, stats } from './dashboard.js';
 import { incomplete } from './complete.js';
 import { streakInfo } from './gamification.js';
 import { tresoData } from './treasury.js';
+import './bilan-extra.js';
 
 /* ---------- Bilan : trois onglets, chacun avec sa couleur ---------- */
 /* Sous l'objectif : Finances (vert), Activité (bleu), Stock (orange). Chaque onglet montre 6 indicateurs clés avec une flèche
@@ -12,8 +13,9 @@ import { tresoData } from './treasury.js';
 const TABS = [['m', 'Finances'], ['a', 'Activité'], ['s', 'Stock']];
 const BY_TOOL = { treso: 'm', rapport: 'm', fisc: 'm', calcom: 'a', defis: 'a' };
 const BY_CK = { seuil: 'm', cohorte: 's', fourn: 's', live: 'a', planning: 'a' };
-const BY_SEC = { 'Ventes': 'a', 'Dépenses': 'm', 'Stock actuel': 's', 'Six derniers mois': 'm', 'Par plateforme': 'm', 'Par compte': 'm', 'Par catégorie': 'a', 'Meilleures marques': 'a', 'Provenance': 's', 'Retours': 'a', 'Analyse par ballot': 's' };
-const FIXED = el => el.matches('.ap, .dsa, .gcard, .hero, .empty, .btabs, .btiles, .bchips, [data-ck="today"], button.btn');
+const BY_SEC = { 'Ventes': 'a', 'Dépenses': 'm', 'Stock actuel': 's', 'Six derniers mois': 'm', 'Par plateforme': 'm', 'Par compte': 'm', 'Par catégorie': 'a', 'Meilleures marques': 'a', 'Provenance': 's', 'Retours': 'a', 'Analyse par ballot': 's',
+  'D\'où vient chaque euro': 'm', 'Marge par mois': 'm', 'Bénéfice cumulé du mois': 'm', 'Ventes par jour de semaine': 'a', 'Ventes semaine par semaine': 'a', 'Ancienneté du stock': 's', 'Valeur du stock par catégorie': 's', 'Entrées et sorties par mois': 's' };
+const FIXED = el => el.matches('.ap, .dsa, .gcard, .hero, .bmo, .empty, .btabs, .btiles, .bchips, [data-ck="today"], button.btn');
 
 export const tabOf = el => {
   if (el.dataset.tool) return BY_TOOL[el.dataset.tool] || 'm';
@@ -99,9 +101,11 @@ app.renderDash = function () {
   renderDash0.apply(this, arguments);
   const box = $('dsh');
   if (!box || !app.loaded) return;
-  /* le bénéfice net de la période se place juste sous la carte Objectifs (hors onglets) */
-  const hero = box.querySelector('.hero'), goal = box.querySelector('.gcard') || box.querySelector('.ap');
-  if (hero && goal && goal.nextElementSibling !== hero) goal.after(hero);
+  /* le bénéfice net de la période se place tout en haut, au-dessus des objectifs ; le bénéfice du mois avec le stock ajouté suit les objectifs (hors onglets) */
+  /* la carte « Aujourd'hui » / « Ma journée » reste tout en haut quand elle existe */
+  const hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), top = box.querySelector('.ap, .tdy'), bmo = box.querySelector('.bmo');
+  if (hero) { if (goal) { if (goal.previousElementSibling !== hero) goal.before(hero); } else if (top) { if (top.nextElementSibling !== hero) top.after(hero); } else if (box.firstElementChild !== hero) box.prepend(hero); }
+  if (bmo) { const after = goal || hero || top; if (after && after.nextElementSibling !== bmo) after.after(bmo); }
   box.querySelectorAll('.btiles, .btabs, .bchips').forEach(b => b.remove());
   const items = kids(box);
   /* rien à classer, ou bilan réduit du mode simple : pas d'onglets */
