@@ -23,12 +23,12 @@ describe('v45 : pastille colis sur Outils', () => {
 });
 
 describe('v45 : Bilan', () => {
-  it('le bénéfice net est juste sous la carte Objectifs, hors onglets', async () => {
+  it('le bénéfice net est juste au-dessus de la carte Objectifs, hors onglets', async () => {
     app.setCfg({ goal: 800, goalMode: 'net', goalCA: 0 }, true);
     nav.go('dash'); app.renderDash(); await tick(30);
     const box = $('dsh'), hero = box.querySelector('.hero');
     expect(hero).not.toBeNull();
-    expect(hero.previousElementSibling.classList.contains('gcard')).toBe(true);
+    expect(hero.nextElementSibling.classList.contains('gcard')).toBe(true);
     expect(hero.className).not.toMatch(/bt-[mas]/);
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
   });
