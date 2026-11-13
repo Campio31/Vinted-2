@@ -3,6 +3,12 @@ import { $, LSg, LSs, addDays, age, avail, days, dj, esc, eur, eurR, ok, pad, pr
 import { bilCtx, bilOk, bilRange, group, hbars, stats } from './dashboard.js';
 import { MOIS } from './gamification.js';
 import { sheetHead, showSheet } from './tools-index.js';
+import { closeSheet } from './piece-sheet.js';
+import { go } from './nav.js';
+import { incomplete } from './complete.js';
+import { ballotsData } from './ballots-calendar.js';
+import { FDN, fitPx, mkCanvas, wrapTxt } from './social.js';
+import { shareFiles } from './proofs.js';
 
 /* ---------- Bilan : bénéfice du mois avec le stock acheté, 8 graphiques de plus, rapport mensuel ---------- */
 /* Les graphiques et l'indicateur suivent les filtres du Bilan (bilOk). Le rapport mensuel regarde tout le stock et toutes les ventes. */
@@ -30,7 +36,7 @@ function monthCardHTML() {
   const m = today().slice(0, 7), r = monthProfit(app.P.filter(bilOk), m);
   return `<div class="card bmo"><span class="l">${t('Bénéfice de {m}, achats de stock inclus', { m: MOIS[+m.slice(5, 7) - 1] })}</span>
   <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:2px 0 6px"><b class="bmov" style="font-size:30px;font-variant-numeric:tabular-nums${r.ben < 0 ? ';color:var(--red)' : ''}">${eur(r.ben)}</b><span class="hint" style="margin:0">${t('{c} encaissés − {f} de frais − {a} de stock ajouté', { c: eurR(r.ca), f: eurR(r.frais), a: eurR(r.cost) })}</span></div>
-  <div style="display:flex;gap:10px;margin:0 0 6px">${[[eurR(r.ca), tn(r.nSold, 'vente', 'ventes')], ['−' + eurR(r.cost), t('stock ajouté : {n}', { n: tn(r.nAdded, 'pièce', 'pièces') })], [eurR(r.classic), t('bénéfice classique')]].map(([v, l]) => `<div style="flex:1;min-width:0"><b style="display:block;font-size:18px;font-variant-numeric:tabular-nums">${v}</b><span class="hint" style="margin:0;display:block;font-size:12px">${esc(l)}</span></div>`).join('')}</div>
+  <div style="display:flex;gap:10px;margin:0 0 6px">${[[eurR(r.ca), tn(r.nSold, 'vente', 'ventes')], [(r.cost > 0 ? '−' : '') + eurR(r.cost), t('stock ajouté : {n}', { n: tn(r.nAdded, 'pièce', 'pièces') })], [eurR(r.classic), t('bénéfice classique')]].map(([v, l]) => `<div style="flex:1;min-width:0"><b style="display:block;font-size:18px;font-variant-numeric:tabular-nums">${v}</b><span class="hint" style="margin:0;display:block;font-size:12px">${esc(l)}</span></div>`).join('')}</div>
   <div class="hint" style="margin:6px 0 8px">${t('Le bénéfice classique ne déduit que le prix d\'achat des pièces vendues. Ici, tout ce que tu as acheté ce mois-ci est déduit, vendu ou non.')}</div>
   <button type="button" class="btn sm mint" data-mrep="1">${t('Rapport du mois')}</button></div>`;
 }
@@ -61,15 +67,19 @@ function barsHTML(cols, legend) {
 }
 
 /* ---------- Finances ---------- */
+/** Barre « d'où vient chaque euro » : S = stats des ventes, dep = dépenses de la période. */
+function euroBarHTML(S, dep) {
+  const rest = S.ca - S.cost - S.fr - dep;
+  const parts = [[t('Achat des pièces'), S.cost, 'var(--denim)'], [t('Frais de vente'), S.fr, 'var(--mute)'], [t('Dépenses'), dep, '#e8a33d'], [rest >= 0 ? t('Il te reste') : t('Perte'), Math.abs(rest), rest >= 0 ? 'var(--mint)' : 'var(--red)']].filter(p => p[1] > 0.004);
+  const tot = Math.max(S.ca, parts.reduce((a, p) => a + (p[0] === t('Perte') ? 0 : p[1]), 0)) || 1;
+  return `<div style="display:flex;height:18px;border-radius:9px;overflow:hidden;background:var(--soft);margin-bottom:10px">${parts.map(p => `<i title="${esc(p[0])}" style="display:block;height:100%;width:${(p[1] / tot * 100).toFixed(2)}%;background:${p[2]}"></i>`).join('')}</div>`
+    + parts.map(p => `<div style="display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0"><i style="width:10px;height:10px;border-radius:50%;background:${p[2]};flex:none"></i><span style="flex:1">${esc(p[0])}</span><b style="font-variant-numeric:tabular-nums">${eurR(p[1])}</b><span style="width:42px;text-align:right;color:var(--mute)">${Math.round(p[1] / S.ca * 100)} %</span></div>`).join('');
+}
 function euroCard() {
   const S = bilCtx.S, r = bilRange();
   if (!S || !S.ca) return card('D\'où vient chaque euro', bilCtx.lbl || '', none());
-  const dep = sum((app.DEP || []).filter(d => ok(d.date) && (!r.from || d.date >= r.from) && (!r.to || d.date <= r.to)), d => d.montant), rest = S.ca - S.cost - S.fr - dep;
-  const parts = [[t('Achat des pièces'), S.cost, 'var(--denim)'], [t('Frais de vente'), S.fr, 'var(--mute)'], [t('Dépenses'), dep, '#e8a33d'], [rest >= 0 ? t('Il te reste') : t('Perte'), Math.abs(rest), rest >= 0 ? 'var(--mint)' : 'var(--red)']].filter(p => p[1] > 0.004);
-  const tot = Math.max(S.ca, parts.reduce((a, p) => a + (p[0] === t('Perte') ? 0 : p[1]), 0)) || 1;
-  return card('D\'où vient chaque euro', t('Sur {c} encaissés {l}', { c: eurR(S.ca), l: bilCtx.lbl }),
-    `<div style="display:flex;height:18px;border-radius:9px;overflow:hidden;background:var(--soft);margin-bottom:10px">${parts.map(p => `<i title="${esc(p[0])}" style="display:block;height:100%;width:${(p[1] / tot * 100).toFixed(2)}%;background:${p[2]}"></i>`).join('')}</div>`
-    + parts.map(p => `<div style="display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0"><i style="width:10px;height:10px;border-radius:50%;background:${p[2]};flex:none"></i><span style="flex:1">${esc(p[0])}</span><b style="font-variant-numeric:tabular-nums">${eurR(p[1])}</b><span style="width:42px;text-align:right;color:var(--mute)">${Math.round(p[1] / S.ca * 100)} %</span></div>`).join(''));
+  const dep = sum((app.DEP || []).filter(d => ok(d.date) && (!r.from || d.date >= r.from) && (!r.to || d.date <= r.to)), d => d.montant);
+  return card('D\'où vient chaque euro', t('Sur {c} encaissés {l}', { c: eurR(S.ca), l: bilCtx.lbl }), euroBarHTML(S, dep));
 }
 function marginCard() {
   const L = app.P.filter(bilOk), ms = monthsBack(6).map(m => { const S = stats(soldIn(L, m)); return { m, v: S.n ? Math.round(S.marge * 100) : null, n: S.n }; });
@@ -77,18 +87,24 @@ function marginCard() {
   if (!ms.some(x => x.v != null)) return card('Marge par mois', sub, none());
   return card('Marge par mois', sub, lineSVG([{ v: ms.map(x => x.v), c: 'var(--ink)', dots: true, tag: false }], ms.map(x => mShort(x.m)), v => Math.round(v) + ' %', t('Marge par mois')) + `<div class="hint" style="margin-top:6px">${ms.filter(x => x.v != null).map(x => mShort(x.m) + ' ' + x.v + ' %').join(' · ')}</div>`);
 }
-function cumulCard() {
-  const L = app.P.filter(bilOk), m = today().slice(0, 7), pm = prevM(m), nd = dim(m), dn = +today().slice(8, 10);
+/** Courbe du bénéfice cumulé du mois m face au mois d'avant ; la projection de fin de mois n'existe que pour le mois en cours. */
+function cumulChart(L, m) {
+  const pm = prevM(m), nd = dim(m), isCur = m === today().slice(0, 7), dn = isCur ? +today().slice(8, 10) : nd;
   const daily = mm => { const a = new Array(dim(mm) + 1).fill(0); soldIn(L, mm).forEach(p => { a[+p.dv.slice(8, 10)] += profit(p); }); return a; };
   const cur = daily(m), old = daily(pm), cumu = (a, upto) => { let c = 0; const o = []; for (let d = 1; d <= upto; d++) { c += a[d] || 0; o.push(c); } return o; };
   const A = cumu(cur, dn), B = cumu(old, dim(pm)), so = A[A.length - 1] || 0, proj = dn ? so / dn * nd : 0;
-  if (!so && !B.some(Boolean)) return card('Bénéfice cumulé du mois', MOIS[+m.slice(5, 7) - 1], none());
+  if (!so && !B.some(Boolean)) return null;
   const nn = Math.max(nd, B.length), pad0 = a => a.concat(new Array(Math.max(0, nn - a.length)).fill(null));
-  const projS = new Array(nn).fill(null); for (let i = dn - 1; i <= nd - 1; i++) projS[i] = nd > dn ? so + (proj - so) * (i - (dn - 1)) / (nd - dn) : so;
+  const projS = new Array(nn).fill(null); if (isCur) for (let i = dn - 1; i <= nd - 1; i++) projS[i] = nd > dn ? so + (proj - so) * (i - (dn - 1)) / (nd - dn) : so;
   const xl = Array.from({ length: nn }, (_, i) => ([0, 6, 13, 20, 27].includes(i) ? String(i + 1) : ''));
-  return card('Bénéfice cumulé du mois', t('{m} face à {p}, bénéfice sur les pièces vendues', { m: MOIS[+m.slice(5, 7) - 1], p: MOIS[+pm.slice(5, 7) - 1] }),
-    lineSVG([{ v: pad0(B), c: 'var(--mute)' }, { v: projS, c: 'var(--mint)', dash: true }, { v: pad0(A), c: 'var(--ink)', tag: true }], xl, v => eurR(v), t('Bénéfice cumulé du mois'))
-    + `<div class="lgd"><span style="color:var(--ink)">${t('Ce mois-ci')}</span><span style="color:var(--mute)">${t('Mois dernier')}</span><span style="color:var(--mint)">${t('Projection')}</span></div><div class="hint" style="margin-top:6px">${t('À ce rythme, tu finis le mois autour de {v}.', { v: eurR(proj) })}</div>`);
+  const ser = [{ v: pad0(B), c: 'var(--mute)' }]; if (isCur) ser.push({ v: projS, c: 'var(--mint)', dash: true }); ser.push({ v: pad0(A), c: 'var(--ink)', tag: true });
+  return { so, proj, isCur, html: lineSVG(ser, xl, v => eurR(v), t('Bénéfice cumulé du mois'))
+    + `<div class="lgd"><span style="color:var(--ink)">${isCur ? t('Ce mois-ci') : mShort(m)}</span><span style="color:var(--mute)">${isCur ? t('Mois dernier') : mShort(pm)}</span>${isCur ? `<span style="color:var(--mint)">${t('Projection')}</span>` : ''}</div>` };
+}
+function cumulCard() {
+  const m = today().slice(0, 7), pm = prevM(m), ch = cumulChart(app.P.filter(bilOk), m);
+  if (!ch) return card('Bénéfice cumulé du mois', MOIS[+m.slice(5, 7) - 1], none());
+  return card('Bénéfice cumulé du mois', t('{m} face à {p}, bénéfice sur les pièces vendues', { m: MOIS[+m.slice(5, 7) - 1], p: MOIS[+pm.slice(5, 7) - 1] }), ch.html + `<div class="hint" style="margin-top:6px">${t('À ce rythme, tu finis le mois autour de {v}.', { v: eurR(ch.proj) })}</div>`);
 }
 
 /* ---------- Activité ---------- */
@@ -175,36 +191,130 @@ export function analyse(m) {
   if (S.length >= 5 && wd[bestWd] >= 2) persp.push(t('Tes meilleurs jours de vente sont le {d} : publie la veille.', { d: wdName(bestWd) }));
   if (old.length) persp.push(t('En relançant les pièces qui stagnent, tu peux libérer environ {v} d\'argent immobilisé.', { v: eurR(sum(old, x => x.achat)) }));
   if (!persp.length) persp.push(t('Ajoute des pièces et enregistre tes ventes : les perspectives se calculent à partir de ton historique.'));
+  /* moyenne des 6 mois d'avant (les mois sans vente ne comptent pas), et score du mois face à ses prédécesseurs */
+  const av6 = avg6(L, m), sc = scoreOf(L, m), hist = []; { let x = m; for (let i = 0; i < 6; i++) { x = prevM(x); const q = scoreOf(L, x); if (q.n) hist.push(q.total); } }
+  const avgScore = hist.length ? Math.round(sum(hist, x => x) / hist.length) : null;
+  if (s.n && av6) {
+    if (av6.ca > 0 && (proj ? proj.ca : s.ca) >= av6.ca * 1.15) forts.push(t('Au-dessus de ta moyenne des 6 derniers mois : {a} de chiffre d\'affaires contre {b} en moyenne.', { a: eurR(proj ? proj.ca : s.ca), b: eurR(av6.ca) }));
+    if (av6.ca > 0 && (proj ? proj.ca : s.ca) <= av6.ca * 0.85) ameliorer.push(t('En dessous de ta moyenne des 6 derniers mois : {a} contre {b} en moyenne.', { a: eurR(proj ? proj.ca : s.ca), b: eurR(av6.ca) }));
+  }
+  const dv = (v, f) => (v == null || !av6 ? '' : f(v));
   const kpi = [
-    [t('Chiffre d\'affaires'), eur(s.ca), k.ca, 'pct'], [t('Bénéfice sur les pièces'), eur(s.ben), k.ben, 'pct'], [t('Bénéfice avec le stock ajouté'), eur(mp.ben), pct(mp.ben, mpP.ben), 'pct'],
-    [t('Marge'), s.ca ? Math.round(s.marge * 100) + ' %' : '—', k.marge, 'pt'], [t('Ventes'), String(s.n), k.n, 'pct'], [t('Panier moyen'), eur(s.panier), k.panier, 'pct'], [t('Délai avant la vente'), s.n ? dj(s.delai) : '—', k.delai, 'pct'],
+    [t('Chiffre d\'affaires'), eur(s.ca), k.ca, 'pct', dv(av6 && av6.ca, eur)], [t('Bénéfice sur les pièces'), eur(s.ben), k.ben, 'pct', dv(av6 && av6.ben, eur)], [t('Bénéfice avec le stock ajouté'), eur(mp.ben), pct(mp.ben, mpP.ben), 'pct', ''],
+    [t('Marge'), s.ca ? Math.round(s.marge * 100) + ' %' : '—', k.marge, 'pt', dv(av6 && av6.marge, v => Math.round(v) + ' %')], [t('Ventes'), String(s.n), k.n, 'pct', dv(av6 && av6.n, v => String(Math.round(v * 10) / 10).replace('.', app.DS || ','))], [t('Panier moyen'), eur(s.panier), k.panier, 'pct', dv(av6 && av6.panier, eur)], [t('Délai avant la vente'), s.n ? dj(s.delai) : '—', k.delai, 'pct', dv(av6 && av6.delai, dj)],
     [t('Stock ajouté'), tn(mp.nAdded, 'pièce', 'pièces') + ' · ' + eur(mp.cost), null], [t('Dépenses hors pièces'), eur(dep), pct(dep, depP), 'pct'], [t('Retours'), String(R.length), null],
     [t('Stock actuel'), tn(stock.length, 'pièce', 'pièces') + ' · ' + eur(sum(stock, x => x.achat)), null]];
-  return { m, cur, pm, s, p, dep, mp, R, stock, old, unpub, cats, plats, k, proj, forts: forts.slice(0, 5), ameliorer: ameliorer.slice(0, 5), persp: persp.slice(0, 5), kpi };
+  /* plan d'action : les 3 gestes qui comptent le plus, chacun avec un raccourci */
+  const plan = [], badB = ballotsData().filter(b => b.sold > 0 && b.left > 0 && b.rec < b.cost).sort((a, b) => a.rec / a.cost - b.rec / b.cost)[0], nInc = L.filter(incomplete).length, nMot = R.filter(r => !r.m).length;
+  if (old.length) plan.push({ k: 'enligne', x: t('Baisser le prix ou relancer {n} en ligne depuis 30 jours ou plus', { n: tn(old.length, 'pièce', 'pièces') }) });
+  if (unpub.length) plan.push({ k: 'apub', x: t('Publier {n}', { n: tn(unpub.length, 'pièce', 'pièces') }) });
+  if (nMot) plan.push({ k: 'motifs', x: t('Renseigner le motif de {n}', { n: tn(nMot, 'retour', 'retours') }) });
+  if (badB) plan.push({ k: 'ballot:' + badB.name, x: t('Surveiller le ballot « {b} » : {p} % du prix récupéré', { b: badB.name, p: Math.round(badB.rec / badB.cost * 100) }) });
+  if (nInc) plan.push({ k: 'incomplet', x: t('Compléter les {n} fiches incomplètes', { n: nInc }) });
+  if (s.n >= 3 && s.marge < 0.3) plan.push({ k: '', x: t('Revoir tes prix d\'achat et tes frais : la marge est sous 30 %') });
+  if (!objSet()) plan.push({ k: 'obj', x: t('Fixer un objectif de marge, de délai ou de ventes') });
+  return { m, cur, pm, s, p, dep, mp, R, stock, old, unpub, cats, plats, k, proj, av6, score: sc, avgScore, plan: plan.slice(0, 3), forts: forts.slice(0, 5), ameliorer: ameliorer.slice(0, 5), persp: persp.slice(0, 5), kpi };
 }
+const objSet = () => { const o = app.cfg.objx || {}; return ['ventes', 'marge', 'delai'].some(k => +o[k] > 0); };
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+/** Moyennes des 6 mois avant m (seuls les mois avec au moins une vente comptent). */
+function avg6(L, m) {
+  const rows = []; let x = m; for (let i = 0; i < 6; i++) { x = prevM(x); const st = stats(soldIn(L, x)); if (st.n) rows.push(st); }
+  if (!rows.length) return null; const av = f => sum(rows, f) / rows.length;
+  return { months: rows.length, ca: av(r => r.ca), ben: av(r => r.ben), n: av(r => r.n), marge: av(r => r.marge) * 100, panier: av(r => r.panier), delai: av(r => r.delai) };
+}
+/** Score du mois sur 100 : croissance (30), marge (30), rapidité de vente (25), régularité (15). Calculé avec l'historique des ventes seul, donc comparable d'un mois à l'autre. */
+export function scoreOf(L, m) {
+  const cur = m === today().slice(0, 7), nd = dim(m), dn = cur ? +today().slice(8, 10) : nd, s = stats(soldIn(L, m));
+  const parts = [{ k: 'Croissance', pts: 0, max: 30 }, { k: 'Marge', pts: 0, max: 30 }, { k: 'Rapidité de vente', pts: 0, max: 25 }, { k: 'Régularité', pts: 0, max: 15 }];
+  if (!s.n) return { total: 0, n: 0, parts };
+  const base = [1, 2, 3].map(i => { let x = m; for (let j = 0; j < i; j++) x = prevM(x); return stats(soldIn(L, x)).ca; }).filter(v => v > 0), avg = base.length ? sum(base, v => v) / base.length : 0, ca = cur && dn ? s.ca / dn * nd : s.ca;
+  parts[0].pts = avg > 0 ? 30 * clamp((ca / avg - 0.6) / 0.6, 0, 1) : (ca > 0 ? 18 : 0);
+  parts[1].pts = 30 * clamp(s.marge / 0.6, 0, 1);
+  parts[2].pts = 25 * clamp((60 - s.delai) / 46, 0, 1);
+  const wk = new Set(), ws = new Set(); for (let d = 1; d <= dn; d++) { const dt = m + '-' + pad(d, 2); wk.add(addDays(dt, -wdOf(dt))); } soldIn(L, m).forEach(p => ws.add(addDays(p.dv, -wdOf(p.dv))));
+  parts[3].pts = 15 * (wk.size ? Math.min(1, ws.size / wk.size) : 0);
+  parts.forEach(p => { p.pts = Math.round(p.pts); });
+  return { total: Math.min(100, parts.reduce((a, p) => a + p.pts, 0)), n: s.n, parts };
+}
+export const scoreLabel = v => (v >= 80 ? 'Excellent' : v >= 60 ? 'Bon mois' : v >= 40 ? 'Mois moyen' : 'À redresser');
 const mark = '<svg viewBox="0 0 104 104" width="34" height="34"><rect width="104" height="104" rx="22" fill="#111"/><rect x="12" y="68" width="80" height="18" rx="3" fill="#F1F2F4"/><rect x="18" y="46" width="68" height="18" rx="3" fill="#C9CBD0"/><rect x="32" y="14" width="58" height="18" rx="3" fill="#FF4A1C" transform="rotate(-12 62 24)"/></svg>';
 const dTxt = (v, kind, good) => (v == null || !isFinite(v) || !Math.round(v) ? '' : ` <small style="color:${(v > 0) === good ? 'var(--mint)' : 'var(--red)'}">${Math.abs(v) > 500 && kind !== 'pt' ? (v > 0 ? '> +500' : '< −500') : sg(v)}${kind === 'pt' ? ' pt' : ' %'}</small>`);
-export function monthReportHTML(m) {
+/** Les deux graphiques du rapport : d'où vient chaque euro, bénéfice cumulé du mois. */
+function reportCharts(m, a) {
+  const L = app.P, S = a.s, ch = cumulChart(L, m);
+  return `<h4>${t('En images')}</h4>${S.ca ? `<div class="rch"><span class="l">${t('D\'où vient chaque euro')}</span>${euroBarHTML(S, a.dep)}</div>` : ''}${ch ? `<div class="rch" style="margin-top:10px"><span class="l">${t('Bénéfice cumulé du mois')}</span>${ch.html}</div>` : ''}${!S.ca && !ch ? `<p>${t('Pas encore de données.')}</p>` : ''}`;
+}
+/** Bloc du score : note sur 100, mention, détail par critère, moyenne des mois d'avant. */
+function scoreHTML(a) {
+  const sc = a.score;
+  if (!sc.n) return `<div class="rsc"><b style="font-size:38px">0</b><span> / 100 · ${t(scoreLabel(0))}</span></div>`;
+  return `<div class="rsc" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:4px 0 6px"><div style="text-align:center;min-width:92px"><b style="font-size:42px;line-height:1;font-variant-numeric:tabular-nums">${sc.total}</b><span style="font-size:14px"> / 100</span><div style="font-weight:700;margin-top:2px">${t(scoreLabel(sc.total))}</div></div>
+  <div style="flex:1;min-width:180px">${sc.parts.map(p => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0"><span style="width:104px">${t(p.k)}</span><span style="flex:1;height:8px;background:var(--soft);border-radius:4px;overflow:hidden"><i style="display:block;height:100%;width:${p.pts / p.max * 100}%;background:var(--ink)"></i></span><b style="width:42px;text-align:right;font-variant-numeric:tabular-nums">${p.pts}/${p.max}</b></div>`).join('')}</div></div>
+  ${a.avgScore != null ? `<div class="hint" style="margin:0 0 6px">${t('Moyenne de tes mois précédents : {s} / 100.', { s: a.avgScore })} ${sc.total > a.avgScore ? t('Ce mois-ci fait mieux.') : sc.total < a.avgScore ? t('Ce mois-ci fait moins bien.') : t('Même niveau.')}</div>` : ''}`;
+}
+/** Rapport du mois. opt.actions : boutons du plan d'action (pas dans le PDF). */
+export function monthReportHTML(m, opt) {
   const a = analyse(m), lst = (L, mk, col) => `<ul style="list-style:none;margin:0 0 6px;padding:0">${L.map(x => `<li style="display:flex;gap:8px;margin:0 0 7px;line-height:1.4"><b style="color:${col};flex:none">${mk}</b><span>${esc(x)}</span></li>`).join('')}</ul>`;
-  const badUp = new Set([t('Délai avant la vente'), t('Dépenses hors pièces')]);
+  const badUp = new Set([t('Délai avant la vente'), t('Dépenses hors pièces')]), withAv = a.kpi.some(r => r[4]);
+  const plan = a.plan.length ? `<ul style="list-style:none;margin:0 0 6px;padding:0">${a.plan.map((x, i) => `<li style="display:flex;gap:10px;align-items:center;margin:0 0 8px;line-height:1.4"><b style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--ink);color:var(--bg,#fff);display:inline-flex;align-items:center;justify-content:center;font-size:12px">${i + 1}</b><span style="flex:1">${esc(x.x)}</span>${opt && opt.actions && x.k ? `<button type="button" class="btn sm sec" data-pa="${esc(x.k)}" style="flex:none;width:auto">${t('Y aller')}</button>` : ''}</li>`).join('')}</ul>` : `<p>${t('Rien d\'urgent : continue sur ta lancée.')}</p>`;
   return `<div class="rp"><div class="rph">${mark}<div><b>syno</b><span>${t('Rapport du mois')}</span></div><div class="rpm"><b>${esc(mLong(m))}</b><span>${a.cur ? t('en cours, au {d}', { d: today().slice(8, 10) + '/' + today().slice(5, 7) }) : t('face à {m}', { m: MOIS[+a.pm.slice(5, 7) - 1] })}</span></div></div>
-  <h4>${t('Indicateurs clés')}</h4><table class="rt">${a.kpi.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}${r[3] ? dTxt(r[2], r[3], !badUp.has(r[0])) : ''}</td></tr>`).join('')}</table>
+  <h4>${t('Score du mois')}</h4>${scoreHTML(a)}
+  <h4>${t('Indicateurs clés')}</h4><table class="rt">${withAv ? `<tr><td></td><td style="text-align:right"><small>${t('Ce mois')}</small></td><td style="text-align:right"><small>${t('Moyenne 6 mois')}</small></td></tr>` : ''}${a.kpi.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}${r[3] ? dTxt(r[2], r[3], !badUp.has(r[0])) : ''}</td>${withAv ? `<td style="text-align:right;color:var(--mute)">${esc(r[4] || '')}</td>` : ''}</tr>`).join('')}</table>
   ${a.cur ? `<div class="hint" style="margin:-4px 0 8px">${t('Évolutions comparées au même nombre de jours du mois précédent.')}</div>` : ''}
+  ${reportCharts(m, a)}
   <h4>${t('Points forts')}</h4>${a.forts.length ? lst(a.forts, '✓', 'var(--mint)') : `<p>${t('Pas encore de point fort net ce mois-ci : continue à publier et à vendre.')}</p>`}
   <h4>${t('Points à améliorer')}</h4>${a.ameliorer.length ? lst(a.ameliorer, '!', 'var(--red)') : `<p>${t('Rien d\'alarmant ce mois-ci.')}</p>`}
   <h4>${t('Perspectives d\'évolution')}</h4>${lst(a.persp, '→', 'var(--ink)')}
+  <h4>${t('Plan d\'action')}</h4>${plan}
   <p class="rpf">${t('Analyse automatique à partir des données saisies dans Syno : elle donne des repères, pas un conseil comptable.')}</p></div>`;
+}
+/** Image à partager (1080 × 1350) : score et chiffres clés du mois. disc = mode discret, sans montants. */
+export async function reportImage(m, disc) {
+  try {
+    const a = analyse(m); await document.fonts.load('800 80px Archivo').catch(() => {});
+    const W = 1080, H = 1350, [c, x] = mkCanvas(W, H, '#111111'), F = '#F1F2F4', O = '#FF4A1C';
+    app.logoMark(x, 70, 70, 90); x.fillStyle = F; x.font = '800 54px ' + FDN; x.fillText('syno', 180, 138);
+    x.globalAlpha = 0.6; x.font = '500 40px ' + FDN; x.fillText(t('Rapport du mois') + ' · ' + mLong(m), 70, 230); x.globalAlpha = 1;
+    x.fillStyle = O; fitPx(x, String(a.score.total), 300, 600); x.fillText(String(a.score.total), 60, 520);
+    x.fillStyle = F; x.font = '500 54px ' + FDN; x.fillText('/ 100 · ' + t(scoreLabel(a.score.total)), 60, 600);
+    const dCa = a.k.ca != null ? sg(a.k.ca) + ' %' : '—', cells = disc
+      ? [[tn(a.s.n, 'vente', 'ventes'), ''], [Math.round(a.s.marge * 100) + ' %', t('Marge')], [dCa, t('Chiffre d\'affaires')], [a.s.n ? dj(a.s.delai) : '—', t('Délai avant la vente')]]
+      : [[eurR(a.s.ca), t('Chiffre d\'affaires')], [eurR(a.s.ben), t('Bénéfice sur les pièces')], [tn(a.s.n, 'vente', 'ventes'), ''], [Math.round(a.s.marge * 100) + ' %', t('Marge')]];
+    cells.forEach(([v, l], i) => { const cx = 60 + (i % 2) * 500, cy = 760 + Math.floor(i / 2) * 200; x.fillStyle = F; fitPx(x, v, 96, 460); x.fillText(v, cx, cy); if (l) { x.fillStyle = '#8a8d94'; x.font = '500 36px ' + FDN; x.fillText(l, cx, cy + 50); } });
+    x.fillStyle = '#C9CBD0'; x.font = '500 42px ' + FDN; const top = a.forts[0] || a.persp[0] || ''; if (top) wrapTxt(x, '✓ ' + top, 60, 1180, 960, 54, 2);
+    x.fillStyle = '#8a8d94'; x.font = '500 34px ' + FDN; x.fillText(t('Fait avec Syno'), 60, H - 50);
+    return c;
+  } catch (e) { return null; }
+}
+const markSeen = m => { const s = LSg('mrSeen', []); if (!s.includes(m)) LSs('mrSeen', [...s, m].slice(-24)); };
+/** Gestes du plan d'action : on ferme la fiche puis on ouvre l'écran concerné. */
+function doAction(k) {
+  closeSheet();
+  if (k === 'apub' || k === 'enligne' || k === 'incomplet') { app.filt = { apub: 'Apub', enligne: 'Enligne', incomplet: 'Incomplet' }[k]; app.lim = 60; go('list'); if (app.renderList) app.renderList(); }
+  else if (k === 'motifs') app.openMotifs && app.openMotifs();
+  else if (k === 'obj') app.openObjectifs && app.openObjectifs();
+  else if (k.startsWith('ballot:')) app.openBallot && app.openBallot(k.slice(7));
 }
 export function openMonthReport(m0) {
   const months = monthsBack(7).reverse(); let m = m0 && months.includes(m0) ? m0 : (LSg('mrM', '') || months[0]); if (!months.includes(m)) m = months[0];
   const draw = () => {
-    showSheet(sheetHead(t('Rapport du mois')) + `<div class="chips" style="margin-bottom:12px">${months.map(x => `<button type="button" class="chip sm${x === m ? ' on' : ''}" data-mm="${x}">${mShort(x)} ${x.slice(0, 4)}</button>`).join('')}</div><div class="acts" style="margin:0 0 12px"><button type="button" class="btn mint" id="mr_pdf">${t('Enregistrer en PDF')}</button></div><div class="rpv">${monthReportHTML(m)}</div>`);
-    $('shc').onclick = e => { const b = e.target.closest('[data-mm]'); if (b) { m = b.dataset.mm; LSs('mrM', m); return draw(); } if (e.target.closest('#mr_pdf') && app.printHTML) app.printHTML(monthReportHTML(m)); };
+    markSeen(m);
+    const disc = !!LSg('wrDisc', false);
+    showSheet(sheetHead(t('Rapport du mois')) + `<div class="chips" style="margin-bottom:12px">${months.map(x => `<button type="button" class="chip sm${x === m ? ' on' : ''}" data-mm="${x}">${mShort(x)} ${x.slice(0, 4)}</button>`).join('')}</div><div class="acts" style="margin:0 0 8px"><button type="button" class="btn mint" id="mr_pdf">${t('Enregistrer en PDF')}</button><button type="button" class="btn sec" id="mr_img">${t('Image à partager')}</button></div><label class="chk cfr" style="margin:0 0 12px"><input type="checkbox" id="mr_disc"${disc ? ' checked' : ''}><span><b>${t('Mode discret')}</b><small>${t('Remplace les euros par des pourcentages et des nombres de ventes avant de partager.')}</small></span></label><div class="rpv">${monthReportHTML(m, { actions: true })}</div>`);
+    $('shc').onchange = e => { if (e.target.id === 'mr_disc') LSs('wrDisc', e.target.checked); };
+    $('shc').onclick = async e => {
+      const b = e.target.closest('[data-mm]'); if (b) { m = b.dataset.mm; LSs('mrM', m); return draw(); }
+      const pa = e.target.closest('[data-pa]'); if (pa) return doAction(pa.dataset.pa);
+      if (e.target.closest('#mr_pdf') && app.printHTML) app.printHTML(monthReportHTML(m));
+      if (e.target.closest('#mr_img')) { const c = await reportImage(m, !!LSg('wrDisc', false)); if (!c) return; const blob = await new Promise(r => c.toBlob(r, 'image/png')); if (blob) await shareFiles([new File([blob], 'syno-rapport-' + m + '.png', { type: 'image/png' })], t('Rapport du mois')); }
+    };
   };
   draw();
 }
 app.openMonthReport = openMonthReport;
-$('dsh').addEventListener('click', e => { if (e.target.closest('[data-mrep]')) openMonthReport(today().slice(0, 7)); });
+$('dsh').addEventListener('click', e => { if (e.target.closest('[data-mrep]')) openMonthReport(e.target.closest('[data-mrep]').dataset.mrep.length === 7 ? e.target.closest('[data-mrep]').dataset.mrep : today().slice(0, 7)); });
+export { sum, dim, prevM, monthsBack, mShort, mLong, soldIn, addedIn, pct, sg, wdName, wdOf, card, none, lineSVG, barsHTML, markSeen, objSet, euroBarHTML };
 
 /* ---------- traductions (K : français, English, Italiano, Español, Deutsch), ici pour que ce module reste autonome ---------- */
 if (typeof window !== 'undefined' && window.K) {

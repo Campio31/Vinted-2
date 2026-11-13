@@ -5,6 +5,7 @@ import { incomplete } from './complete.js';
 import { streakInfo } from './gamification.js';
 import { tresoData } from './treasury.js';
 import './bilan-extra.js';
+import './bilan-plus.js';
 
 /* ---------- Bilan : trois onglets, chacun avec sa couleur ---------- */
 /* Sous l'objectif : Finances (vert), Activité (bleu), Stock (orange). Chaque onglet montre 6 indicateurs clés avec une flèche
@@ -14,8 +15,8 @@ const TABS = [['m', 'Finances'], ['a', 'Activité'], ['s', 'Stock']];
 const BY_TOOL = { treso: 'm', rapport: 'm', fisc: 'm', calcom: 'a', defis: 'a' };
 const BY_CK = { seuil: 'm', cohorte: 's', fourn: 's', live: 'a', planning: 'a' };
 const BY_SEC = { 'Ventes': 'a', 'Dépenses': 'm', 'Stock actuel': 's', 'Six derniers mois': 'm', 'Par plateforme': 'm', 'Par compte': 'm', 'Par catégorie': 'a', 'Meilleures marques': 'a', 'Provenance': 's', 'Retours': 'a', 'Analyse par ballot': 's',
-  'D\'où vient chaque euro': 'm', 'Marge par mois': 'm', 'Bénéfice cumulé du mois': 'm', 'Ventes par jour de semaine': 'a', 'Ventes semaine par semaine': 'a', 'Ancienneté du stock': 's', 'Valeur du stock par catégorie': 's', 'Entrées et sorties par mois': 's' };
-const FIXED = el => el.matches('.ap, .dsa, .gcard, .hero, .bmo, .empty, .btabs, .btiles, .bchips, [data-ck="today"], button.btn');
+  'D\'où vient chaque euro': 'm', 'Marge par mois': 'm', 'Bénéfice cumulé du mois': 'm', 'Ventes par jour de semaine': 'a', 'Ventes semaine par semaine': 'a', 'Ancienneté du stock': 's', 'Valeur du stock par catégorie': 's', 'Entrées et sorties par mois': 's', 'Comparer deux périodes': 'm', 'Saisonnalité': 'm' };
+const FIXED = el => el.matches('.ap, .dsa, .gcard, .hero, .bmo, .bobj, .bsum, .bnote, .empty, .btabs, .btiles, .bchips, [data-ck="today"], button.btn');
 
 export const tabOf = el => {
   if (el.dataset.tool) return BY_TOOL[el.dataset.tool] || 'm';
@@ -106,6 +107,11 @@ app.renderDash = function () {
   const hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), top = box.querySelector('.ap, .tdy'), bmo = box.querySelector('.bmo');
   if (hero) { if (goal) { if (goal.previousElementSibling !== hero) goal.before(hero); } else if (top) { if (top.nextElementSibling !== hero) top.after(hero); } else if (box.firstElementChild !== hero) box.prepend(hero); }
   if (bmo) { const after = goal || hero || top; if (after && after.nextElementSibling !== bmo) after.after(bmo); }
+  /* objectifs détaillés sous le bénéfice du mois ; résumé en une phrase puis rappel du rapport, juste avant le bénéfice net */
+  const bobj = box.querySelector('.bobj'), bsum = box.querySelector('.bsum'), bnote = box.querySelector('.bnote');
+  if (bobj && bmo && bmo.nextElementSibling !== bobj) bmo.after(bobj);
+  if (hero && bsum && hero.previousElementSibling !== bsum) hero.before(bsum);
+  if (bnote && (bsum || hero)) (bsum || hero).before(bnote);
   box.querySelectorAll('.btiles, .btabs, .bchips').forEach(b => b.remove());
   const items = kids(box);
   /* rien à classer, ou bilan réduit du mode simple : pas d'onglets */
