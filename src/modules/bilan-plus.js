@@ -248,6 +248,10 @@ if (typeof window !== 'undefined' && window.K) {
   K("Voir le rapport", "See the report", "Vedi il rapporto", "Ver el informe", "Bericht ansehen");
   K("Y aller", "Go", "Vai", "Ir", "Hingehen");
   K("Analyse détaillée", "Detailed analysis", "Analisi dettagliata", "Análisis detallado", "Detaillierte Analyse");
+  K("Finance", "Finance", "Finanza", "Finanzas", "Finanzen");
+  K("Général", "General", "Generale", "General", "Allgemein");
+  K("bénéfice net", "net profit", "utile netto", "beneficio neto", "Nettogewinn");
+  K("score du mois", "score of the month", "punteggio del mese", "puntuación del mes", "Monatsbewertung");
   K("Comparer deux périodes", "Compare two periods", "Confronta due periodi", "Comparar dos periodos", "Zwei Zeiträume vergleichen");
   K("Saisonnalité", "Seasonality", "Stagionalità", "Estacionalidad", "Saisonalität");
 }

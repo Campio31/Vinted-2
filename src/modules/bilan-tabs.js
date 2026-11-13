@@ -4,14 +4,25 @@ import { bilCtx, bilOk, bilRange, stats } from './dashboard.js';
 import { incomplete } from './complete.js';
 import { streakInfo } from './gamification.js';
 import { tresoData } from './treasury.js';
-import './bilan-extra.js';
+import { scoreOf } from './bilan-extra.js';
 import './bilan-plus.js';
 
-/* ---------- Bilan : trois onglets, chacun avec sa couleur ---------- */
-/* Sous l'objectif : Finances (vert), Activité (bleu), Stock (orange). Chaque onglet montre 6 indicateurs clés avec une flèche
-   de hausse ou de baisse, puis UN graphique à la fois (des pastilles pour changer), de façon que tout tienne sur un écran.
-   Le dernier onglet et le dernier graphique de chaque onglet sont retenus. */
-const TABS = [['m', 'Finances'], ['a', 'Activité'], ['s', 'Stock']];
+/* ---------- Bilan : cinq onglets en haut, chacun avec sa couleur ---------- */
+/* Ma journée (violet), Général (rose), Finance (vert), Activité (bleu), Stock (orange). Les onglets prennent la place des filtres, qui passent juste dessous.
+   Général garde le bénéfice net, les objectifs et le résumé ; Finance, Activité et Stock montrent 6 indicateurs clés avec une flèche de hausse ou de baisse,
+   puis UN graphique à la fois (des pastilles pour changer). Le dernier onglet et le dernier graphique de chaque onglet sont retenus. */
+const TABS = [['j', 'Ma journée'], ['g', 'Général'], ['m', 'Finance'], ['a', 'Activité'], ['s', 'Stock']];
+const TAB_IDS = TABS.map(x => x[0]);
+/* couleurs : [fond de l'onglet, texte, fond de l'onglet choisi] */
+const COLORS = { j: ['#EEEAFB', '#4A2FA0', '#7B5CD6'], g: ['#FCE7F0', '#99224F', '#D6336C'] };
+(() => {
+  const css = TAB_IDS.map(x => `#dsh[data-bt="${x}"]>${TAB_IDS.filter(o => o !== x).map(o => `.bt-${o}`).join(`,#dsh[data-bt="${x}"]>`)}{display:none!important}`).join('')
+    + Object.entries(COLORS).map(([k, c]) => `.btabs .chip[data-bt="${k}"]{color:${c[1]};background:${c[0]}}.btabs .chip.on[data-bt="${k}"]{background:${c[2]};color:#fff}#dsh[data-bt="${k}"]{--bt:${c[2]}}.bchips.bt-${k} .chip.on{background:${c[2]};border-color:${c[2]};color:#fff}`).join('')
+    + '.btiles.bt-g .bkt{background:#FCE7F0;color:#7A1B3D}'
+    + '.bt5{display:flex;gap:4px;overflow-x:auto;width:100%;margin:0 0 6px;scrollbar-width:none}.bt5::-webkit-scrollbar{display:none}.bt5 .chip{flex:1 0 auto;white-space:nowrap;min-height:44px;padding:0 9px;font-size:13px}'
+    + '.bflt{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%}#per[data-bt="j"] .bflt{display:none}';
+  if (typeof document !== 'undefined' && !document.getElementById('bt5css')) { const s = document.createElement('style'); s.id = 'bt5css'; s.textContent = css; document.head.appendChild(s); }
+})();
 const BY_TOOL = { treso: 'm', rapport: 'm', fisc: 'm', calcom: 'a', defis: 'a' };
 const BY_CK = { seuil: 'm', cohorte: 's', fourn: 's', live: 'a', planning: 'a' };
 const BY_SEC = { 'Ventes': 'a', 'Dépenses': 'm', 'Stock actuel': 's', 'Six derniers mois': 'm', 'Par plateforme': 'm', 'Par compte': 'm', 'Par catégorie': 'a', 'Meilleures marques': 'a', 'Provenance': 's', 'Retours': 'a', 'Analyse par ballot': 's',
@@ -19,6 +30,8 @@ const BY_SEC = { 'Ventes': 'a', 'Dépenses': 'm', 'Stock actuel': 's', 'Six dern
 const FIXED = el => el.matches('.ap, .dsa, .gcard, .hero, .bmo, .bobj, .bsum, .bnote, .empty, .btabs, .btiles, .bchips, [data-ck="today"], button.btn');
 
 export const tabOf = el => {
+  if (el.matches('.tdy, .ap, .bnote, [data-ck="today"]')) return 'j';
+  if (el.matches('.bsum, .hero, .gcard, .bmo, .bobj, .dsa')) return 'g';
   if (el.dataset.tool) return BY_TOOL[el.dataset.tool] || 'm';
   if (el.classList.contains('kpis')) return 'm';
   if (el.dataset.ck && BY_CK[el.dataset.ck]) return BY_CK[el.dataset.ck];
@@ -26,8 +39,8 @@ export const tabOf = el => {
   if (h && BY_SEC[h.dataset.sec]) return BY_SEC[h.dataset.sec];
   return el.classList.contains('minic') ? 'a' : 'm';
 };
-let tab = LSg('bilTab', 'm');
-if (!TABS.some(x => x[0] === tab)) tab = 'm';
+let tab = LSg('bilTab', 'g');
+if (!TAB_IDS.includes(tab)) tab = 'g';
 const pick = Object.assign({ m: '', a: '', s: '' }, LSg('bilPick', {}));   /* graphique choisi dans chaque onglet */
 const keyOf = el => el.dataset.ck || (el.querySelector('h3[data-sec]') || {}).dataset?.sec || (el.querySelector('h3') || {}).textContent || '';
 const labelOf = el => (el.dataset.lb || (el.querySelector('h3') || {}).textContent || keyOf(el)).split('·')[0].replace(/\s+/g, ' ').trim();
@@ -58,8 +71,19 @@ function arrow(cur, prev, goodUp, pts) {
 /** Les 6 indicateurs de chaque onglet : [valeur, libellé, outil au toucher, flèche]. */
 export function tilesOf(k) {
   const S = bilCtx.S || { n: 0, ca: 0, ben: 0, marge: 0, panier: 0, delai: 0 }, A = app.P.filter(p => avail(p) && bilOk(p)), td = today(), td0 = addDays(td, -30);
-  if (k === 'm' || k === 'a') {
+  if (k === 'g' || k === 'm' || k === 'a') {
     const W = windows(), c = mtr(soldIn(W.from, W.to)), p = mtr(soldIn(W.pf, W.pt));
+    if (k === 'g') {
+      const m0 = today().slice(0, 7), d0 = new Date(); d0.setDate(1); d0.setMonth(d0.getMonth() - 1);
+      const sc = scoreOf(app.P, m0), sp = scoreOf(app.P, d0.getFullYear() + '-' + String(d0.getMonth() + 1).padStart(2, '0'));
+      return [
+        [eurR(S.ben), t('bénéfice net'), '', arrow(c.ben, p.ben, true)],
+        [eurR(S.ca), t('chiffre d\'affaires'), '', arrow(c.ca, p.ca, true)],
+        [Math.round(S.marge * 100) + ' %', t('de marge'), '', arrow(c.marge, p.marge, true, true)],
+        [S.n, t(S.n > 1 ? 'ventes' : 'vente'), '', arrow(c.n, p.n, true)],
+        [A.length, t('pièces en stock'), '', arrow(stockAt(td).length, stockAt(td0).length, true)],
+        [sc.n ? sc.total + ' / 100' : '—', t('score du mois'), '', sc.n && sp.n ? arrow(sc.total, sp.total, true, true) : arrow()]];
+    }
     if (k === 'm') {
       const dep = (app.DEP || []).filter(d => ok(d.date) && (!bilCtx.from || d.date >= bilCtx.from) && (!bilRange().to || d.date <= bilRange().to)).reduce((a, d) => a + (d.montant || 0), 0), tr = tresoData();
       return [
@@ -92,8 +116,11 @@ export function tilesOf(k) {
 }
 const tilesHTML = k => `<div class="btiles bt-${k}">${tilesOf(k).map(([v, l, tool, ar]) => `<${tool ? 'button type="button"' : 'div'} class="bkt"${tool ? ` data-tool="${tool}"` : ''}>${ar}<b>${v}</b><span>${l}</span></${tool ? 'button' : 'div'}>`).join('')}</div>`;
 
-function barHTML() {
-  return `<div class="dsa btabs" role="tablist" aria-label="${t('Bilan')}">${TABS.map(([k, l]) => `<button type="button" role="tab" class="chip${k === tab ? ' on' : ''}" aria-selected="${k === tab}" data-bt="${k}">${t(l)}</button>`).join('')}</div>`;
+/** Onglets visibles : « Ma journée » n'existe que si la carte du jour est là. */
+const shownTabs = box => TABS.filter(([k]) => k !== 'j' || box.querySelector('.tdy, .ap'));
+/** La barre d'onglets, tout en haut du Bilan à la place des filtres. */
+function barHTML(shown) {
+  return `<div class="bt5 btabs" role="tablist" aria-label="${t('Bilan')}">${shown.map(([k, l]) => `<button type="button" role="tab" class="chip${k === tab ? ' on' : ''}" aria-selected="${k === tab}" data-bt="${k}">${t(l)}</button>`).join('')}</div>`;
 }
 
 const renderDash0 = app.renderDash;
@@ -116,7 +143,8 @@ app.renderDash = function () {
   const items = kids(box);
   /* rien à classer, ou bilan réduit du mode simple : pas d'onglets */
   if (!items.length || items.every(el => el.style.display === 'none')) { delete box.dataset.bt; return; }
-  items.forEach(el => { el.classList.remove('bt-m', 'bt-a', 'bt-s'); el.classList.add('bt-' + tabOf(el)); });
+  /* chaque élément du Bilan va dans un seul onglet (les cartes fixes aussi : Ma journée, Général) */
+  [...box.children].filter(el => !el.matches('.btiles, .bchips, .empty, button.btn')).forEach(el => { TAB_IDS.forEach(k => el.classList.remove('bt-' + k)); el.classList.add('bt-' + tabOf(el)); });
   /* les anciennes cartes d'indicateurs sont remplacées par les 6 tuiles de l'onglet */
   items.filter(el => el.matches('button.minic, .kpis')).forEach(el => el.remove());
   const rest = kids(box), cards = rest.filter(el => el.classList.contains('card') && el.style.display !== 'none');
@@ -128,19 +156,22 @@ app.renderDash = function () {
     L.forEach(el => { el.classList.add('bsel0'); el.classList.remove('shut'); el.classList.toggle('bnot', el !== cur); el.classList.toggle('bsel', el === cur); el.dataset.bk = keyOf(el); });
     return L.length > 1 ? `<div class="bchips bt-${k}" role="tablist">${L.map(el => `<button type="button" role="tab" class="chip sm${el === cur ? ' on' : ''}" aria-selected="${el === cur}" data-bp="${k}" data-bk="${keyOf(el).replace(/"/g, '&quot;')}">${labelOf(el)}</button>`).join('')}</div>` : '';
   }).join('');
-  const head = barHTML() + TABS.map(([k]) => tilesHTML(k)).join('') + chips;
+  const head = ['g', 'm', 'a', 's'].map(tilesHTML).join('') + chips;
   if (rest[0]) rest[0].insertAdjacentHTML('beforebegin', head); else box.insertAdjacentHTML('beforeend', head);
+  /* les onglets prennent la place des filtres, qui passent dans une ligne juste dessous */
+  const shown = shownTabs(box), per = $('per'); if (!shown.some(x => x[0] === tab)) tab = 'g';
+  if (per) { per.innerHTML = barHTML(shown) + '<div class="bflt">' + per.innerHTML + '</div>'; per.dataset.bt = tab; const on = per.querySelector('.btabs .chip.on'); if (on && typeof on.scrollIntoView === 'function') on.scrollIntoView({ inline: 'center', block: 'nearest' }); }
   box.dataset.bt = tab;
 };
 
+/** Change d'onglet sans redessiner le Bilan. */
+function setTab(k) {
+  const box = $('dsh'), per = $('per'); tab = k; LSs('bilTab', tab); box.dataset.bt = tab; if (per) per.dataset.bt = tab;
+  document.querySelectorAll('#per .btabs .chip').forEach(c => { const on = c.dataset.bt === tab; c.classList.toggle('on', on); c.setAttribute('aria-selected', String(on)); if (on && typeof c.scrollIntoView === 'function') c.scrollIntoView({ inline: 'center', block: 'nearest' }); });
+}
+$('per').addEventListener('click', e => { const b = e.target.closest('.btabs [data-bt]'); if (b) setTab(b.dataset.bt); });
 $('dsh').addEventListener('click', e => {
-  const box = $('dsh'), b = e.target.closest('[data-bt]');
-  if (b && b.classList.contains('chip')) {
-    tab = b.dataset.bt; LSs('bilTab', tab);
-    box.dataset.bt = tab;
-    box.querySelectorAll('.btabs .chip').forEach(c => { const on = c.dataset.bt === tab; c.classList.toggle('on', on); c.setAttribute('aria-selected', String(on)); });
-    return;
-  }
+  const box = $('dsh');
   const p = e.target.closest('[data-bp]');
   if (p) {
     const k = p.dataset.bp, key = p.dataset.bk;
