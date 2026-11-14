@@ -68,3 +68,18 @@ describe('Bilan : les filtres valent pour tous les indicateurs et graphiques', (
 import fs from 'node:fs';
 import path from 'node:path';
 const require_src = () => fs.readFileSync(path.resolve(process.cwd(), 'src/modules/dashboard.js'), 'utf8');
+
+describe('Bilan : choisir un filtre garde la nouvelle présentation', () => {
+  it('après un filtre, les onglets, les indicateurs et les vignettes sont toujours là', () => {
+    app.renderDash();
+    document.querySelector('#per [data-badv]').click();
+    const puce = [...document.querySelectorAll('#shc [data-fg="cat"]')][0]; expect(puce).toBeTruthy();
+    puce.click();
+    expect(document.querySelector('#per .btabs')).toBeTruthy();
+    expect(document.querySelector('#per .bflt')).toBeTruthy();
+    expect(document.getElementById('dsh').dataset.bt).toBeTruthy();
+    expect(document.querySelectorAll('#dsh .btiles .bkt').length).toBeGreaterThanOrEqual(24);
+    expect(document.querySelectorAll('#dsh .bgrid > .card.bgr').length).toBeGreaterThan(5);
+    expect(document.querySelector('#dsh .bsum')).toBeTruthy();
+  });
+});
