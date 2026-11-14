@@ -1,10 +1,10 @@
 import { app } from '../state.js';
 import { $, LSg, LSs, addDays, avail, days, dj, esc, eur, eurR, ok, pad, profit, sold, title, today } from './core.js';
-import { bilOk, group, hbars, stats } from './dashboard.js';
+import { bilCtx, bilOk, group, hbars, stats } from './dashboard.js';
 import { MOIS } from './gamification.js';
 import { sheetHead, showSheet } from './tools-index.js';
 import { closeSheet } from './piece-sheet.js';
-import { analyse, barsHTML, card, dim, markSeen, pct, prevM, scoreLabel, sg, soldIn, sum } from './bilan-extra.js';
+import { analyse, barsHTML, card, dim, lineSVG, mShort, markSeen, monthsBack, pct, prevM, scoreLabel, scoreOf, sg, soldIn, sum } from './bilan-extra.js';
 
 /* ---------- Bilan : comparer deux périodes, saisonnalité, objectifs par indicateur, résumé, rappel du rapport, analyse de chaque ballot ---------- */
 
@@ -99,9 +99,17 @@ export function summarySentence() {
   const late = objState().find(x => x.s === 'late'); if (late) s += ' ' + t('Objectif en retard : {o}.', { o: late.l });
   return s;
 }
+/* palette de l'onglet Général : rose poudré et prune, sur fond clair */
+const G = { ink: '#3B1F2B', mute: '#8C6B77', line: '#F1D5DF', track: '#EBD3DC', accent: '#C2456B' };
+const lvColor = v => (v >= 80 ? '#2E9E6B' : v >= 60 ? G.accent : v >= 40 ? '#D98A2B' : '#C4443F');
+/** Score du mois en grand : anneau, mention, détail des 4 critères ; le résumé en une phrase passe en dessous, discret. */
 function sumCard() {
-  const m = today().slice(0, 7), sc = analyse(m).score;
-  return `<div class="card bsum"><p style="margin:0 0 8px;font-size:16px;line-height:1.4;font-weight:700">${esc(summarySentence())}</p><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${sc.n ? `<span style="font-size:13px;color:var(--mute)">${t('Score du mois')} <b style="color:var(--ink)">${sc.total}/100</b> · ${t(scoreLabel(sc.total))}</span>` : ''}<button type="button" class="btn sm sec" data-mrep="1" style="width:auto;margin-left:auto">${t('Voir le rapport')}</button></div></div>`;
+  const m = today().slice(0, 7), sc = analyse(m).score, c = lvColor(sc.total), R = 54, L = 2 * Math.PI * R;
+  const ringSvg = `<svg viewBox="0 0 132 132" width="132" height="132" role="img" aria-label="${esc(t('Score du mois'))} ${sc.total} / 100" style="display:block;flex:none"><circle cx="66" cy="66" r="${R}" fill="none" stroke="${G.track}" stroke-width="12"/><circle cx="66" cy="66" r="${R}" fill="none" stroke="${c}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${(L * Math.max(0.01, sc.total / 100)).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 66 66)"/><text x="66" y="76" text-anchor="middle" style="font-size:44px;font-weight:800;fill:${G.ink};font-variant-numeric:tabular-nums">${sc.n ? sc.total : '—'}</text><text x="66" y="98" text-anchor="middle" style="font-size:13px;fill:${G.mute}">/ 100</text></svg>`;
+  const bars = sc.parts.map(p => `<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:5px 0;color:${G.ink}"><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t(p.k)}</span><span style="width:60px;height:7px;background:${G.track};border-radius:4px;overflow:hidden;flex:none"><i style="display:block;height:100%;width:${sc.n ? p.pts / p.max * 100 : 0}%;background:${c}"></i></span><b style="width:36px;text-align:right;font-variant-numeric:tabular-nums">${sc.n ? p.pts + '/' + p.max : '—'}</b></div>`).join('');
+  return `<div class="card bsum" style="background:linear-gradient(135deg,#FFF7F9,#FBEAF0);border:1px solid ${G.line};border-radius:26px;padding:18px;color:${G.ink}">
+  <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="margin:0 auto">${ringSvg}</div><div style="flex:1;min-width:170px"><div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:${G.mute};font-weight:700">${t('Score du mois')}</div><div style="display:inline-block;margin:4px 0 6px;padding:3px 12px;border-radius:999px;background:${c};color:#fff;font-size:15px;font-weight:800">${sc.n ? t(scoreLabel(sc.total)) : t('À redresser')}</div>${bars}</div></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid ${G.line}"><p style="margin:0;flex:1;font-size:13px;line-height:1.4;color:${G.mute}">${esc(summarySentence())}</p><button type="button" class="chip sm" data-mrep="1" style="flex:none;background:#fff;border-color:${G.line};color:${G.accent};font-weight:700">${t('Voir le rapport')} ›</button></div></div>`;
 }
 export function noteMonth() {
   const td = today(), pm = prevM(td.slice(0, 7));
@@ -140,10 +148,39 @@ export function openBallot(name) {
 }
 app.openBallot = openBallot;
 
+/* ===== graphiques de l'onglet Général : score, plateformes, objectifs ===== */
+function scoreHistCard() {
+  const ms = monthsBack(6), sc = ms.map(m => scoreOf(app.P, m)), vals = sc.map(s => (s.n ? s.total : null)), sub = t('Score sur 100, mois par mois');
+  if (!vals.some(v => v != null)) return card('Évolution du score', sub, `<div class="hint">${t('Pas encore de données.')}</div>`);
+  const best = vals.reduce((b, v, i) => (v != null && (b < 0 || v > vals[b]) ? i : b), -1);
+  return card('Évolution du score', sub, lineSVG([{ v: vals, c: G.accent, dots: true }], ms.map(m => mShort(m)), v => String(Math.round(v)), t('Évolution du score')) + `<div class="hint">${t('Meilleur mois : {m}, {s} / 100.', { m: MOIS[+ms[best].slice(5, 7) - 1], s: vals[best] })}</div>`);
+}
+const PFCOL = ['#C2456B', '#2F6FDE', '#1D9E75', '#E07B12', '#7B5CD6', '#9AA0A6'];
+function pfRingCard() {
+  const L = bilCtx.inP || [], sub = t('Chiffre d\'affaires {l}', { l: bilCtx.lbl || '' }), g = {};
+  L.forEach(x => { const k = x.canal || 'Vinted'; g[k] = (g[k] || 0) + (x.pv || 0); });
+  const rows = Object.entries(g).sort((a, b) => b[1] - a[1]), tot = sum(rows, r => r[1]);
+  if (!tot) return card('Chiffre d\'affaires par plateforme', sub, `<div class="hint">${t('Pas encore de données.')}</div>`);
+  const R = 42, C = 2 * Math.PI * R; let off = 0;
+  const arcs = rows.map(([k, v], i) => { const len = v / tot * C, s = `<circle cx="60" cy="60" r="${R}" fill="none" stroke="${PFCOL[i % PFCOL.length]}" stroke-width="16" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 60 60)"/>`; off += len; return s; }).join('');
+  const donut = `<svg viewBox="0 0 120 120" width="150" height="150" role="img" aria-label="${esc(t('Chiffre d\'affaires par plateforme'))}" style="display:block;flex:none;margin:0 auto"><circle cx="60" cy="60" r="${R}" fill="none" stroke="${G.track}" stroke-width="16"/>${arcs}<text x="60" y="64" text-anchor="middle" style="font-size:15px;font-weight:800;fill:${G.ink}">${eurR(tot)}</text></svg>`;
+  const leg = rows.map(([k, v], i) => `<div style="display:flex;align-items:center;gap:8px;font-size:14px;margin:4px 0"><i style="width:10px;height:10px;border-radius:50%;background:${PFCOL[i % PFCOL.length]};flex:none"></i><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(tv(k))}</span><b style="font-variant-numeric:tabular-nums">${eurR(v)}</b><span style="width:38px;text-align:right;color:var(--mute)">${Math.round(v / tot * 100)} %</span></div>`).join('');
+  return card('Chiffre d\'affaires par plateforme', sub, `<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">${donut}<div style="flex:1;min-width:170px">${leg}</div></div>`);
+}
+function objHistCard() {
+  const o = app.cfg.objx || {}, ms = monthsBack(6), sub = t('Les objectifs détaillés, atteints ou non');
+  const defs = [['ventes', t('Ventes du mois'), st => st.n >= +o.ventes], ['marge', t('Marge du mois'), st => st.n >= 3 && st.marge * 100 >= +o.marge], ['delai', t('Délai avant la vente'), st => st.n >= 3 && st.delai <= +o.delai]].filter(d => +o[d[0]] > 0);
+  if (!defs.length) return card('Objectifs mois par mois', sub, `<div class="hint">${t('Fixe un objectif de ventes, de marge ou de délai de vente : le Bilan te dit si tu es dans le rythme.')}</div><button type="button" class="btn sm sec" data-obj="1" style="margin-top:8px">${t('Fixer mes objectifs')}</button>`);
+  const stM = ms.map(m => stats(soldIn(app.P, m)));
+  let ok0 = 0, all = 0;
+  const rows = defs.map(([k, l, f]) => `<tr><td style="padding:6px 8px 6px 0;font-size:13px">${esc(l)}</td>${stM.map(st => { if (!st.n) return `<td style="text-align:center;color:var(--mute)">·</td>`; const g = f(st); all++; if (g) ok0++; return `<td style="text-align:center;font-weight:800;color:${g ? '#1D9E75' : '#E24B4A'}">${g ? '✓' : '✗'}</td>`; }).join('')}</tr>`).join('');
+  return card('Objectifs mois par mois', sub, `<table style="width:100%;border-collapse:collapse"><tr><td></td>${ms.map(m => `<td style="text-align:center;font-size:11px;color:var(--mute)">${esc(mShort(m))}</td>`).join('')}</tr>${rows}</table><div class="hint" style="margin-top:6px">${all ? t('{a} objectifs atteints sur {b} suivis.', { a: ok0, b: all }) : t('Pas encore de données.')}</div>`);
+}
+
 /* ===== branchement dans le Bilan ===== */
 const safe = f => () => { try { return f(); } catch (e) { return ''; } };
 const charts0 = app.bilanChartsHTML, month0 = app.bilanMonthHTML;
-app.bilanChartsHTML = () => (charts0 ? charts0() : '') + safe(compareCard)() + safe(seasonCard)();
+app.bilanChartsHTML = () => (charts0 ? charts0() : '') + safe(scoreHistCard)() + safe(pfRingCard)() + safe(objHistCard)() + safe(compareCard)() + safe(seasonCard)();
 app.bilanMonthHTML = () => (month0 ? month0() : '') + safe(objCard)() + safe(sumCard)() + safe(noteCard)();
 $('dsh').addEventListener('click', e => {
   if (e.target.closest('[data-obj]')) return openObjectifs();
@@ -256,6 +293,76 @@ if (typeof window !== 'undefined' && window.K) {
   K("Voir le rapport", "See the report", "Vedi il rapporto", "Ver el informe", "Bericht ansehen");
   K("Y aller", "Go", "Vai", "Ir", "Hingehen");
   K("Analyse détaillée", "Detailed analysis", "Analisi dettagliata", "Análisis detallado", "Detaillierte Analyse");
+  K("Argent disponible estimé, avec les ventes encaissées et les dépenses.", "Estimated cash available, from sales collected and expenses.", "Denaro disponibile stimato, con le vendite incassate e le spese.", "Dinero disponible estimado, con las ventas cobradas y los gastos.", "Geschätztes verfügbares Geld, aus eingenommenen Verkäufen und Ausgaben.");
+  K("bénéfice du mois avec le stock", "month profit with stock", "utile del mese con lo stock", "beneficio del mes con el stock", "Monatsgewinn inkl. Bestand");
+  K("Bénéfice moyen gagné sur chaque pièce vendue.", "Average profit made on each item sold.", "Utile medio su ogni capo venduto.", "Beneficio medio obtenido en cada prenda vendida.", "Durchschnittlicher Gewinn pro verkauftem Teil.");
+  K("Bénéfice sur les pièces vendues sur la période choisie : prix de vente moins prix d'achat et frais.", "Profit on items sold over the chosen period: selling price minus purchase price and fees.", "Utile sui capi venduti nel periodo scelto: prezzo di vendita meno prezzo d'acquisto e commissioni.", "Beneficio de las prendas vendidas en el periodo elegido: precio de venta menos precio de compra y gastos.", "Gewinn auf verkaufte Teile im gewählten Zeitraum: Verkaufspreis minus Einkaufspreis und Gebühren.");
+  K("Comment c'est calculé", "How it is calculated", "Come si calcola", "Cómo se calcula", "So wird es berechnet");
+  K("Comment il se compose", "What it is made of", "Come si compone", "De qué se compone", "Woraus es besteht");
+  K("Dépenses hors pièces : carburant, matériel, abonnements.", "Expenses outside items: fuel, equipment, subscriptions.", "Spese fuori dai capi: carburante, materiale, abbonamenti.", "Gastos ajenos a las prendas: combustible, material, suscripciones.", "Ausgaben außerhalb der Teile: Kraftstoff, Material, Abos.");
+  K("face à la période d'avant", "versus the previous period", "rispetto al periodo precedente", "frente al periodo anterior", "gegenüber dem Vorzeitraum");
+  K("Fiches auxquelles il manque des informations.", "Listings with missing information.", "Schede a cui mancano delle informazioni.", "Fichas a las que les falta información.", "Einträge mit fehlenden Informationen.");
+  K("Jours de suite où tu as publié au moins une pièce.", "Days in a row on which you published at least one item.", "Giorni di fila in cui hai pubblicato almeno un capo.", "Días seguidos en los que has publicado al menos una prenda.", "Tage in Folge, an denen du mindestens ein Teil veröffentlicht hast.");
+  K("Les 6 derniers mois", "The last 6 months", "Gli ultimi 6 mesi", "Los últimos 6 meses", "Die letzten 6 Monate");
+  K("Montant moyen d'une vente.", "Average amount of a sale.", "Importo medio di una vendita.", "Importe medio de una venta.", "Durchschnittlicher Betrag eines Verkaufs.");
+  K("Nombre de pièces vendues sur la période choisie.", "Number of items sold over the chosen period.", "Numero di capi venduti nel periodo scelto.", "Número de prendas vendidas en el periodo elegido.", "Anzahl verkaufter Teile im gewählten Zeitraum.");
+  K("Nombre de pièces vendues.", "Number of items sold.", "Numero di capi venduti.", "Número de prendas vendidas.", "Anzahl verkaufter Teile.");
+  K("Part des pièces entrées en stock qui ont été vendues.", "Share of items that entered stock and have been sold.", "Quota dei capi entrati in stock che sono stati venduti.", "Parte de las prendas entradas en stock que se han vendido.", "Anteil der eingelagerten Teile, die verkauft wurden.");
+  K("Part du chiffre d'affaires qui reste en bénéfice.", "Share of revenue that remains as profit.", "Quota del fatturato che resta come utile.", "Parte de la facturación que queda como beneficio.", "Anteil des Umsatzes, der als Gewinn bleibt.");
+  K("Pièces à vendre en stock.", "Items for sale in stock.", "Capi da vendere in stock.", "Prendas por vender en stock.", "Zu verkaufende Teile im Bestand.");
+  K("Pièces actuellement en ligne.", "Items currently online.", "Capi attualmente online.", "Prendas actualmente en línea.", "Aktuell online befindliche Teile.");
+  K("Pièces en ligne depuis 30 jours ou plus : à baisser ou relancer.", "Items online for 30 days or more: to lower in price or bump.", "Capi online da 30 giorni o più: da ribassare o rilanciare.", "Prendas en línea desde hace 30 días o más: para bajar de precio o reactivar.", "Seit 30 Tagen oder länger online: Preis senken oder neu hochbringen.");
+  K("Pièces en stock pas encore publiées.", "Items in stock not published yet.", "Capi in stock non ancora pubblicati.", "Prendas en stock sin publicar.", "Noch nicht veröffentlichte Teile im Bestand.");
+  K("Prix d'achat des pièces en stock : l'argent qui dort.", "Purchase price of items in stock: the money that sleeps.", "Prezzo d'acquisto dei capi in stock: il denaro che dorme.", "Precio de compra de las prendas en stock: el dinero que duerme.", "Einkaufspreis der Teile im Bestand: das schlafende Geld.");
+  K("Stock ajouté ce mois-ci", "Stock added this month", "Stock aggiunto questo mese", "Stock añadido este mes", "Diesen Monat hinzugefügter Bestand");
+  K("Temps moyen entre la mise en ligne (ou l'entrée) et la vente.", "Average time between going online (or entering stock) and the sale.", "Tempo medio tra la pubblicazione (o l'ingresso) e la vendita.", "Tiempo medio entre la publicación (o la entrada) y la venta.", "Durchschnittliche Zeit zwischen Veröffentlichung (oder Eingang) und Verkauf.");
+  K("Temps moyen passé en stock par les pièces à vendre.", "Average time spent in stock by the items for sale.", "Tempo medio trascorso in stock dai capi da vendere.", "Tiempo medio en stock de las prendas por vender.", "Durchschnittliche Zeit im Bestand der zu verkaufenden Teile.");
+  K("Total encaissé sur les ventes de la période choisie.", "Total collected on sales over the chosen period.", "Totale incassato sulle vendite del periodo scelto.", "Total cobrado en las ventas del periodo elegido.", "Gesamteinnahmen aus Verkäufen im gewählten Zeitraum.");
+  K("Total encaissé sur les ventes.", "Total collected on sales.", "Totale incassato sulle vendite.", "Total cobrado en las ventas.", "Gesamteinnahmen aus Verkäufen.");
+  K("Ventes dont le colis n'est pas encore préparé ou expédié.", "Sales whose parcel is not yet prepared or shipped.", "Vendite il cui pacco non è ancora preparato o spedito.", "Ventas cuyo paquete aún no está preparado o enviado.", "Verkäufe, deren Paket noch nicht vorbereitet oder versendet ist.");
+  K("Ventes du mois moins les frais, moins le prix d'achat de tout le stock ajouté ce mois-ci, vendu ou non.", "This month's sales minus fees, minus the purchase price of all the stock added this month, sold or not.", "Vendite del mese meno le commissioni, meno il prezzo d'acquisto di tutto lo stock aggiunto questo mese, venduto o no.", "Ventas del mes menos los gastos, menos el precio de compra de todo el stock añadido este mes, vendido o no.", "Verkäufe des Monats minus Gebühren, minus Einkaufspreis des gesamten diesen Monat hinzugefügten Bestands, verkauft oder nicht.");
+  K("Ventes encaissées", "Sales collected", "Vendite incassate", "Ventas cobradas", "Eingenommene Verkäufe");
+  K("{a} objectifs atteints sur {b} suivis.", "{a} goals reached out of {b} tracked.", "{a} obiettivi raggiunti su {b} seguiti.", "{a} objetivos alcanzados de {b} seguidos.", "{a} Ziele von {b} verfolgten erreicht.");
+  K("{n} mois", "{n} months", "{n} mesi", "{n} meses", "{n} Monate");
+  K("{n} vente ce jour-là", "{n} sale that day", "{n} vendita quel giorno", "{n} venta ese día", "{n} Verkauf an diesem Tag");
+  K("{n} ventes ce jour-là", "{n} sales that day", "{n} vendite quel giorno", "{n} ventas ese día", "{n} Verkäufe an diesem Tag");
+  K("{p} % du stock", "{p} % of the stock", "{p} % dello stock", "{p} % del stock", "{p} % des Bestands");
+  K("catégorie dominante", "main category", "categoria dominante", "categoría dominante", "Hauptkategorie");
+  K("Catégorie qui représente la plus grande part de ton stock.", "Category that makes up the biggest share of your stock.", "Categoria che rappresenta la quota maggiore del tuo stock.", "Categoría que representa la mayor parte de tu stock.", "Kategorie mit dem größten Anteil an deinem Bestand.");
+  K("Chiffre d'affaires {l}", "Revenue {l}", "Fatturato {l}", "Facturación {l}", "Umsatz {l}");
+  K("Chiffre d'affaires par plateforme", "Revenue by platform", "Fatturato per piattaforma", "Facturación por plataforma", "Umsatz pro Plattform");
+  K("Cotisations sociales estimées : chiffre d'affaires multiplié par le taux des réglages. Estimation, à faire valider.", "Estimated social contributions: revenue multiplied by the rate in the settings. An estimate, to be checked.", "Contributi sociali stimati: fatturato moltiplicato per l'aliquota delle impostazioni. Stima da far verificare.", "Cotizaciones sociales estimadas: facturación multiplicada por el tipo de los ajustes. Estimación, a validar.", "Geschätzte Sozialabgaben: Umsatz mal Satz aus den Einstellungen. Schätzung, bitte prüfen lassen.");
+  K("d'âge moyen", "average age", "di età media", "de edad media", "Durchschnittsalter");
+  K("de cotisations estimées", "estimated contributions", "di contributi stimati", "de cotizaciones estimadas", "geschätzte Abgaben");
+  K("de croissance du CA", "revenue growth", "di crescita del fatturato", "de crecimiento de la facturación", "Umsatzwachstum");
+  K("de frais de vente", "in selling fees", "di commissioni di vendita", "de gastos de venta", "Verkaufsgebühren");
+  K("de frais sur le CA", "of fees on revenue", "di commissioni sul fatturato", "de gastos sobre la facturación", "Gebühren am Umsatz");
+  K("de stock net ce mois-ci", "net stock this month", "di stock netto questo mese", "de stock neto este mes", "Nettobestand diesen Monat");
+  K("de stock restant", "of stock left", "di stock rimasto", "de stock restante", "Restbestand");
+  K("de valeur d'achat du stock", "purchase value of stock", "di valore d'acquisto dello stock", "de valor de compra del stock", "Einkaufswert des Bestands");
+  K("d'écoulement", "sell-through", "di smaltimento", "de salida", "Abverkauf");
+  K("en ligne depuis 60 jours et plus", "online for 60 days or more", "online da 60 giorni e oltre", "en línea desde hace 60 días o más", "seit 60 Tagen oder länger online");
+  K("Évolution du chiffre d'affaires face à la période d'avant.", "Change in revenue versus the previous period.", "Variazione del fatturato rispetto al periodo precedente.", "Evolución de la facturación frente al periodo anterior.", "Veränderung des Umsatzes gegenüber dem Vorzeitraum.");
+  K("Évolution du score", "Score over time", "Andamento del punteggio", "Evolución de la puntuación", "Entwicklung der Bewertung");
+  K("Jour de la semaine où tu vends le plus de pièces sur la période.", "Day of the week on which you sell the most items over the period.", "Giorno della settimana in cui vendi più capi nel periodo.", "Día de la semana en el que vendes más prendas en el periodo.", "Wochentag, an dem du im Zeitraum die meisten Teile verkaufst.");
+  K("jour de vente le plus fort", "strongest selling day", "giorno di vendita più forte", "día de venta más fuerte", "stärkster Verkaufstag");
+  K("Les objectifs détaillés, atteints ou non", "The detailed goals, reached or not", "Gli obiettivi dettagliati, raggiunti o no", "Los objetivos detallados, alcanzados o no", "Die detaillierten Ziele, erreicht oder nicht");
+  K("Meilleur mois : {m}, {s} / 100.", "Best month: {m}, {s} / 100.", "Mese migliore: {m}, {s} / 100.", "Mejor mes: {m}, {s} / 100.", "Bester Monat: {m}, {s} / 100.");
+  K("Montants remboursés à tes acheteurs sur la période.", "Amounts refunded to your buyers over the period.", "Importi rimborsati ai tuoi acquirenti nel periodo.", "Importes reembolsados a tus compradores en el periodo.", "An deine Käufer im Zeitraum erstattete Beträge.");
+  K("Nombre de mois qu'il faudrait pour écouler le stock au rythme de vente des 3 derniers mois.", "Number of months needed to sell the stock at the sales pace of the last 3 months.", "Numero di mesi necessari per smaltire lo stock al ritmo di vendita degli ultimi 3 mesi.", "Número de meses necesarios para vender el stock al ritmo de ventas de los últimos 3 meses.", "Anzahl Monate, die der Bestand im Verkaufstempo der letzten 3 Monate zum Verkauf braucht.");
+  K("Objectifs mois par mois", "Goals month by month", "Obiettivi mese per mese", "Objetivos mes a mes", "Ziele Monat für Monat");
+  K("Par jour de la semaine", "By day of the week", "Per giorno della settimana", "Por día de la semana", "Nach Wochentag");
+  K("Par motif", "By reason", "Per motivo", "Por motivo", "Nach Grund");
+  K("Part des ventes réalisées dans les 7 jours qui suivent la mise en ligne.", "Share of sales made within 7 days of going online.", "Quota delle vendite realizzate entro 7 giorni dalla pubblicazione.", "Parte de las ventas realizadas en los 7 días siguientes a la publicación.", "Anteil der Verkäufe innerhalb von 7 Tagen nach der Veröffentlichung.");
+  K("Part du chiffre d'affaires absorbée par les frais de vente.", "Share of revenue absorbed by selling fees.", "Quota del fatturato assorbita dalle commissioni di vendita.", "Parte de la facturación absorbida por los gastos de venta.", "Anteil des Umsatzes, der von Verkaufsgebühren aufgezehrt wird.");
+  K("Pièces ajoutées moins pièces vendues sur le mois : positif, ton stock grossit.", "Items added minus items sold over the month: positive means your stock is growing.", "Capi aggiunti meno capi venduti nel mese: positivo, il tuo stock cresce.", "Prendas añadidas menos prendas vendidas en el mes: positivo, tu stock crece.", "Hinzugefügte minus verkaufte Teile im Monat: positiv heißt, dein Bestand wächst.");
+  K("Pièces en ligne depuis 60 jours ou plus : à baisser ou retirer.", "Items online for 60 days or more: to lower in price or take down.", "Capi online da 60 giorni o più: da ribassare o ritirare.", "Prendas en línea desde hace 60 días o más: para bajar de precio o retirar.", "Seit 60 Tagen oder länger online: Preis senken oder abnehmen.");
+  K("plateforme n°1", "top platform", "piattaforma n°1", "plataforma n.º 1", "Plattform Nr. 1");
+  K("Plateforme qui réalise le plus de ventes, et sa part du total.", "Platform that makes the most sales, and its share of the total.", "Piattaforma che realizza più vendite e sua quota sul totale.", "Plataforma que realiza más ventas y su parte del total.", "Plattform mit den meisten Verkäufen und ihr Anteil am Gesamtwert.");
+  K("Score sur 100, mois par mois", "Score out of 100, month by month", "Punteggio su 100, mese per mese", "Puntuación sobre 100, mes a mes", "Bewertung von 100, Monat für Monat");
+  K("Total des frais retenus sur les ventes de la période choisie.", "Total fees deducted on sales over the chosen period.", "Totale delle commissioni trattenute sulle vendite del periodo scelto.", "Total de gastos retenidos en las ventas del periodo elegido.", "Gesamte auf Verkäufe im gewählten Zeitraum einbehaltene Gebühren.");
+  K("vendues en moins de 7 jours", "sold in under 7 days", "vendute in meno di 7 giorni", "vendidas en menos de 7 días", "in unter 7 Tagen verkauft");
+  K("Bénéfice classique", "Classic profit", "Utile classico", "Beneficio clásico", "Klassischer Gewinn");
   K("Finance", "Finance", "Finanza", "Finanzas", "Finanzen");
   K("Général", "General", "Generale", "General", "Allgemein");
   K("bénéfice net", "net profit", "utile netto", "beneficio neto", "Nettogewinn");

@@ -28,8 +28,8 @@ const wdName = i => new Date(2024, 0, 1 + i).toLocaleDateString(app.LOC, { weekd
 const wdOf = d => (new Date(d + 'T12:00:00').getDay() + 6) % 7;
 
 /* ---------- indicateur : bénéfice du mois en comptant tout le stock acheté ce mois-ci ---------- */
-export function monthProfit(L, m) {
-  const S = soldIn(L, m), st = stats(S), add = addedIn(L, m), cost = sum(add, x => x.achat);
+export function monthProfit(L, m, maxDay) {
+  const S = soldIn(L, m, maxDay), st = stats(S), add = addedIn(L, m, maxDay), cost = sum(add, x => x.achat);
   return { m, ca: st.ca, frais: st.fr, classic: st.ben, nSold: st.n, nAdded: add.length, cost, ben: st.ca - st.fr - cost, kept: add.filter(avail).length };
 }
 function monthCardHTML() {
