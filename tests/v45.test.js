@@ -23,12 +23,12 @@ describe('v45 : pastille colis sur Outils', () => {
 });
 
 describe('v45 : Bilan', () => {
-  it('le bénéfice net est juste au-dessus de la carte Objectifs, hors onglets', async () => {
+  it('le score est juste au-dessus de la carte Objectifs ; le bénéfice net sur 90 jours n\'est plus affiché en haut', async () => {
     app.setCfg({ goal: 800, goalMode: 'net', goalCA: 0 }, true);
     nav.go('dash'); app.renderDash(); await tick(30);
-    const box = $('dsh'), hero = box.querySelector('.hero');
-    expect(hero).not.toBeNull();
-    expect(hero.nextElementSibling.classList.contains('gcard')).toBe(true);
+    const box = $('dsh'), hero = box.querySelector('.hero'), sum = box.querySelector('.bsum');
+    expect(hero).not.toBeNull(); expect(hero.style.display).toBe('none');
+    expect(sum.nextElementSibling.classList.contains('gcard')).toBe(true);
     expect(hero.className).not.toMatch(/bt-[mas]/);
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
   });
@@ -67,8 +67,7 @@ describe('v45 : compte en sélection', () => {
   });
 });
 describe('v47 : onglets du Bilan', () => {
-  it('les graphiques sont de petites vignettes sur 3 colonnes : un toucher agrandit, le choix est gardé', async () => {
-    localStorage.removeItem('bilOpen');
+  it('les graphiques sont de petites vignettes sur 3 colonnes : un toucher les ouvre en plein écran', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);
     const box = $('dsh');
     for (const k of ['m', 'a', 's']) {
@@ -83,14 +82,21 @@ describe('v47 : onglets du Bilan', () => {
     const c = box.querySelectorAll('.bgrid.bt-m > .card.bgr')[1], key = c.dataset.bk;
     c.click();
     expect(c.classList.contains('open')).toBe(true);
-    expect(JSON.parse(localStorage.getItem('bilOpen'))).toContain(key);
+    /* plein écran : la feuille de style fixe la carte ouverte sur tout l'écran, avec sa croix */
+    const css = document.getElementById('bt5css').textContent;
+    expect(css).toMatch(/\.bgrid>\.card\.bgr\.open\{position:fixed;inset:0/);
+    expect(c.querySelector('.bgx')).not.toBeNull();
     /* un nouveau dessin garde le graphique ouvert */
     app.renderDash(); await tick(20);
     expect([...$('dsh').querySelectorAll('.bgrid.bt-m > .card.bgr.open')].map(x => x.dataset.bk)).toEqual([key]);
-    /* un toucher sur le titre le referme */
-    $('dsh').querySelector('.bgrid.bt-m > .card.bgr.open h3').click();
+    /* la croix le referme */
+    $('dsh').querySelector('.bgrid.bt-m > .card.bgr.open .bgx').click();
     expect($('dsh').querySelectorAll('.bgrid.bt-m > .card.bgr.open')).toHaveLength(0);
-    expect(JSON.parse(localStorage.getItem('bilOpen'))).not.toContain(key);
+    /* la touche Échap aussi */
+    $('dsh').querySelector('.bgrid.bt-m > .card.bgr').click();
+    expect($('dsh').querySelectorAll('.bgrid.bt-m > .card.bgr.open')).toHaveLength(1);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect($('dsh').querySelectorAll('.bgrid.bt-m > .card.bgr.open')).toHaveLength(0);
   });
   it('chaque onglet a sa couleur (classe de l\'onglet sur le Bilan)', async () => {
     nav.go('dash'); app.renderDash(); await tick(30);

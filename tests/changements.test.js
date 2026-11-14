@@ -93,13 +93,13 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     const card = h.closest('.card');
     const holder = [...card.children].find(el => el.contains(h));
     expect(holder.classList.contains('hd')).toBe(true);
-    /* les graphiques sont des vignettes : un toucher les agrandit, un toucher sur le titre les referme */
+    /* les graphiques sont des vignettes : un toucher les ouvre en plein écran, la croix les referme */
     expect(card.classList.contains('bgr')).toBe(true);
     expect(card.parentElement.matches('.bgrid.bt-a')).toBe(true);
     expect(card.classList.contains('open')).toBe(false);
     card.click();
     expect(card.classList.contains('open')).toBe(true);
-    h.click();
+    card.querySelector('.bgx').click();
     expect(card.classList.contains('open')).toBe(false);
   });
 
@@ -111,9 +111,9 @@ describe('Bilan : calendrier, trésorerie et bilan mensuel', () => {
     expect(c.auto).toBe(true);
     expect(Number.isFinite(c.now)).toBe(true);
     app.renderDash();
-    const tuile = document.querySelector('#dsh .btiles.bt-m [data-tool="treso"]');
+    const tuile = document.querySelector('#dsh .btiles.bt-m [data-tile="m-cotis"]');
     expect(tuile).toBeTruthy();
-    expect(tuile.textContent).toContain(t('trésorerie'));
+    expect(tuile.textContent).toContain(t('de cotisations estimées'));
   });
 
   it('avec un solde indiqué, le calcul repart de ce solde', async () => {

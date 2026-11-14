@@ -108,9 +108,10 @@ describe('v44 : Bilan en onglets', () => {
     const de = k => tous.filter(el => el.classList.contains('bt-' + k));
     ['j', 'g', 'm', 'a', 's'].forEach(k => expect(de(k).length, k).toBeGreaterThan(0));
     expect(de('j').every(el => el.matches('.tdy, .ap'))).toBe(true);
+    expect(box.querySelector('.gcard') ? box.querySelector('.gcard').classList.contains('bt-g') : true).toBe(true);
     expect(box.querySelector('.hero').classList.contains('bt-g')).toBe(true);
-    expect(box.querySelector('.btiles.bt-m [data-tool="treso"]')).not.toBeNull();
-    expect(box.querySelector('.btiles.bt-a [data-tool="trophees"]')).not.toBeNull();
+    expect(box.querySelector('.btiles.bt-m [data-tile="m-frais"]')).not.toBeNull();
+    expect(box.querySelector('.btiles.bt-a [data-tile="a-pf"]')).not.toBeNull();
     bar.querySelector('[data-bt="a"]').click();
     expect(box.dataset.bt).toBe('a');
     expect(bar.querySelector('[data-bt="a"]').classList.contains('on')).toBe(true);

@@ -80,9 +80,10 @@ describe('Bilan : objectifs par indicateur', () => {
 
 describe('Bilan : résumé en une phrase et rappel du rapport', () => {
   it('le résumé est en haut, avant le bénéfice net, et dit où en est le mois', () => {
-    app.renderDash(); const box = document.getElementById('dsh'), hero = box.querySelector('.hero'), sum = box.querySelector('.bsum');
-    expect(sum).toBeTruthy(); expect(hero.previousElementSibling.classList.contains('bsum') || hero.previousElementSibling.classList.contains('bnote') || true).toBe(true);
-    expect(sum.compareDocumentPosition(hero) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    app.setCfg({ goal: 800, goalMode: 'net', goalCA: 0 }, true); app.renderDash(); const box = document.getElementById('dsh'), goal = box.querySelector('.gcard'), sum = box.querySelector('.bsum');
+    expect(sum).toBeTruthy();
+    expect(sum.compareDocumentPosition(goal) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
     expect(sum.querySelector('[data-mrep]')).toBeTruthy(); expect(X.summarySentence().length).toBeGreaterThan(15);
     expect(X.summarySentence()).not.toMatch(/undefined|NaN|\{[a-z]\}/);
   });
@@ -181,11 +182,12 @@ function faireBallot() {
 }
 
 describe('Général : couleur de l\'onglet et objectifs mieux présentés', () => {
-  it('le fond noir devient la couleur de Général, pour le bénéfice net et l\'objectif', () => {
+  it('Général n\'a plus de fond noir : cadran clair rose poudré, texte prune', () => {
     app.renderDash();
     const css = document.getElementById('bt5css').textContent;
-    expect(css).toContain('#dsh[data-bt="g"]{--hero:#C9235F');
-    expect(css).toContain('#dsh[data-bt="g"] .gcard');
+    expect(css).toContain('#dsh[data-bt="g"] .gcard{background:linear-gradient(135deg,#FFF7F9,#FBEAF0);color:#3B1F2B');
+    expect(css).not.toContain('--hero:#C9235F');
+    expect(css).toContain('.gcard>.bobj');
   });
   it('chaque objectif détaillé a son anneau, sa valeur et son état', () => {
     app.setCfg({ objx: { ventes: 10, marge: 50, delai: 30 } }, true); app.renderDash();

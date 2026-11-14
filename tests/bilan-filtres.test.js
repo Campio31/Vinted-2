@@ -21,14 +21,15 @@ describe('Bilan : les filtres valent pour tous les indicateurs et graphiques', (
     D.bilSet({ cat: c });
     const A = enStock().filter(p => p.cat === c);
     expect(A.length).toBeLessThan(tout);
-    expect(tuile('s', 0)).toBe(A.length);
-    expect(tuile('s', 3)).toBe(A.filter(p => !p.pub).length);
+    /* valeur d'achat du stock et pièces en ligne depuis 60 jours et plus */
+    expect(String(tuile('s', 0)).replace(/\D/g, '')).toBe(new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.round(A.reduce((a, p) => a + (p.achat || 0), 0))).replace(/\D/g, ''));
+    expect(tuile('s', 5)).toBe(A.filter(p => p.pub && (Date.now() - Date.parse(p.pub)) / 864e5 >= 60).length);
   });
   it('onglet Activité : pièces vendues et pièces en ligne suivent le filtre', () => {
     const c = cats()[0]; D.bilSet({ cat: c });
     const F = app.P.filter(p => p.cat === c), sd = F.filter(p => p.statut === 'Vendu').length;
-    expect(tuile('a', 2)).toBe(Math.round(sd / F.length * 100) + ' %');
-    expect(tuile('a', 5)).toBe(F.filter(p => p.statut === 'Disponible' && p.pub).length);
+    expect(tuile('a', 1)).toBe(Math.round(sd / F.length * 100) + ' %');
+    expect(tuile('a', 0)).toBe(F.filter(p => p.statut === 'Disponible' && p.pub).length);
   });
   it('le tableau du Bilan : stock actuel, six mois, calendrier, retours et ballots filtrés', () => {
     const c = cats()[0], F = app.P.filter(p => p.cat === c);

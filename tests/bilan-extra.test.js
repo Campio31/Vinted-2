@@ -11,17 +11,25 @@ afterEach(() => { D.bilSet({ pf: '', cat: '', marque: '', prov: '', genre: '' })
 const secCard = k => document.querySelector(`#dsh h3[data-sec="${k}"]`)?.closest('.card');
 
 describe('Bilan : bénéfice net en haut, indicateur du mois, 6 graphiques par onglet', () => {
-  it('le bénéfice net de la période est au-dessus des objectifs, le bénéfice du mois juste après', () => {
+  it('le bénéfice sur 90 jours n\'est plus en haut ; le score est au-dessus d\'un seul cadran d\'objectifs', () => {
     app.setCfg({ goal: 800, goalMode: 'net', goalCA: 0 }, true); app.renderDash();
-    const box = document.getElementById('dsh'), hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), bmo = box.querySelector('.bmo');
-    expect(hero).toBeTruthy(); expect(goal).toBeTruthy(); expect(bmo).toBeTruthy();
-    /* le bénéfice du mois (stock acheté compris) vit dans la carte du bénéfice net */
-    expect(bmo.parentElement).toBe(hero); expect(bmo.classList.contains('card')).toBe(false);
-    /* seule la carte « Ma journée » peut rester au-dessus du bénéfice net */
-    let el = hero.previousElementSibling; while (el) { expect(el.matches('.ap, .tdy, .dsa, .bsum, .bnote')).toBe(true); el = el.previousElementSibling; }
-    expect(hero.nextElementSibling).toBe(goal);
-    expect(goal.nextElementSibling.classList.contains('bobj')).toBe(true);
+    const box = document.getElementById('dsh'), hero = box.querySelector('.hero'), goal = box.querySelector('.gcard'), bmo = box.querySelector('.bmo'), sum = box.querySelector('.bsum');
+    expect(goal).toBeTruthy(); expect(sum).toBeTruthy();
+    /* les anciennes cartes de bénéfice net et de bénéfice du mois sont masquées : ce sont maintenant des indicateurs */
+    expect(hero.style.display).toBe('none'); expect(bmo.style.display).toBe('none');
+    /* seules la carte « Ma journée », la barre de personnalisation et le rappel peuvent précéder le score */
+    let el = sum.previousElementSibling; while (el) { expect(el.matches('.ap, .tdy, .dsa, .bnote, .hero')).toBe(true); el = el.previousElementSibling; }
+    expect(sum.nextElementSibling).toBe(goal);
+    /* l'objectif du mois et les objectifs détaillés sont dans le même cadran */
+    expect(goal.querySelector(':scope > .bobj')).toBeTruthy();
     app.setCfg({ goal: 0, goalMode: 'net', goalCA: 0 }, true);
+  });
+  it('le score est présenté en grand, avec le résumé en dessous', () => {
+    app.renderDash(); const sum = document.querySelector('#dsh .bsum');
+    expect(sum.querySelector('svg')).toBeTruthy(); expect(sum.querySelector('svg text').textContent).toMatch(/^(\d+|—)$/);
+    expect(sum.querySelector('[data-mrep]')).toBeTruthy();
+    expect(sum.querySelectorAll('p')).toHaveLength(1);   /* une seule phrase, discrète */
+    expect(sum.style.background).toContain('gradient');
   });
   it('indicateur : ventes du mois − frais − prix d\'achat de tout le stock ajouté ce mois-ci', () => {
     const m = loc(), avant = E.monthProfit(app.P, m);
@@ -106,7 +114,9 @@ describe('Bilan : onglet Général', () => {
     expect(tuiles).toHaveLength(6);
     const S = D.bilCtx.S; expect(tuiles[0].querySelector('b').textContent.replace(/\D/g, '')).toBe(new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.round(S.ben)).replace(/\D/g, ''));
     expect(tuiles[3].querySelector('b').textContent).toBe(String(S.n));
-    expect(tuiles[5].querySelector('b').textContent).toMatch(/^(\d+ \/ 100|—)$/);
+    /* le dernier indicateur est le bénéfice du mois avec le stock ajouté (à la place du score) */
+    expect(tuiles[5].dataset.tile).toBe('g-benstock'); expect(tuiles[5].querySelector('span').textContent).toBe(t('bénéfice du mois avec le stock'));
+    expect(tuiles[5].querySelector('b').textContent.replace(/\D/g, '')).toBe(new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.round(E.monthProfit(app.P.filter(D.bilOk), loc()).ben)).replace(/\D/g, ''));
   });
   it('les filtres se trouvent sous les onglets et disparaissent dans « Ma journée »', () => {
     app.renderDash();
@@ -114,5 +124,77 @@ describe('Bilan : onglet Général', () => {
     expect(per.firstElementChild.classList.contains('btabs')).toBe(true);
     expect(per.querySelector('.bflt [data-p]')).toBeTruthy();
     expect(document.getElementById('bt5css').textContent).toContain('#per[data-bt="j"] .bflt{display:none}');
+  });
+});
+
+describe('Bilan : détail de chaque indicateur', () => {
+  it('un toucher sur un indicateur ouvre sa fiche : valeur, évolution, calcul', () => {
+    app.renderDash();
+    ['g', 'm', 'a', 's'].forEach(k => {
+      const tuiles = [...document.querySelectorAll(`#dsh .btiles.bt-${k} .bkt`)]; expect(tuiles, k).toHaveLength(6);
+      tuiles.forEach(b => {
+        expect(b.tagName).toBe('BUTTON'); expect(b.dataset.tile).toMatch(/^[gmas]-/);
+        b.click();
+        const s = document.getElementById('shc'); expect(s.textContent.toLowerCase(), b.dataset.tile).toContain(b.querySelector('span').textContent.toLowerCase());
+        expect(s.textContent, b.dataset.tile).toContain(b.querySelector('b').textContent.trim());
+        expect(s.querySelectorAll('.card').length, b.dataset.tile).toBeGreaterThanOrEqual(2);
+      });
+    });
+  });
+  it('le détail du bénéfice avec le stock donne sa composition et ouvre le rapport', () => {
+    app.renderDash(); document.querySelector('#dsh [data-tile="g-benstock"]').click();
+    const s = document.getElementById('shc'); expect(s.textContent).toContain(t('Stock ajouté ce mois-ci'));
+    expect(s.querySelector('.mo')).toBeTruthy(); s.querySelector('#tl_rep').click();
+    expect(document.getElementById('shc').querySelector('.rp')).toBeTruthy();
+  });
+  it('les indicateurs liés à un outil proposent de l\'ouvrir', () => {
+    app.renderDash(); document.querySelector('#dsh [data-tile="m-cotis"]').click();
+    expect(document.querySelector('#shc [data-tool="fisc"]')).toBeTruthy();
+  });
+  it('tous les textes des fiches sont traduits', () => {
+    I18N.miss.clear(); app.renderDash();
+    document.querySelectorAll('#dsh .btiles .bkt').forEach(b => b.click());
+    expect([...I18N.miss].filter(k => !/^[\d\s€%.,:+−-]+$/.test(k))).toEqual([]);
+  });
+});
+
+describe('Bilan : les indicateurs choisis', () => {
+  const ids = k => [...document.querySelectorAll(`#dsh .btiles.bt-${k} .bkt`)].map(b => b.dataset.tile);
+  it('chaque onglet a les 6 indicateurs demandés, dans l\'ordre', () => {
+    app.renderDash();
+    expect(ids('m')).toEqual(['m-frais', 'm-bpv', 'm-frp', 'm-cotis', 'm-croiss', 'm-retours']);
+    expect(ids('a')).toEqual(['a-online', 'a-ecoul', 'a-delai', 'a-pf', 'a-rapide', 'a-jour']);
+    expect(ids('s')).toEqual(['s-immo', 's-age', 's-mois', 's-net', 's-catdom', 's-60']);
+  });
+  it('les calculs : frais, frais sur le CA, plateforme n°1, jour fort, mois de stock, stock net', () => {
+    app.setCfg({ tauxSoc: 12 }, true); D.bilSet({ pf: '', cat: '', marque: '', prov: '', genre: '' }); app.period = 90; app.renderDash();
+    const S = D.bilCtx.S, val = id => document.querySelector(`#dsh [data-tile="${id}"] b`).textContent;
+    const nb = s => +String(s).replace(/[^\d.,-]/g, '').replace(',', '.');
+    expect(nb(val('m-frais'))).toBeCloseTo(Math.round(S.fr), 0);
+    expect(nb(val('m-frp'))).toBe(Math.round(S.fr / S.ca * 100));
+    expect(nb(val('m-cotis'))).toBeCloseTo(Math.round(S.ca * 0.12), 0);
+    const pf = {}; D.bilCtx.inP.forEach(x => { const k = x.canal || 'Vinted'; pf[k] = (pf[k] || 0) + 1; });
+    const top = Object.entries(pf).sort((a, b) => b[1] - a[1])[0];
+    expect(document.querySelector('#dsh [data-tile="a-pf"] span').textContent).toContain(String(Math.round(top[1] / D.bilCtx.inP.length * 100)));
+    expect(val('a-jour').length).toBeGreaterThan(2);
+    const A = app.P.filter(p => p.statut === 'Disponible'), cat = {}; A.forEach(x => { const c = x.cat || 'Non renseigné'; cat[c] = (cat[c] || 0) + 1; });
+    expect(document.querySelector('#dsh [data-tile="s-catdom"] span').textContent).toContain(String(Math.round(Math.max(...Object.values(cat)) / A.length * 100)));
+    expect(val('s-net')).toMatch(/^[+−]?\d+$/);
+  });
+  it('les fiches de détail donnent la répartition quand elle existe (plateforme, jour, catégorie)', () => {
+    app.renderDash();
+    ['a-pf', 'a-jour', 's-catdom'].forEach(id => { document.querySelector(`#dsh [data-tile="${id}"]`).click(); expect(document.getElementById('shc').querySelectorAll('.hb').length, id).toBeGreaterThan(0); });
+  });
+  it('3 graphiques dans Général : score, plateformes, objectifs mois par mois', () => {
+    app.renderDash(); const cards = [...document.querySelectorAll('#dsh .bgrid.bt-g > .card.bgr')].map(c => c.dataset.bk);
+    expect(cards).toEqual(['Évolution du score', 'Chiffre d\'affaires par plateforme', 'Objectifs mois par mois']);
+    const pf = document.querySelector('#dsh .bgrid.bt-g [data-bk="Chiffre d\'affaires par plateforme"]'); expect(pf.querySelector('svg circle')).toBeTruthy();
+    app.setCfg({ objx: { ventes: 1, marge: 10, delai: 90 } }, true); app.renderDash();
+    expect(document.querySelector('#dsh [data-bk="Objectifs mois par mois"] table')).toBeTruthy();
+    app.setCfg({ objx: {} }, true);
+  });
+  it('tout est traduit', () => {
+    I18N.miss.clear(); app.renderDash(); document.querySelectorAll('#dsh .btiles .bkt').forEach(b => b.click());
+    expect([...I18N.miss].filter(k => !/^[\d\s€%.,:+−-]+$/.test(k))).toEqual([]);
   });
 });
