@@ -47,7 +47,7 @@ function openBilanFilters(){
    {k:'genre',l:t('Genre'),o:facet(L,x=>x.genre).map(([v,n])=>[v,tv(v),n])},
    {k:'marque',l:t('Marque'),o:facet(L,x=>x.marque).map(([v,n])=>[v,v,n])},
    {k:'prov',l:t('Provenance'),o:facet(L,x=>x.prov).map(([v,n])=>[v,tv(v),n])}].filter(g=>g.o.length)},
-  changed:()=>{BADV.forEach(k=>{badv[k]=st[k]||''});bilSave();app.cptFilt=st.cf||'';const v=st.per||'0';app.period=/^\d+$/.test(v)&&v!=='7'?+v:v;renderDash()},
+  changed:()=>{BADV.forEach(k=>{badv[k]=st[k]||''});bilSave();app.cptFilt=st.cf||'';const v=st.per||'0';app.period=/^\d+$/.test(v)&&v!=='7'?+v:v;app.renderDash()},
   count:()=>{const r=bilRange();return base().filter(x=>(!r.from||(x.dv||'')>=r.from)&&(!r.to||(x.dv||'')<=r.to)&&advOk(x)&&(!st.cf||(app.compteOf(x)||{}).id===st.cf)).length},
   clear:()=>{BADV.forEach(k=>{st[k]=''});st.cf='';st.per='30'}})}
 function renderDash(){
